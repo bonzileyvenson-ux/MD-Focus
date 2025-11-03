@@ -1,0 +1,46 @@
+$circle-size: 15rem;
+$stroke-width: 8; // A espessura do anel
+$raio: 45;
+// Circunferência (2 * PI * Raio): 2 * 3.14159 * 45 = ~283
+
+.progress-container {
+  position: relative;
+  width: $circle-size;
+  height: $circle-size;
+  margin: 3rem auto;
+}
+
+svg {
+  transform: rotate(-90deg);
+}
+
+.progress-track {
+  fill: none;
+  stroke: #e0f2f1;
+  stroke-width: $stroke-width;
+}
+
+.progress-fill {
+  fill: none;
+  stroke: #007bff;
+  stroke-width: $stroke-width;
+
+  stroke-dasharray: 283;
+
+  stroke-dashoffset: 283;
+
+  transition: stroke-dashoffset 0.8s ease-in-out;
+
+  stroke-linecap: butt;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  z-index: 10;
+}

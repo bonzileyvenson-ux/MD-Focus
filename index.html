@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .hidden {
+        display: none !important;
+      }
+    </style>
+    <title>MD Focus | Gestão da Meta Diária</title>
+  </head>
+  <body>
+    <main>
+      <section>
+        <h2 class="h2-title"><span>MD</span> Focus</h2>
+
+        <div class="view-meta">
+          <div class="meta-data-hidden" id="meta-data">
+            <p>Pontos: <span id="ponto-total"> 0</span></p>
+            <p>Meta: <span id="meta-mensal"></span></p>
+            <p>Diária: <span id="meta-value"></span></p>
+            <p class="emojis-meta">
+              <i id="btn-abrir-historico" class="bi bi-emoji-smile"></i>
+              <span id="dias-restante"></span>
+            </p>
+          </div>
+          <p class="usuario-name-hidden" id="usuario-nome">
+            <i class="bi bi-person-badge-fill"></i>yvenson
+          </p>
+          <div class="text-bemVindo" id="messagem-inicial">
+            <p>Bem vindo ao <b>MD Focus</b>:</p>
+            <p>
+              Para começar inserir o seu nome, e escolhe a meta que deseja
+              alcançar esse mês
+            </p>
+          </div>
+          <div class="input-meta-name" id="input-cadasto">
+            <label for="input-name"
+              ><i class="bi bi-person-badge-fill"></i
+            ></label>
+            <input
+              type="text"
+              name="input-name"
+              id="input-name"
+              placeholder="Digite o seu primeiro nome"
+            />
+            <button id="btn-confirmar">
+              <i class="bi bi-plus-circle"></i>
+            </button>
+          </div>
+
+          <select class="meta-opcao" name="" id="meta-dropdown">
+            <option value="none" selected>Definir Meta</option>
+            <option value="600">R$ 600,00</option>
+            <option value="500">R$ 500,00</option>
+            <option value="400">R$ 400,00</option>
+            <option value="300">R$ 300,00</option>
+          </select>
+        </div>
+
+        <div class="edita-pontos edita-pontos-hidden" id="edita-pontos">
+          <input type="number" id="input-pontos" />
+          <button id="btn-pontos-submit">
+            <i class="bi bi-check-circle"></i>
+          </button>
+        </div>
+
+        <div class="progress-wrapper">
+          <div id="progress-container" class="progress-container">
+            <svg width="100%" height="100%" viewBox="0 0 100 100">
+              <circle class="progress-track" cx="50" cy="50" r="45" />
+              <circle
+                id="progress-fill"
+                class="progress-fill"
+                cx="50"
+                cy="50"
+                r="45"
+              />
+            </svg>
+            <div id="progress-text" class="progress-text">0%</div>
+          </div>
+        </div>
+
+        <div class="btns-submit">
+    <button class="lapis-edita hidden" id="btn-edit"><i class="bi bi-pencil-fill"></i></button>
+    <button class="btn-submitcalculator hidden" id="calculo-rapido">
+        <i class="bi bi-calculator"></i>
+    </button>
+    <div class="edit-icon" id="btn-principal">
+        <i class="bi bi-microsoft"></i>
+    </div>
+</div>
+
+        <div id="historico-modal" class="modal-backdrop-hidden">
+          <div class="modal-content-custom">
+            <div class="modal-header">
+              <h3 class="titulo-modal">Revisão Semanal de Metas</h3>
+              <div id="btn-fechar-historico" class="close-btn">
+                <i class="bi bi-emoji-sunglasses-fill"></i>
+              </div>
+            </div>
+
+            <div class="modal-body">
+              <h4 class="mt-4">Registro Detalhado:</h4>
+              <ul id="historico-lista" class="list-group"></ul>
+              <div class="media-status-card">
+                <h5 class="mt-5">Média de Pontos (Últimos 5 Dias):</h5>
+                <p class="h3-media-semanal " id="media-semanal">0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="js/app.js"></script>
+    <script src="./node_modules/notie/dist/notie.min.js"></script>
+  </body>
+</html>

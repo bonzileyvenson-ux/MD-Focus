@@ -1,0 +1,549 @@
+@charset "UTF-8";
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition: all 200ms ease-in;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-size: 1.6rem;
+  font-family: "Montserrat", sans-serif;
+}
+
+.h2-title {
+  width: 100%;
+  padding: 1rem;
+  background-color: rgb(28, 10, 95);
+  font-size: 3rem;
+  text-align: center;
+  box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5), inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
+  color: rgb(255, 255, 255);
+}
+.h2-title span {
+  color: hsl(24, 76%, 48%);
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+main {
+  width: 100vw;
+  height: 100dvh;
+  background-image: linear-gradient(46deg, rgb(255, 255, 255), rgb(81, 79, 180));
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+main section {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  transition: max-width 0.3s ease-in-out;
+}
+
+.section-modal-open {
+  max-width: 70rem;
+  margin: 0 auto;
+}
+
+.container-progress {
+  margin-top: 5rem;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.edit-icon {
+  position: fixed;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  right: 2rem;
+  bottom: 3rem;
+  padding: 3rem;
+  font-size: 3rem;
+  color: hsl(203, 68%, 82%);
+  background-color: #0e1079;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0.4rem 0.2rem rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.edita-pontos-hidden {
+  display: none;
+}
+
+.edita-pontos {
+  max-width: 30rem;
+  width: 50%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.5rem auto;
+  border: 1px solid hsl(246, 96%, 27%);
+  border-radius: 3rem;
+  background-color: white;
+}
+.edita-pontos input {
+  width: 70%;
+  height: 3rem;
+  font-size: 1.6rem;
+  padding: 0 1rem;
+  border: none;
+  outline: none;
+  border-radius: 3rem 0 0 3rem;
+}
+.edita-pontos button {
+  width: 25%;
+  height: 3rem;
+  border: none;
+  background-color: hsl(241, 85%, 35%);
+  color: white;
+  font-size: 1.6rem;
+  border-radius: 0 3rem 3rem 0;
+  cursor: pointer;
+}
+
+/* Fundo da Notificação (O contêiner principal) */
+.notie-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+  text-align: center;
+  font-size: 1.5rem;
+  font-family: sans-serif;
+  font-weight: 500;
+  border-radius: 0.8rem;
+  min-height: 10%;
+  text-align: center;
+  box-shadow: inset 0.5rem 0 0.5rem 0 rgba(8, 14, 17, 0.5), inset -0.5rem 0 0.5rem 0 rgba(8, 14, 17, 0.5);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notie-background-success {
+  background-color: #38c172;
+  color: #fff;
+}
+
+.notie-background-error {
+  background-color: #ac4d4a;
+  color: #fff;
+}
+
+.notie-background-warning {
+  background-color: #c4862b;
+  color: #333;
+}
+
+.notie-background-info {
+  background-color: #4d82d6;
+  color: #fff;
+}
+
+.lapis-edita,
+.btn-submitcalculator {
+  background-color: rgb(12, 12, 116);
+  color: white;
+  width: 2.8rem;
+  height: 2.8rem;
+  padding: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-size: 1.6rem;
+  border-radius: 50%;
+  position: fixed;
+}
+
+.btns-submit {
+  position: relative;
+  width: 5rem;
+  height: 5rem;
+}
+
+.btn-submitcalculator {
+  right: 6rem;
+  bottom: 8rem;
+}
+
+.lapis-edita {
+  right: 8rem;
+  bottom: 4rem;
+}
+
+.lapis-edita,
+.btn-submitcalculator {
+  display: flex;
+}
+
+.progress-container {
+  position: relative;
+  width: 15rem;
+  height: 15rem;
+  margin: 3rem auto;
+}
+
+svg {
+  transform: rotate(-90deg);
+}
+
+.progress-track {
+  fill: none;
+  stroke: #e0f2f1;
+  stroke-width: 8;
+}
+
+.progress-fill {
+  fill: none;
+  stroke: #007bff;
+  stroke-width: 8;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 283;
+  transition: stroke-dashoffset 0.8s ease-in-out;
+  stroke-linecap: butt;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  z-index: 10;
+}
+
+.view-meta {
+  position: relative;
+  width: 90%;
+  max-width: 60rem;
+  margin: 0 auto;
+  height: 35vh;
+  background-color: white;
+  padding: 2.5rem;
+  box-shadow: inset 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.4), 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.3);
+  border-radius: 2rem;
+  border: 1px solid hsl(209, 100%, 50%);
+  display: flex;
+  gap: 2rem;
+  flex-flow: column;
+  align-items: start;
+  justify-content: center;
+}
+
+.input-meta-name-hidden {
+  display: none;
+}
+
+.input-meta-name {
+  display: flex;
+  gap: 1rem;
+  max-width: 30rem;
+  margin: 0 auto;
+  align-items: center;
+  width: fit-content;
+  color: hsl(29, 100%, 50%);
+}
+.input-meta-name input {
+  padding: 0.3rem 1.5rem;
+  font-size: 1.6rem;
+  border: 1px solid hsl(29, 100%, 50%);
+  border-radius: 1rem;
+  outline: none;
+}
+.input-meta-name label {
+  font-size: 2rem;
+  cursor: pointer;
+}
+.input-meta-name button {
+  padding: 0.5rem 1rem;
+  font-size: 2rem;
+  border: none;
+  color: hsl(29, 100%, 50%);
+  background-color: transparent;
+  border-radius: 1rem;
+  cursor: pointer;
+}
+
+@media (max-width: 400px) {
+  .input-meta-name {
+    flex-direction: column;
+    align-items: stretch;
+    width: 80%;
+  }
+  .input-meta-name input {
+    text-align: center;
+  }
+  .input-meta-name button {
+    margin-top: 1rem;
+  }
+}
+.text-bemVindo-hidden {
+  display: none;
+}
+
+.text-bemVindo {
+  font-size: 1.6rem;
+  color: hsl(246, 96%, 27%);
+  font-weight: 500;
+}
+
+.emojis-meta {
+  position: absolute;
+  right: 3rem;
+  font-size: 3.5rem;
+  transform: translate(-3rem, 1rem);
+  margin-top: 1rem;
+  color: hsl(29, 100%, 35%);
+}
+
+.meta-data-hidden {
+  display: none;
+}
+
+.meta-data {
+  display: flex;
+  gap: 1rem;
+  flex-flow: column;
+  font-size: 2rem;
+  font-weight: 700;
+  color: hsl(209, 100%, 50%);
+}
+.meta-data span {
+  font-weight: 100;
+  font-size: 1.6rem;
+}
+
+.usuario-name-hidden {
+  display: none;
+}
+
+.usuario-name {
+  max-width: 50%;
+  position: absolute;
+  right: 0;
+  bottom: 2rem;
+  padding: 0.5rem 1rem;
+  margin-right: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+  font-style: italic;
+  color: hsl(29, 100%, 50%);
+  border-radius: 2rem;
+  background: linear-gradient(to right, white, hsl(209, 100%, 80%));
+  text-transform: capitalize;
+  border-bottom: 2px solid hsl(209, 100%, 50%);
+  border-left: 2px solid hsl(209, 100%, 50%);
+}
+.usuario-name .bi {
+  margin-right: 0.5rem;
+}
+
+.meta-opcao {
+  color: white;
+  position: absolute;
+  right: 0;
+  top: 2rem;
+  margin-right: 2rem;
+  padding: 0.4rem;
+  border-radius: 1rem;
+  background-color: hsl(209, 100%, 50%);
+  font-size: 1.4rem;
+}
+
+.modal-backdrop-hidden {
+  display: none;
+}
+
+.modal-backdrop {
+  display: block;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  backdrop-filter: blur(0.5rem);
+  background-color: rgba(15, 15, 15, 0.815);
+  transition: all ease-in 5000ms;
+}
+
+.modal-header {
+  background-color: hsl(271, 85%, 49%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5), inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
+  color: rgb(255, 255, 255);
+  max-height: 10vh;
+  min-height: 6.8rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 3rem;
+}
+.modal-header .titulo-modal {
+  font-size: 2.5rem;
+  max-width: 70rem;
+  text-align: center;
+  color: white;
+  text-align: center;
+}
+.modal-header .close-btn {
+  width: 5rem;
+  background-color: none;
+  color: #fff;
+}
+.modal-header .close-btn i {
+  font-size: 3rem;
+  cursor: pointer;
+}
+
+.modal-body {
+  width: 100vw;
+  box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5), inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
+}
+.modal-body .mt-4 {
+  text-align: center;
+  padding-top: 2rem;
+  font-size: 2rem;
+  color: hsl(271, 85%, 49%);
+  margin-bottom: 1rem;
+}
+.modal-body .list-group {
+  width: 90%;
+  margin: 0 auto;
+  padding: 3rem;
+  border: 1px solid hsl(271, 31%, 34%);
+  border-radius: 2rem;
+}
+.modal-body .list-group li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: hsla(0, 16%, 81%, 0.275);
+  list-style: decimal;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+.modal-body .mt-5 {
+  text-align: center;
+  padding-top: 2rem;
+  font-size: 2rem;
+  color: hsl(271, 85%, 49%);
+}
+
+.btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #8a8383;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 1.6rem;
+}
+
+.historico-item-card {
+  position: relative;
+  padding: 1rem;
+  border-radius: 3rem;
+}
+
+.historico-item-data {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  font-size: 1.6rem;
+}
+
+.edicao-in-place {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: hsla(0, 15%, 81%, 0.685);
+  border-radius: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  font-size: 1.6;
+  z-index: 10;
+}
+
+/* Oculta o container inicialmente */
+.edita-pontos-hidden {
+  display: none !important;
+}
+
+.btn-corrigir {
+  background-color: transparent;
+  color: black;
+  font-weight: 700;
+  font-size: 1.6rem;
+}
+
+.edit-botoes {
+  height: 100%;
+  width: 30%;
+  display: flex;
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+}
+.edit-botoes .btn-success {
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  flex: 1;
+  width: 100%;
+  color: #115a0a;
+}
+.edit-botoes .btn-cancelar-correcao {
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  flex: 1;
+  width: 100%;
+  color: #bd0f0f;
+}
+
+.input-correcao {
+  background-color: transparent;
+  outline: none;
+  border: none;
+  width: 100%;
+  max-width: 70%;
+}
+
+.h3-media-semanal {
+  margin-top: 2rem;
+  font-size: 2rem;
+  text-align: center;
+  color: #fcfcfc;
+  background-color: hsl(271, 31%, 54%);
+}
+
+/*# sourceMappingURL=style.css.map */

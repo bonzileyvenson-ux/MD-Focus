@@ -1,0 +1,143 @@
+.view-meta {
+  position: relative;
+  width: 90%;
+  max-width: 60rem;
+  margin: 0 auto;
+  height: 35vh;
+  background-color: #ffff;
+  padding: 2.5rem;
+  box-shadow: inset 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.4),
+    0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.3);
+  border-radius: 2rem;
+  border: 1px solid hsl(209, 100%, 50%);
+ 
+  display: flex;
+  gap: 2rem;
+  flex-flow: column;
+  align-items: start;
+  justify-content: center;
+}
+
+.input-meta-name-hidden {
+  display: none;
+}
+
+.input-meta-name {
+  display: flex;
+  gap: 1rem;
+  max-width: 30rem;
+  margin: 0 auto;
+  align-items: center;
+  width: fit-content;
+  color: hsl(29, 100%, 50%);
+  input {
+    padding: 0.3rem 1.5rem;
+    font-size: 1.6rem;
+    border: 1px solid hsl(29, 100%, 50%);
+    border-radius: 1rem;
+    outline: none;
+  }
+  label {
+    font-size: 2rem;
+    cursor: pointer;
+  }
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 2rem;
+    border: none;
+    color: hsl(29, 100%, 50%);
+    background-color: transparent;
+    border-radius: 1rem;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 400px) {
+  .input-meta-name {
+    flex-direction: column;
+    align-items: stretch;
+    width: 80%;
+
+    input {
+      text-align: center;
+    }
+
+    button {
+      margin-top: 1rem;
+    }
+  }
+}
+
+.text-bemVindo-hidden {
+  display: none;
+}
+
+.text-bemVindo {
+  font-size: 1.6rem;
+  color: hsl(246, 96%, 27%);
+  font-weight: 500;
+}
+
+.emojis-meta {
+  position: absolute;
+  right: 3rem;
+  font-size: 3.5rem;
+  transform: translate(-3rem, 1rem);
+  margin-top: 1rem;
+  color: hsl(29, 100%, 35%);
+}
+
+.meta-data-hidden {
+  display: none;
+}
+.meta-data {
+  display: flex;
+  gap: 1rem;
+  flex-flow: column;
+  font-size: 2rem;
+  font-weight: 700;
+  color: hsl(209, 100%, 50%);
+
+  span {
+    font-weight: 100;
+    font-size: 1.6rem;
+  }
+}
+
+.usuario-name-hidden {
+  display: none;
+}
+
+.usuario-name {
+  max-width: 50%;
+  position: absolute;
+  right: 0;
+  bottom: 2rem;
+  padding: 0.5rem 1rem;
+  margin-right: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+  font-style: italic;
+  color: hsl(29, 100%, 50%);
+  border-radius: 2rem;
+  background: linear-gradient(to right, white, hsl(209, 100%, 80%));
+  text-transform: capitalize;
+  border-bottom: 2px solid hsl(209, 100%, 50%);
+  border-left: 2px solid hsl(209, 100%, 50%);
+
+  .bi {
+    margin-right: 0.5rem
+  }
+}
+
+.meta-opcao {
+  color: #ffff;
+  position: absolute;
+  right: 0;
+  top: 2rem;
+  margin-right: 2rem;
+  padding: 0.4rem;
+  border-radius: 1rem;
+  background-color: hsl(209, 100%, 50%);
+  font-size: 1.4rem;
+}

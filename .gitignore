@@ -1,0 +1,12 @@
+# Ignorar a pasta de dependências do Node/NPM
+node_modules/
+
+# Ignorar arquivos temporários e logs
+*.log
+.DS_Store
+
+# Ignorar arquivos de pacotes
+package-lock.json
+
+# Se você estiver usando o editor VS Code (opcional)
+.vscode/
