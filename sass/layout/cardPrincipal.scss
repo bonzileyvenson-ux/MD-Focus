@@ -54,17 +54,22 @@
 
 @media (max-width: 400px) {
   .input-meta-name {
-    flex-direction: column;
+    justify-content: start;
     align-items: stretch;
-    width: 80%;
+    width: 90%;
 
     input {
       text-align: center;
+      width: 100%;
+      &::placeholder{
+        font-size: 1.1rem;
+      }
     }
 
-    button {
-      margin-top: 1rem;
-    }
+  }
+
+  .text-bemVindo{
+    margin-top: 2rem;
   }
 }
 
@@ -85,6 +90,12 @@
   transform: translate(-3rem, 1rem);
   margin-top: 1rem;
   color: hsl(29, 100%, 35%);
+  display: flex;
+  // flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  
+   
 }
 
 .meta-data-hidden {
@@ -96,11 +107,26 @@
   flex-flow: column;
   font-size: 2rem;
   font-weight: 700;
-  color: hsl(209, 100%, 50%);
+  color: hsl(209, 100%, 57%);
+  
 
   span {
-    font-weight: 100;
+    
+    font-weight: 500;
     font-size: 1.6rem;
+    color: hsl(29, 100%, 50%);
+  }
+
+  .dias-restante{
+    font-size: 1.2rem;
+    font-weight: 700;
+    background-color: hsl(204, 28%, 56%);
+    color: hsl(0, 0%, 100%);
+    border-radius: 50%;
+    padding: 0.3rem;
+    margin-left: 0.2rem;
+    translate: (0 -1rem);
+    box-shadow: inset  0 0 0.2rem 0 rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -120,10 +146,10 @@
   font-style: italic;
   color: hsl(29, 100%, 50%);
   border-radius: 2rem;
-  background: linear-gradient(to right, white, hsl(209, 100%, 80%));
+  background: linear-gradient(to left, white, hsl(209, 100%, 80%));
   text-transform: capitalize;
   border-bottom: 2px solid hsl(209, 100%, 50%);
-  border-left: 2px solid hsl(209, 100%, 50%);
+  border-right: 2px solid hsl(209, 100%, 50%);
 
   .bi {
     margin-right: 0.5rem
@@ -138,6 +164,7 @@
   margin-right: 2rem;
   padding: 0.4rem;
   border-radius: 1rem;
-  background-color: hsl(209, 100%, 50%);
+  background-color: hsl(209, 67%, 60%);
   font-size: 1.4rem;
+  box-shadow: inset  0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.2);
 }

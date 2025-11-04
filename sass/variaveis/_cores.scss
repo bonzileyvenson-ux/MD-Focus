@@ -1,3 +1,40 @@
 $clr-success: #00ff62ff;
 $clr-attention: #ffc105;
 $clr-primary-circle: #5ca1b3;
+
+$clrs: (
+  // Cores Primárias
+  "primary": hsl(246, 96%, 27%),
+  "secondary": hsl(209, 100%, 50%),
+  "tercery": hsl(29, 90%, 42%),
+  "roxo": rgb(81, 79, 180),
+  "success": rgb(64, 182, 109),
+  "danger": #dd1b2f,
+  "warning": #cfa118,
+  "info": #1e9bcc,
+  "azul-claro": hsl(203, 68%, 82%),
+  // Cores Neutras (Texto e Fundo)
+  "dark": #343a40,
+  "light": #f8f9fa,
+  "blanco": #ffffff,
+  "black": #000000,
+  "gray": #adb5bd
+);
+
+@function clr($nomeDaCor) {
+  @return map-get($clrs, $nomeDaCor);
+}
+
+
+$clr-M: (
+     "primary": hsl(207, 61%, 41%),
+     "secondary": hsl(184, 61%, 56%),
+    
+);
+   
+
+
+
+@function clr-M($nomeDaCor) {
+  @return map-get($clr-M, $nomeDaCor);
+}

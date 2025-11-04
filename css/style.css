@@ -1,9 +1,7 @@
-@charset "UTF-8";
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  transition: all 200ms ease-in;
 }
 
 html {
@@ -15,17 +13,17 @@ body {
   font-family: "Montserrat", sans-serif;
 }
 
-.h2-title {
+.h1-title {
   width: 100%;
   padding: 1rem;
-  background-color: rgb(28, 10, 95);
+  background-color: hsl(246, 96%, 27%);
   font-size: 3rem;
   text-align: center;
   box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5), inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
-  color: rgb(255, 255, 255);
+  color: #ffffff;
 }
-.h2-title span {
-  color: hsl(24, 76%, 48%);
+.h1-title span {
+  color: hsl(29, 90%, 42%);
   text-decoration: underline;
   font-weight: bold;
 }
@@ -33,7 +31,7 @@ body {
 main {
   width: 100vw;
   height: 100dvh;
-  background-image: linear-gradient(46deg, rgb(255, 255, 255), rgb(81, 79, 180));
+  background-image: linear-gradient(46deg, #ffffff, rgb(81, 79, 180));
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -61,19 +59,19 @@ main section {
 
 .edit-icon {
   position: fixed;
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
   right: 2rem;
   bottom: 3rem;
-  padding: 3rem;
-  font-size: 3rem;
+  padding: 2.8rem;
+  font-size: 2.5rem;
   color: hsl(203, 68%, 82%);
-  background-color: #0e1079;
+  background-color: hsl(246, 96%, 27%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0.4rem 0.2rem rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0.5rem 0.2rem rgba(0, 0, 0, 0.5);
   cursor: pointer;
 }
 
@@ -105,14 +103,13 @@ main section {
   width: 25%;
   height: 3rem;
   border: none;
-  background-color: hsl(241, 85%, 35%);
-  color: white;
+  background-color: hsl(246, 96%, 27%);
+  color: #ffffff;
   font-size: 1.6rem;
   border-radius: 0 3rem 3rem 0;
   cursor: pointer;
 }
 
-/* Fundo da Notificação (O contêiner principal) */
 .notie-container {
   position: fixed;
   top: 0;
@@ -123,10 +120,10 @@ main section {
   font-size: 1.5rem;
   font-family: sans-serif;
   font-weight: 500;
-  border-radius: 0.8rem;
-  min-height: 10%;
+  border-radius: 0 1rem 0 1rem;
+  min-height: 8vh;
+  max-height: 8vh;
   text-align: center;
-  box-shadow: inset 0.5rem 0 0.5rem 0 rgba(8, 14, 17, 0.5), inset -0.5rem 0 0.5rem 0 rgba(8, 14, 17, 0.5);
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
@@ -134,39 +131,40 @@ main section {
 }
 
 .notie-background-success {
-  background-color: #38c172;
-  color: #fff;
+  background-color: rgb(64, 182, 109);
+  color: #ffffff;
 }
 
 .notie-background-error {
-  background-color: #ac4d4a;
-  color: #fff;
+  background-color: #dd1b2f;
+  color: #ffffff;
 }
 
 .notie-background-warning {
-  background-color: #c4862b;
-  color: #333;
+  background-color: #cfa118;
+  color: #343a40;
 }
 
 .notie-background-info {
-  background-color: #4d82d6;
-  color: #fff;
+  background-color: #1e9bcc;
+  color: #ffffff;
 }
 
 .lapis-edita,
 .btn-submitcalculator {
-  background-color: rgb(12, 12, 116);
-  color: white;
-  width: 2.8rem;
-  height: 2.8rem;
-  padding: 1.2rem;
+  background-color: hsl(246, 96%, 27%);
+  color: hsl(203, 68%, 82%);
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   cursor: pointer;
-  font-size: 1.6rem;
+  font-size: 2rem;
   border-radius: 50%;
+  font-size: 2rem;
   position: fixed;
 }
 
@@ -177,12 +175,12 @@ main section {
 }
 
 .btn-submitcalculator {
-  right: 6rem;
-  bottom: 8rem;
+  right: 6.8rem;
+  bottom: 8.2rem;
 }
 
 .lapis-edita {
-  right: 8rem;
+  right: 8.8rem;
   bottom: 4rem;
 }
 
@@ -283,15 +281,19 @@ svg {
 
 @media (max-width: 400px) {
   .input-meta-name {
-    flex-direction: column;
+    justify-content: start;
     align-items: stretch;
-    width: 80%;
+    width: 90%;
   }
   .input-meta-name input {
     text-align: center;
+    width: 100%;
   }
-  .input-meta-name button {
-    margin-top: 1rem;
+  .input-meta-name input::placeholder {
+    font-size: 1.1rem;
+  }
+  .text-bemVindo {
+    margin-top: 2rem;
   }
 }
 .text-bemVindo-hidden {
@@ -311,6 +313,9 @@ svg {
   transform: translate(-3rem, 1rem);
   margin-top: 1rem;
   color: hsl(29, 100%, 35%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .meta-data-hidden {
@@ -323,11 +328,23 @@ svg {
   flex-flow: column;
   font-size: 2rem;
   font-weight: 700;
-  color: hsl(209, 100%, 50%);
+  color: hsl(209, 100%, 57%);
 }
 .meta-data span {
-  font-weight: 100;
+  font-weight: 500;
   font-size: 1.6rem;
+  color: hsl(29, 100%, 50%);
+}
+.meta-data .dias-restante {
+  font-size: 1.2rem;
+  font-weight: 700;
+  background-color: hsl(204, 28%, 56%);
+  color: hsl(0, 0%, 100%);
+  border-radius: 50%;
+  padding: 0.3rem;
+  margin-left: 0.2rem;
+  translate: 0 -1rem;
+  box-shadow: inset 0 0 0.2rem 0 rgba(0, 0, 0, 0.1);
 }
 
 .usuario-name-hidden {
@@ -346,10 +363,10 @@ svg {
   font-style: italic;
   color: hsl(29, 100%, 50%);
   border-radius: 2rem;
-  background: linear-gradient(to right, white, hsl(209, 100%, 80%));
+  background: linear-gradient(to left, white, hsl(209, 100%, 80%));
   text-transform: capitalize;
   border-bottom: 2px solid hsl(209, 100%, 50%);
-  border-left: 2px solid hsl(209, 100%, 50%);
+  border-right: 2px solid hsl(209, 100%, 50%);
 }
 .usuario-name .bi {
   margin-right: 0.5rem;
@@ -363,8 +380,9 @@ svg {
   margin-right: 2rem;
   padding: 0.4rem;
   border-radius: 1rem;
-  background-color: hsl(209, 100%, 50%);
+  background-color: hsl(209, 67%, 60%);
   font-size: 1.4rem;
+  box-shadow: inset 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.2);
 }
 
 .modal-backdrop-hidden {
@@ -378,13 +396,12 @@ svg {
   right: 0;
   left: 0;
   bottom: 0;
-  backdrop-filter: blur(0.5rem);
+  backdrop-filter: blur(1rem);
   background-color: rgba(15, 15, 15, 0.815);
-  transition: all ease-in 5000ms;
 }
 
 .modal-header {
-  background-color: hsl(271, 85%, 49%);
+  background-color: hsl(207, 61%, 41%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -401,7 +418,6 @@ svg {
   font-size: 2.5rem;
   max-width: 70rem;
   text-align: center;
-  color: white;
   text-align: center;
 }
 .modal-header .close-btn {
@@ -422,21 +438,21 @@ svg {
   text-align: center;
   padding-top: 2rem;
   font-size: 2rem;
-  color: hsl(271, 85%, 49%);
+  color: hsl(184, 61%, 56%);
   margin-bottom: 1rem;
 }
 .modal-body .list-group {
   width: 90%;
   margin: 0 auto;
   padding: 3rem;
-  border: 1px solid hsl(271, 31%, 34%);
+  border: 1px solid hsl(184, 61%, 56%);
   border-radius: 2rem;
 }
 .modal-body .list-group li {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: hsla(0, 16%, 81%, 0.275);
+  background-color: hsla(0, 9%, 90%, 0.747);
   list-style: decimal;
   margin-bottom: 1rem;
   padding: 1rem;
@@ -445,8 +461,8 @@ svg {
 .modal-body .mt-5 {
   text-align: center;
   padding-top: 2rem;
-  font-size: 2rem;
-  color: hsl(271, 85%, 49%);
+  font-size: 1.6rem;
+  color: hsl(0, 7%, 70%);
 }
 
 .btn {
@@ -457,7 +473,7 @@ svg {
   align-items: center;
   justify-content: center;
   background-color: #8a8383;
-  color: #fff;
+  color: #ffffff;
   border: none;
   cursor: pointer;
   font-size: 1.6rem;
@@ -543,7 +559,7 @@ svg {
   font-size: 2rem;
   text-align: center;
   color: #fcfcfc;
-  background-color: hsl(271, 31%, 54%);
+  background-color: hsl(207, 61%, 41%);
 }
 
 /*# sourceMappingURL=style.css.map */
