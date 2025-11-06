@@ -4,7 +4,7 @@ $clr-primary-circle: #5ca1b3;
 
 $clrs: (
   // Cores Primárias
-  "primary": hsl(246, 96%, 27%),
+  "primary": hsl(240, 96%, 27%),
   "secondary": hsl(209, 100%, 50%),
   "tercery": hsl(29, 90%, 42%),
   "roxo": rgb(81, 79, 180),
@@ -13,10 +13,11 @@ $clrs: (
   "warning": #cfa118,
   "info": #1e9bcc,
   "azul-claro": hsl(203, 68%, 82%),
+  "dark-blue": rgb(18, 59, 107),
   // Cores Neutras (Texto e Fundo)
   "dark": #343a40,
   "light": #f8f9fa,
-  "blanco": #ffffff,
+  "blanco": hsl(0, 0%, 100%),
   "black": #000000,
   "gray": #adb5bd
 );
@@ -29,6 +30,7 @@ $clrs: (
 $clr-M: (
      "primary": hsl(207, 61%, 41%),
      "secondary": hsl(184, 61%, 56%),
+     "tercery": rgb(218, 131, 18),
     
 );
    

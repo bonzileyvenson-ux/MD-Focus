@@ -27,8 +27,24 @@ export function getChaveDadosUsuario() {
  */
 export function carregarDados() {
   const chave = getChaveDadosUsuario();
-  const dados = localStorage.getItem(chave);
-  return dados ? JSON.parse(dados) : null;
+  const dadosJSON = localStorage.getItem(chave);
+  if (!dadosJSON) {
+    return null;
+  }
+
+  const dados = JSON.parse(dadosJSON);
+
+  const hoje = new Date();
+  const dataUltimoCalculo = new Date(dados.dataUltimoCalculo);
+
+  if (hoje.getMonth() !== dataUltimoCalculo.getMonth()) {
+    dados.realizadoDiario = {};
+    dados.realizadoTotal = 0;
+    dados.dataUltimoCalculo = hoje.toISOString().slice(0, 10);
+    salvarDados(dados); // Salva os dados zerados
+  }
+
+  return dados;
 }
 
 /**

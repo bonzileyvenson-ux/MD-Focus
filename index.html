@@ -9,12 +9,19 @@
     />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notie@4.3.1/dist/notie.min.css">
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" type="image/png" href="favicon.png"> 
+
+<link rel="apple-touch-icon" href="touch-icon.png">
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#1c0a5f">
     <style>
       .hidden {
         display: none !important;
       }
     </style>
-    <title>MD Focus | Gestão da Meta Diária</title>
+    <title>MD Focus | Gestão de Meta Diária</title>
   </head>
   <!DOCTYPE html>
   <html lang="en">
@@ -34,11 +41,14 @@
       </style>
       <title>MD Focus | Gestão da Meta Diária</title>
     </head>
-    <body>
-      <main>
-        <section>
-          <h1 class="h1-title"><span>MD</span> Focus</h2>
-  
+    <body class="index-body">
+     
+        <h1 class="h1-title"><span>MD</span> Focus</h2>
+
+          <div class="body">
+       
+  <main>
+    <section  class="section1">
           <div class="view-meta">
             <div class="meta-data-hidden" id="meta-data">
               <p>Pontos: <span id="ponto-total"> 0</span></p>
@@ -82,13 +92,15 @@
               <option value="300">R$ 300,00</option>
             </select>
           </div>
-  
+ 
           <div class="edita-pontos edita-pontos-hidden" id="edita-pontos">
             <input type="number" id="input-pontos" />
             <button id="btn-pontos-submit">
               <i class="bi bi-check-circle"></i>
             </button>
           </div>
+          </section>
+          <section class="section2">
   
           <div class="progress-wrapper">
             <div id="progress-container" class="progress-container">
@@ -116,7 +128,16 @@
       </div>
   </div>
   
-          <div id="historico-modal" class="modal-backdrop-hidden">
+          
+          <div>
+        <a href="uso_privacidade.html" class="footer-link" target="_blank">
+          <p><i class="bi bi-shield-check"></i>  Política de privacidade | Modo de uso </p>
+        </a>
+      </div>
+        </section>
+ 
+      </main>
+      <div id="historico-modal" class="modal-backdrop-hidden">
             <div class="modal-content-custom">
               <div class="modal-header">
                 <h3 class="titulo-modal">Revisão Semanal de Metas</h3>
@@ -135,8 +156,8 @@
               </div>
             </div>
           </div>
-        </section>
-      </main>
+          </div>
+      
       <script type="module" src="js/app.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/notie@4.3.1/dist/notie.min.js"></script>
     </body>

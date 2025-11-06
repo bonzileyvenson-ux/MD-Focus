@@ -3,11 +3,20 @@ $stroke-width: 8; // A espessura do anel
 $raio: 45;
 // Circunferência (2 * PI * Raio): 2 * 3.14159 * 45 = ~283
 
+
+
+ 
+
+
 .progress-container {
   position: relative;
   width: $circle-size;
   height: $circle-size;
   margin: 3rem auto;
+@include landscape-desktop {
+ 
+}
+ 
 }
 
 svg {

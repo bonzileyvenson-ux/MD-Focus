@@ -1,10 +1,17 @@
-
 .modal-backdrop-hidden {
   display: none;
+  @include landscape-desktop {
+    display: block;
+    position: relative;
+
+    background-color: transparent;
+
+    width: 30%;
+  }
 }
 
 .modal-backdrop {
-    display: block;
+  display: block;
   position: fixed; // <-- Use fixed para garantir cobertura total
   top: 0;
   right: 0;
@@ -12,7 +19,13 @@
   bottom: 0;
   backdrop-filter: blur(1rem);
   background-color: rgba(15, 15, 15, 0.815);
-  
+
+  @include landscape-desktop {
+    position: relative;
+    backdrop-filter: none;
+    background-color: transparent;
+    width: 30%;
+  }
 }
 
 .modal-header {
@@ -21,8 +34,7 @@
   align-items: center;
   justify-content: center;
   gap: 2rem;
-  box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5),
-    inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
+  @include box-shadow-primary;
   color: rgb(255, 255, 255);
   max-height: 10vh;
   min-height: 6.8rem;
@@ -35,9 +47,8 @@
     max-width: 70rem;
 
     text-align: center;
-  
+
     text-align: center;
-    
   }
 
   .close-btn {
@@ -50,15 +61,25 @@
       cursor: pointer;
     }
   }
+
+  @include landscape-desktop {
+    display: none;
+  }
 }
 
 .modal-body {
-  // background-color: #d6c6c646;
   width: 100vw;
-  // height: 60vh;
 
   box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5),
     inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
+
+  @include landscape-desktop {
+    width: 100%;
+    box-shadow: none;
+    background-color: none;
+    border-left: 5px solid clr(primary);
+    height: 100vh;
+  }
 
   .mt-4 {
     text-align: center;
@@ -66,6 +87,9 @@
     font-size: 2rem;
     color: clr-M(secondary);
     margin-bottom: 1rem;
+    @include landscape-desktop {
+      color: clr(primary);
+    }
   }
 
   .list-group {
@@ -78,7 +102,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background-color: hsla(0, 9%, 90%, 0.747) ;
+      background-color: hsla(0, 9%, 90%, 0.747);
       list-style: decimal;
       margin-bottom: 1rem;
       padding: 1rem;
@@ -92,9 +116,12 @@
     font-size: 1.6rem;
 
     color: hsl(0, 7%, 70%);
+
+    @include landscape-desktop {
+      color: clr(primary);
+    }
   }
 }
-
 
 .btn {
   width: 1.5rem;
@@ -104,22 +131,17 @@
   align-items: center;
   justify-content: center;
   background-color: #8a8383;
-   color: #ffffff;
+  color: #ffffff;
   border: none;
   cursor: pointer;
   font-size: 1.6rem;
-  
- 
-
-
 }
 
 .historico-item-card {
-    position: relative; 
-    padding: 1rem;
-    border-radius: 3rem;
+  position: relative;
+  padding: 1rem;
+  border-radius: 3rem;
 }
-
 
 .historico-item-data {
   width: 100%;
@@ -128,49 +150,45 @@
   justify-content: space-between;
   gap: 2rem;
   font-size: 1.6rem;
-  
-
 }
 
-
 .edicao-in-place {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%; 
-    height: 100%;
-   
-    background-color:hsla(0, 15%, 81%, 0.685);
-   border-radius: 1rem;
-    display: flex; 
-    gap: 1rem;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    font-size: 1.6; 
-    z-index: 10; 
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background-color: hsla(0, 15%, 81%, 0.685);
+  border-radius: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  font-size: 1.6;
+  z-index: 10;
 }
 
 /* Oculta o container inicialmente */
 .edita-pontos-hidden {
-    display: none !important;
+  display: none !important;
 }
 
-.btn-corrigir{
+.btn-corrigir {
   background-color: transparent;
   color: black;
   font-weight: 700;
-  font-size: 1.6rem
+  font-size: 1.6rem;
 }
 
 .edit-botoes {
   height: 100%;
   width: 30%;
   display: flex;
- margin: 0 auto;
+  margin: 0 auto;
   justify-content: space-between;
   align-items: center;
-  
 
   .btn-success {
     border-top-left-radius: 1rem;
@@ -178,32 +196,34 @@
     flex: 1;
     width: 100%;
     color: #115a0a;
-   
   }
 
   .btn-cancelar-correcao {
     border-top-right-radius: 1rem;
     border-bottom-right-radius: 1rem;
     flex: 1;
-    width: 100%;  
+    width: 100%;
     color: #bd0f0f;
   }
 }
 
 .input-correcao {
-  background-color:transparent;
+  background-color: transparent;
   outline: none;
   border: none;
   width: 100%;
-   max-width: 70%;
+  max-width: 70%;
 }
 
-
-.h3-media-semanal{
+.h3-media-semanal {
   margin-top: 2rem;
   font-size: 2rem;
-text-align: center;
-color: #fcfcfc;
-background-color: clr-M(primary);
-
+  text-align: center;
+  color: #fcfcfc;
+  background-color: clr-M(primary);
+  @include landscape-desktop {
+    box-shadow: inset 0.5rem 0 0.5rem 0 rgba(8, 14, 17, 0.3),
+      inset -0.5rem 0 0.5rem 0 rgba(8, 14, 17, 0.3);
+    background-color: clr(primary);
+  }
 }

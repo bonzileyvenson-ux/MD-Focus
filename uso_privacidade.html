@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MD Focus | Modo de Uso e Privacidade</title>
+<link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+        <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/privacidade.css" />
+    <link rel="icon" type="image/png" href="favicon.png"> 
+
+<link rel="apple-touch-icon" href="touch-icon.png">
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#1c0a5f">
+  </head>
+  <body class="body-privacidade">
+    <header class="manual-header">
+      <h1 class="manual-title"><span class="md">MD</span> <span class="focus">Focus:</span> Guia Rápido de Uso</h1>
+    </header>
+
+    <main class="manual-container">
+      <section class="manual-section">
+        <h2 class="section-title">1. Fluxo Inicial e Definição de Meta</h2>
+
+        
+        <p class="section-subtitle">
+         O MD Focus é uma ferramenta inteligente desenvolvida para ajudar você
+          a gerenciar sua meta mensal. Ele recalcula automaticamente a
+          quantidade exata de pontos que você precisa fazer por dia útil para
+          atingir seu objetivo a tempo.
+        </p>
+
+        <dl>
+          <dt>Digite seu nome:</dt>
+          <dd>O seu nome é usado para salvar o seu progresso no seu navegador (Local Storage).</dd>
+          <dt>Escolher sua meta:</dt>
+          <dd>Selecione a meta diária base (R$ 300, R$ 400, etc.). Isso define sua meta mensal total.</dd>
+          <dt>Resultado:</dt>
+          <dd>O Dashboard será preenchido com sua Meta Total e o valor da Diária Necessária calculado para o mês restante.</dd>
+        </dl>
+        <ul>
+          <li>
+            <strong>Acesso <i class="bi bi-person-badge-fill" aria-label="Acesso"></i>:</strong> Digite seu nome e selecione sua meta diária
+            base.
+          </li>
+          <li>
+            <strong>Salvamento <i class="bi bi-plus-circle" aria-label="Salvamento"></i>:</strong> Dados são salvos apenas no seu
+            navegador <i class="bi bi-floppy" aria-label="Disquete"></i>.
+          </li>
+        </ul>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">2. Registro Diário (O Botão Lápis)</h2>
+        <h3>A ação mais importante é registrar seus pontos.</h3>
+        <ul>
+          <li>Botão lápis <i class="bi bi-pen" aria-label="Lápis"></i>: Abre o campo de registro.</li>
+          <li>
+            <strong>Diário Útil:</strong> Você só pode registrar pontos de segunda a sexta-feira.
+          </li>
+          <li><strong>Botão Checkmark <i class="bi bi-check-circle" aria-label="Checkmark"></i> :</strong> Salva o valor.</li>
+          <li>
+            Registro Único: Você só pode registrar o total de pontos <span>
+              uma única vez
+              por dia
+            </span> para evitar fraudes de dados.
+          </li>
+        </ul>
+        <p>A precisão é garantida por regras de segurança:</p>
+
+        <ul class="rules-list">
+          <li class="rule-item">
+           <div class="revisado">Única Vez por Dia:</div> Registro permitido apenas uma
+            vez por dia útil.
+          </li>
+          <li class="rule-item">
+            <div class="revisado">Bloqueio de Fim de Semana:</div>Registro é bloqueado
+            em Sábados e Domingos. <i class="bi bi-calendar2-x" aria-label="Calendário bloqueado"></i>
+          </li>
+          <li class="rule-item">
+            <div class="revisado">Correção:</div> Edição permitida APENAS no último
+            registro para evitar erros.
+          </li> 
+          <li><div class="revisado"> fechar <i class="bi bi-emoji-sunglasses-fill" aria-label="Fechar"></i> | abrir <i class="bi bi-emoji-smile" aria-label="Abrir"></i></div>o modal  histórico</li>
+        </ul>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">3. Entendendo a Inteligência (Recálculo em Tempo Real)</h2>
+        <p>O que registrar: Registre o valor total de pontos que você fez naquele dia de trabalho.</p>
+        
+        <h3>
+          O valor de Diária Necessária é a métrica mais importante, pois ela se
+          ajusta à sua realidade:
+        </h3>
+        <p class="destacado">Meta Diária Necessária = Meta Mensal / Faltante {Dias Úteis Restantes (Excluindo Sáb/Dom)}</p>
+        
+        <ul>
+          <li>
+            <strong>Se você atrasar</strong>: O valor da Diária Necessária aumentará no dia
+            seguinte para compensar a diferença.
+          </li>
+          <li>
+            <strong>Se você adiantar</strong>: O valor da
+            Diária Necessária diminuirá, dando a você mais folga nos dias
+            seguintes.
+          </li>
+        </ul>
+
+        <h3>Recursos de Revisão e Simulação</h3>
+        
+        <dl>
+          <dt>Histórico (Nome de Usuário):</dt>
+          <dd>Mostra os últimos 5 dias registrados e sua Média Semanal.</dd>
+          <dd>Permite acompanhar seu ritmo e identificar rapidamente o dia que ficou para trás.</dd>
+          <dt>Correção de Pontos:</dt>
+          <dd>O botão Lápis <i class="bi bi-pencil" aria-label="Lápis"></i> funcionará apenas no último dia registrado.</dd>
+          <dd>Permite corrigir rapidamente um erro de digitação, garantindo que o Total Acumulado esteja sempre correto.</dd>
+          <dt>Cálculo Rápido <i class="bi bi-calculator" aria-label="Calculadora"></i>:</dt>
+          <dd>Abre o Modo Simulação (temporário).</dd>
+          <dd>Permite que você insira um valor teórico de "pontos realizados" para ver quantos pontos/dia você precisaria fazer, sem alterar seus dados reais.</dd>
+        </dl>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">4. Privacidade e Reset</h2>
+        <div>
+          <p>
+            <strong class="importante">Privacidade:</strong> Seus dados (nome, metas, histórico) são
+            armazenados apenas neste navegador (Local Storage) e nunca são
+            enviados para um servidor. Seus dados são privados e acessíveis
+            somente neste dispositivo.
+          </p>
+
+          <p>
+            <strong class="importante">Botão de Reset:</strong> O botão de <span class="destacado">"Resetar Aplicativo"</span> deve
+            ser usado com cautela, pois ele limpa permanentemente todo o seu
+            histórico e o força a refazer o cadastro. Use-o apenas se for
+            necessário iniciar um ciclo totalmente novo ou resolver um erro
+            grave.
+          </p>
+        </div>
+        <p class="revisado">Seus dados são privados e acessíveis somente neste dispositivo.</p>
+        <p class="destacado">
+          ⚠️ <span class="importante">O botão "Resetar Aplicativo"</span> limpa permanentemente todos os seus
+          dados de metas e histórico. Use com extrema cautela.
+        </p>
+      </section>
+
+      <a href="index.html" class="button-back-to-app">Voltar ao Dashboard</a>
+    </main>
+  </body>
+</html>

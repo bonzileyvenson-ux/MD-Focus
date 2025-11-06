@@ -1,14 +1,15 @@
 {
-  "name": "sass",
+  "name": "md-focus",
   "version": "1.0.0",
-  "description": "modulo de sass",
+  "description": "Acompanhamento de metas",
   "main": "index.js",
   "scripts": {
-    "watch:sass": "npx sass sass/main.scss css/style.css -w --load-path node_modules",
+    "watch:sass": "npx sass sass/main.scss:css/style.css sass/privacidade.scss:css/privacidade.css -w --load-path node_modules",
+    "compile:privacidade": "npx sass sass/privacidade.scss css/privacidade.css",
     "compile:sass": "npx sass sass/main.scss css/style.comp.css",
     "prefix:css": "npx  postcss --use autoprefixer -b 'last 10 versions' css/style.comp.css -o css/style.prefix.css",
     "compress:css": "npx sass css/style.prefix.css css/style.css --style compressed --load-path node_modules",
-    "build:css": "npx run-s compile:sass prefix:css compress:css"
+    "build:css": "npx run-s compile:sass prefix:css compress:css compile:privacidade"
   },
   "author": "Bonyve",
   "license": "ISC",

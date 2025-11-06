@@ -1,5 +1,12 @@
 // js/app.js
 
+import {
+  destacarElemento,
+  alternarDisplay,
+  ocultarEdicaoInPlace,
+  chamarCorrecao,
+} from "./ui.js";
+
 const notie = window.notie;
 
 import {
@@ -16,6 +23,12 @@ import {
   atualizarGraficoCircular,
   calcularMediaSemanal,
 } from "./calc.js";
+import {
+  validarNome,
+  validarMeta,
+  validarPontosRegistro,
+} from "./validation.js";
+import { configurarModalHistorico, abrirModalHistorico } from "./history.js";
 
 // Importar a função de atualização do gráfico
 let modoAtual = "registro";
@@ -51,10 +64,7 @@ function validarECadastrar() {
     ? metaDropdownElement.value
     : "none";
 
-  // --- LÓGICA DE VALIDAÇÃO ---
-  const regex = /^(?!.*(.)\1{2})[A-Za-z\u00C0-\u00Ff]{3,10}$/i;
-
-  if (!regex.test(nomeFuncionario)) {
+  if (!validarNome(nomeFuncionario)) {
     notie.alert({
       type: "error",
       text: "Por favor, digite um nome valído e legível (3 a 10 letras, sem repetição tripla).",
@@ -63,7 +73,7 @@ function validarECadastrar() {
     return;
   }
 
-  if (metaValorString === "none") {
+  if (!validarMeta(metaValorString)) {
     notie.alert({
       type: "error",
       text: "Opa!, você esqueceu de selecionar uma meta válida.",
@@ -84,7 +94,7 @@ function validarECadastrar() {
   iniciarDashboard(nomeFuncionario);
 }
 
-function iniciarDashboard(nome) {
+export function iniciarDashboard(nome) {
   // Se estivermos em um login automático ou se a variável global não estiver pronta,
   // garantimos o carregamento. No primeiro login, 'dadosUsuario' já estará pronto.
   if (!dadosUsuario) {
@@ -129,8 +139,12 @@ function iniciarDashboard(nome) {
   ativarBotaoEdit();
   ativarListenerMeta();
   configurarLimiteInput();
-  configurarMoodalHistorico();
+  configurarModalHistorico();
   editoresBtnsListerner();
+
+  if (window.matchMedia("(min-width: 768px)").matches) {
+    abrirModalHistorico();
+  }
 
   // 6. ALERTA DE SUCESSO (Apenas no login, não no carregamento automático)
   if (nome) {
@@ -157,6 +171,7 @@ function atualizarUIDashboard(resultados) {
     });
 
     PontotalElement.textContent = pontoFormatado;
+    destacarElemento("ponto-total");
   }
 
   const diariaElement = document.getElementById("meta-value");
@@ -170,6 +185,7 @@ function atualizarUIDashboard(resultados) {
     });
 
     diariaElement.textContent = valorFormatado;
+    destacarElemento("meta-value");
   }
 
   // meta mensal
@@ -182,11 +198,13 @@ function atualizarUIDashboard(resultados) {
       maximumFractionDigits: 0,
     });
     metaMensalElement.textContent = metaTotalFormatado;
+    destacarElemento("meta-mensal");
   }
   // 2. Dias Restantes
   const diasRestantesElement = document.getElementById("dias-restante");
   if (diasRestantesElement) {
     diasRestantesElement.textContent = resultados.diasUteisRestantes;
+    destacarElemento("dias-restante");
   }
 
   atualizarGraficoCircular(
@@ -252,46 +270,17 @@ function validarESubmeterPontos() {
 
   // Decide o que fazer com base no modo atual
   if (modoAtual === "registro") {
-    // --- Lógica de REGISTRO (movida de resgistrarDadosDiaria) ---
-    let hoje = new Date();
-
-    // Verifica se é fim de semana
-    const diaDaSemana = hoje.getDay(); // 0 = Domingo, 6 = Sábado
-    if (diaDaSemana === 0 || diaDaSemana === 6) {
-      notie.alert({
-        type: "warning",
-        text: "Fim de semana! Só é possível registrar pontos em dias úteis.",
-        time: 4,
-      });
-      return;
-    }
-
-    let dataHojeKey =
-      hoje.getFullYear() +
-      "-" +
-      String(hoje.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(hoje.getDate()).padStart(2, "0");
-
-    if (pontoAdicionado < 100) {
-      notie.alert({
-        type: "error",
-        text: "Para registro, o valor deve ser maior que 100.",
-        time: 2,
-      });
-      return;
-    }
-
-    if (dadosUsuario.realizadoDiario[dataHojeKey]) {
-      notie.alert({
-        type: "error",
-        text: "Registro bloqueado: O total de pontos para hoje já foi inserido.",
-        time: 4,
-      });
-      document
-        .getElementById("edita-pontos")
-        .classList.add("edita-pontos-hidden");
-      return;
+    const { valido, mensagem, dataHojeKey } = validarPontosRegistro(pontoAdicionado, dadosUsuario.realizadoDiario);
+    if (!valido) {
+        notie.alert({
+            type: "error",
+            text: mensagem,
+            time: 4,
+        });
+        if (mensagem.includes("bloqueado")) {
+            document.getElementById("edita-pontos").classList.add("edita-pontos-hidden");
+        }
+        return;
     }
 
     dadosUsuario.realizadoDiario[dataHojeKey] = pontoAdicionado;
@@ -347,245 +336,21 @@ function configurarLimiteInput() {
 
   if (inputPontosElement) {
     inputPontosElement.addEventListener("input", function () {
-      if (this.value.length > 5) {
-        this.value = this.value.slice(0, 5);
+      let maxLength = 5;
+      if (modoAtual === 'registro') {
+        maxLength = 4;
+      }
+      
+      if (this.value.length > maxLength) {
+        this.value = this.value.slice(0, maxLength);
       }
     });
   }
 }
 
-function gerarHistoricoDetalhado(realizadoDiario) {
-  const listaElement = document.getElementById("historico-lista");
-  let htmlContent = "";
-  if (realizadoDiario && Object.keys(realizadoDiario).length > 0) {
-    const dataOrdenadas = Object.keys(realizadoDiario).sort().reverse();
-    const ultimos5Dias = dataOrdenadas.slice(0, 5);
 
-    ultimos5Dias.forEach((dataKey, index) => {
-      const valor = realizadoDiario[dataKey];
-      const valorFormatado = valor.toLocaleString("pt-BR", {
-        style: "decimal",
-      });
-      const dataReduzida = dataKey.slice(5);
-      const liId = `historico-item-${index}`;
 
-      htmlContent += `
-        <li class="historico-item-card position-relative" id="${liId}">
-            <div class="historico-item-data" id="display-container-${liId}">
-                <span class="card-data-valor">
-                    ${dataReduzida} : ${valorFormatado} pontos
-                </span>
-                <button class="btn-corrigir btn btn-sm btn-light" data-li-id="${liId}" aria-label="Corrigir Registro">
-                    <i class="bi bi-pencil"></i>
-                </button>
-            </div>
-            <div class="edicao-in-place edita-pontos-hidden" id="edicao-${liId}" data-valor-antigo="${valor}" data-date-key="${dataKey}">
-                <input type="number" value="${valor}" class="form-control  input-correcao">
 
-                <div class="edit-botoes">
-                <button class="btn btn-success btn-sm btn-salvar-correcao" aria-label="Salvar Correção">
-                    <i class="bi bi-check-circle-fill"></i>
-                </button>
-                <button class="btn btn-danger btn-sm btn-cancelar-correcao" aria-label="Cancelar Correção">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-                </div>
-            </div>
-        </li>
-      `;
-    });
-  }
-
-  listaElement.innerHTML =
-    htmlContent ||
-    '<li class="list-group-item">Nenhum registro encontrado.</li>';
-
-  // Anexa os listeners depois que o HTML foi criado
-  ligarListenersDeCorrecao();
-  configurarListenersEdicaoInPlace();
-}
-
-function abrirModalHistorico() {
-  if (!dadosUsuario) {
-    dadosUsuario = carregarDados();
-  }
-
-  const mediaElement = document.getElementById("media-semanal");
-  if (mediaElement) {
-    const realizadoDiario = dadosUsuario.realizadoDiario;
-    if (realizadoDiario && Object.keys(realizadoDiario).length > 0) {
-      const media = calcularMediaSemanal(realizadoDiario);
-      mediaElement.textContent = media.toLocaleString("pt-BR", {
-        style: "decimal",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      });
-    } else {
-      mediaElement.textContent = "N/A";
-    }
-  }
-
-  // Esta função agora também anexa os listeners
-  gerarHistoricoDetalhado(dadosUsuario.realizadoDiario);
-
-  const modal = document.getElementById("historico-modal");
-  if (modal) {
-    modal.classList.replace("modal-backdrop-hidden", "modal-backdrop");
-    document.querySelector("main > section").classList.add("section-modal-open");
-  }
-}
-
-function configurarMoodalHistorico() {
-  const btnAbrir = document.getElementById("btn-abrir-historico");
-  const btnFechar = document.getElementById("btn-fechar-historico");
-  const modal = document.getElementById("historico-modal");
-
-  if (btnAbrir) {
-    btnAbrir.addEventListener("click", abrirModalHistorico);
-  }
-
-  if (btnFechar) {
-    btnFechar.addEventListener("click", () => {
-      modal.classList.replace("modal-backdrop", "modal-backdrop-hidden");
-      document.querySelector("main > section").classList.remove("section-modal-open");
-    });
-  }
-}
-
-function chamarCorrecao(btn) {
-  const liId = btn.getAttribute("data-li-id");
-  const edicaoDiv = document.getElementById(`edicao-${liId}`);
-  const displayContainer = document.getElementById(`display-container-${liId}`);
-
-  if (edicaoDiv && displayContainer) {
-    displayContainer.classList.add("edita-pontos-hidden");
-    edicaoDiv.classList.remove("edita-pontos-hidden");
-
-    const inputElement = edicaoDiv.querySelector(".input-correcao");
-    if (inputElement) {
-      inputElement.focus();
-    }
-  }
-}
-
-function corrigirRegistro(dataKey, novoValor, valorAntigo) {
-  const diferenca = novoValor - valorAntigo;
-  dadosUsuario.realizadoTotal += diferenca;
-  dadosUsuario.realizadoDiario[dataKey] = novoValor;
-  salvarDados(dadosUsuario);
-
-  notie.alert({
-    type: "success",
-    text: `Registro de ${dataKey} corrigido com sucesso!`,
-    time: 3,
-  });
-
-  // Redesenha o histórico para mostrar o valor atualizado e resetar a UI
-  gerarHistoricoDetalhado(dadosUsuario.realizadoDiario);
-  // Atualiza o dashboard principal
-  iniciarDashboard(null); // Passa null para não exibir a mensagem de boas-vindas
-}
-
-function ligarListenersDeCorrecao() {
-  document.querySelectorAll(".btn-corrigir").forEach((btn) => {
-    // Clona e substitui o botão para remover listeners antigos e evitar duplicação
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-
-    newBtn.addEventListener("click", (e) => {
-      const clickedButton = e.currentTarget;
-
-      // VERIFICAÇÃO 1: Bloquear edições durante o fim de semana.
-      const hoje = new Date();
-      const diaDaSemana = hoje.getDay();
-      if (diaDaSemana === 0 || diaDaSemana === 6) {
-        notie.alert({
-          type: "warning",
-          text: "Não é possível corrigir registros durante o fim de semana.",
-          time: 4,
-        });
-        return;
-      }
-
-      // VERIFICAÇÃO 2: Permitir edição apenas no último registro.
-      const liId = clickedButton.getAttribute("data-li-id");
-      const edicaoDiv = document.getElementById(`edicao-${liId}`);
-      const dataKeyDoItem = edicaoDiv.getAttribute("data-date-key");
-
-      // Pega a lista de todos os registros e a ordena do mais novo para o mais antigo.
-      const dataOrdenadas = Object.keys(dadosUsuario.realizadoDiario)
-        .sort()
-        .reverse();
-      const ultimoRegistroDataKey =
-        dataOrdenadas.length > 0 ? dataOrdenadas[0] : null;
-
-      if (dataKeyDoItem !== ultimoRegistroDataKey) {
-        notie.alert({
-          type: "error",
-          text: "Apenas o último registro pode ser corrigido para manter a consistência dos dados.",
-          time: 4,
-        });
-        return;
-      }
-
-      // Se todas as verificações passarem, prossiga para a edição.
-      chamarCorrecao(clickedButton);
-    });
-  });
-}
-
-function configurarListenersEdicaoInPlace() {
-  document.querySelectorAll(".btn-salvar-correcao").forEach((btn) => {
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-
-    newBtn.addEventListener("click", (e) => {
-      const edicaoDiv = e.currentTarget.closest(".edicao-in-place");
-      const dataKey = edicaoDiv.getAttribute("data-date-key");
-      const valorAntigo = Number(edicaoDiv.getAttribute("data-valor-antigo"));
-      const inputNovoValor = edicaoDiv.querySelector(".input-correcao");
-      const novoValor = Number(inputNovoValor.value);
-
-      if (isNaN(novoValor) || novoValor < 0) {
-        notie.alert({ type: "error", text: "Valor inválido.", time: 2 });
-        return;
-      }
-
-      if (novoValor === valorAntigo) {
-        notie.alert({
-          type: "warning",
-          text: "Ops!!! esse valor já foi registrado",
-          time: 2,
-        });
-        return;
-      }
-      corrigirRegistro(dataKey, novoValor, valorAntigo);
-    });
-  });
-
-  document.querySelectorAll(".btn-cancelar-correcao").forEach((btn) => {
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-
-    newBtn.addEventListener("click", (e) => {
-      const edicaoDiv = e.currentTarget.closest(".edicao-in-place");
-      ocultarEdicaoInPlace(edicaoDiv);
-    });
-  });
-}
-
-function ocultarEdicaoInPlace(edicaoDiv) {
-  edicaoDiv.classList.add("edita-pontos-hidden");
-
-  const liContainer = edicaoDiv.closest(".historico-item-card");
-  const displayContainer = liContainer
-    ? liContainer.querySelector("[id^=display-container-]")
-    : null;
-
-  if (displayContainer) {
-    displayContainer.classList.remove("edita-pontos-hidden");
-  }
-}
 
 // LÓGICA DE SIMULAÇÃO
 // =================================================================================
@@ -693,6 +458,5 @@ function editoresBtnsListerner() {
   }
 }
 
-function alternarDisplay(element) {
-  element.classList.toggle("hidden");
-}
+
+
