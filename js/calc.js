@@ -1,4 +1,4 @@
-export function contarDiasUteis() {
+export function contarDiasUteis(diasOffAgendados = []) {
   const hoje = new Date();
   const ano = hoje.getFullYear();
   const mes = hoje.getMonth();
@@ -9,10 +9,28 @@ export function contarDiasUteis() {
   let diasUteisPassados = 0;
   let totalDiasUteisMes = 0;
 
+  // Normaliza as datas para o formato 'DD/MM/YYYY' para garantir a correspondência
+  const datasOffFormatadas = diasOffAgendados.map(dataStr => {
+    const partes = dataStr.split('/');
+    if (partes.length === 3) {
+      // Formato DD/MM/YYYY já está correto
+      return `${partes[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[2]}`;
+    }
+    return dataStr; // Retorna o original se não estiver no formato esperado
+  });
+
+
   for (let dia = 1; dia <= ultimoDiaMes; dia++) {
     const data = new Date(ano, mes, dia);
     const diaDaSemana = data.getDay();
-    const isDiaUtil = diaDaSemana !== 0 && diaDaSemana !== 6; // 0 = Domingo, 6 = Sábado
+
+    // Cria a data no formato DD/MM/YYYY para verificação
+    const dataAtualFormatada = `${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${ano}`;
+    
+    // Verifica se a data atual está na lista de dias de folga
+    const isDiaOff = datasOffFormatadas.includes(dataAtualFormatada);
+
+    const isDiaUtil = diaDaSemana !== 0 && diaDaSemana !== 6 && !isDiaOff;
 
     if (isDiaUtil) {
       totalDiasUteisMes++;
@@ -36,7 +54,7 @@ export function contarDiasUteis() {
 
 export function calcularEAtualizarDashboard(dado) {
   // obtenção de tempo
-  const { totalDiasUteisMes, diasUteisRestantes } = contarDiasUteis();
+  const { totalDiasUteisMes, diasUteisRestantes } = contarDiasUteis(dado.diasOffAgendados);
 
   // obtenção de valores
 

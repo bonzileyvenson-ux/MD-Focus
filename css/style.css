@@ -11,10 +11,10 @@ html {
 .index-body {
   font-size: 1.6rem;
   font-family: "Montserrat", sans-serif;
-  background-image: linear-gradient(46deg, hsl(0, 0%, 100%), rgb(81, 79, 180));
+  background-image: linear-gradient(46deg, hsl(0, 0%, 100%), rgb(60, 79, 250));
   width: 100vw;
   height: 100vh;
-  overflow-y: hidden;
+  overflow: hidden;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -55,14 +55,6 @@ html {
     max-width: 70%;
   }
 }
-main section {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
-  transition: max-width 0.3s ease-in-out;
-}
 
 .container-progress {
   margin-top: 5rem;
@@ -90,7 +82,7 @@ main section {
 }
 @media screen and (orientation: landscape) and (min-width: 48em) {
   .edit-icon {
-    z-index: 10000;
+    z-index: 98;
   }
 }
 
@@ -134,7 +126,7 @@ main section {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 999;
+  z-index: 99;
   text-align: center;
   font-size: 1.5rem;
   font-family: sans-serif;
@@ -147,6 +139,12 @@ main section {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.notie-overlay {
+  background-color: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(20rem);
+  z-index: 94;
 }
 
 .notie-background-success {
@@ -165,7 +163,25 @@ main section {
 }
 
 .notie-background-info {
+  width: clamp(70%, 100vw, 100%);
   background-color: #1e9bcc;
+  color: hsl(0, 0%, 100%);
+}
+
+.notie-button {
+  width: 10vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notie-background-success {
+  background-color: rgb(64, 182, 109);
+  color: hsl(0, 0%, 100%);
+}
+
+.notie-background-error {
+  background-color: #dd1b2f;
   color: hsl(0, 0%, 100%);
 }
 
@@ -189,7 +205,7 @@ main section {
 @media screen and (orientation: landscape) and (min-width: 48em) {
   .lapis-edita,
   .btn-submitcalculator {
-    z-index: 10000;
+    z-index: 3;
   }
 }
 
@@ -217,10 +233,36 @@ main section {
 .footer-link {
   position: absolute;
   left: 2rem;
-  bottom: 1rem;
-  font-size: 1.6rem;
+  bottom: 2rem;
+  font-size: 1rem;
+}
+@media screen and (orientation: landscape) and (min-width: 48em) {
+  .footer-link {
+    width: 100%;
+    font-size: 1.2rem;
+  }
+}
+.footer-link .icon-mobile {
+  display: none;
+}
+.footer-link p {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: hsl(29, 90%, 42%);
+  cursor: pointer;
 }
 
+@media (max-width: 768px) {
+  .footer-link .footer-text,
+  .footer-link .icon-desktop {
+    display: none;
+  }
+  .footer-link .icon-mobile {
+    display: inline;
+    font-size: 2rem;
+  }
+}
 @media screen and (orientation: landscape) and (min-width: 48em) {
   .section1 {
     width: 100%;
@@ -291,7 +333,7 @@ svg {
   min-height: 35vh;
   background-color: white;
   padding: 2.5rem;
-  box-shadow: inset 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.4), 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0.3rem 0.2rem rgba(0, 0, 0, 0.4);
   border-radius: 2rem;
   border: 1px solid hsl(209, 100%, 50%);
   display: flex;
@@ -430,15 +472,18 @@ svg {
 }
 
 .meta-opcao {
-  color: white;
   position: absolute;
-  right: 0;
+  right: 2rem;
   top: 2rem;
-  margin-right: 2rem;
-  padding: 0.4rem;
+  padding: 0.8rem;
   border-radius: 1rem;
   background-color: hsl(209, 67%, 60%);
-  font-size: 1.4rem;
+  color: white;
+  font-size: 1.6rem;
+  text-align: center;
+  border: none;
+  outline: none;
+  cursor: pointer;
   box-shadow: inset 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.2);
 }
 
@@ -457,10 +502,7 @@ svg {
 .modal-backdrop {
   display: block;
   position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
+  inset: 0 0 0 0;
   backdrop-filter: blur(1rem);
   background-color: rgba(15, 15, 15, 0.815);
 }
@@ -605,7 +647,7 @@ svg {
   justify-content: space-between;
   padding: 1rem;
   font-size: 1.6;
-  z-index: 10;
+  z-index: 1;
 }
 
 /* Oculta o container inicialmente */
@@ -615,9 +657,11 @@ svg {
 
 .btn-corrigir {
   background-color: transparent;
-  color: black;
-  font-weight: 700;
-  font-size: 1.6rem;
+  color: rgb(18, 59, 107);
+}
+
+.card-data-valor {
+  color: rgb(18, 59, 107);
 }
 
 .edit-botoes {
@@ -663,6 +707,37 @@ svg {
     box-shadow: inset 0.5rem 0 0.5rem 0 rgba(8, 14, 17, 0.3), inset -0.5rem 0 0.5rem 0 rgba(8, 14, 17, 0.3);
     background-color: hsl(240, 96%, 27%);
   }
+}
+
+.form-group {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.form-group label {
+  color: hsl(240, 96%, 27%);
+  font-weight: 700;
+}
+.form-group .observacao-text {
+  width: 90%;
+  min-height: 3rem;
+  background-color: hsla(192, 11%, 91%, 0.767);
+  border-radius: 0.5rem;
+  outline: none;
+  padding: 1rem;
+  margin: 0 auto;
+  border: 1px solid hsl(240, 96%, 27%);
+}
+
+.btn-modal-solicitar {
+  padding: 1rem;
+  background-color: hsl(29, 90%, 42%);
+  border-radius: 10rem;
+  color: hsl(203, 68%, 82%);
+  margin-bottom: 2rem;
+  cursor: pointer;
 }
 
 /*# sourceMappingURL=style.css.map */

@@ -84,7 +84,7 @@
               </button>
             </div>
   
-            <select class="meta-opcao" name="" id="meta-dropdown">
+            <select class="meta-opcao " name="" id="meta-dropdown">
               <option value="none" selected>Definir Meta</option>
               <option value="600">R$ 600,00</option>
               <option value="500">R$ 500,00</option>
@@ -131,12 +131,13 @@
           
           <div>
         <a href="uso_privacidade.html" class="footer-link" target="_blank">
-          <p><i class="bi bi-shield-check"></i>  Política de privacidade | Modo de uso </p>
+          <p><i class="bi bi-shield-check icon-desktop"></i><span class="footer-text">  Política de privacidade | Modo de uso </span><i class="bi bi-shield-fill-check icon-mobile"></i></p>
         </a>
       </div>
         </section>
  
       </main>
+      <!-- Modal de Histórico -->
       <div id="historico-modal" class="modal-backdrop-hidden">
             <div class="modal-content-custom">
               <div class="modal-header">
@@ -152,12 +153,20 @@
                 <div class="media-status-card">
                   <h5 class="mt-5">Média de Pontos (Últimos 5 Dias):</h5>
                   <p class="h3-media-semanal " id="media-semanal">0</p>
+
+                
+            
+            <div class="form-group">
+              <label for="texterarea-obervacoes">Observações (Opcional)</label>
+              <textarea class="observacao-text" id="texterarea-obervacoes" rows="3" placeholder="Use palavras-chave como 'ajudar no recebimento' para bônus ou 'feriado , aniversário' para agendar folga."></textarea>
+              <button id="btn-solicitar" class="btn-modal-solicitar">solicitar</button>
+            </div>
+         
                 </div>
               </div>
             </div>
           </div>
           </div>
-      
       <script type="module" src="js/app.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/notie@4.3.1/dist/notie.min.js"></script>
     </body>

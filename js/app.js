@@ -3,40 +3,39 @@
 import {
   destacarElemento,
   alternarDisplay,
-  ocultarEdicaoInPlace,
-  chamarCorrecao,
+ 
 } from "./ui.js";
 
 const notie = window.notie;
 
 import {
-  // getChaveDadosUsuario, // Não é mais necessária aqui
   salvarDados,
   criarDadosIniciais,
   carregarDados,
   MAPA_METAS,
+  getDadosUsuario,
+  atualizarDadosUsuario,
 } from "./data.js";
 
 // CORREÇÃO 1: Renomear a função no import para o nome correto
 import {
   calcularEAtualizarDashboard,
   atualizarGraficoCircular,
-  calcularMediaSemanal,
+ 
 } from "./calc.js";
 import {
   validarNome,
   validarMeta,
   validarPontosRegistro,
 } from "./validation.js";
-import { configurarModalHistorico, abrirModalHistorico } from "./history.js";
+import { configurarModalHistorico, abrirModalHistorico,solicitarBonus } from "./history.js";
 
 // Importar a função de atualização do gráfico
 let modoAtual = "registro";
 
-let dadosUsuario = null;
-
 document.addEventListener("DOMContentLoaded", () => {
-  dadosUsuario = carregarDados();
+  carregarTema(); // NOVO: Carrega o tema salvo ao iniciar
+  const dadosUsuario = carregarDados();
   if (dadosUsuario) {
     // CORREÇÃO 2: Apenas iniciar o dashboard (os cálculos e gráfico serão feitos dentro de iniciarDashboard)
     iniciarDashboard(dadosUsuario.nome);
@@ -85,7 +84,7 @@ function validarECadastrar() {
   // --- LÓGICA CRÍTICA DE SALVAMENTO (PRIMEIRO LOGIN) ---
 
   // 1. CRIAÇÃO do novo objeto de dados
-  dadosUsuario = criarDadosIniciais(nomeFuncionario, metaValorString);
+  const dadosUsuario = criarDadosIniciais(nomeFuncionario, metaValorString);
 
   // 2. SALVAMENTO do objeto no data.js (localStorage)
   salvarDados(dadosUsuario);
@@ -97,8 +96,9 @@ function validarECadastrar() {
 export function iniciarDashboard(nome) {
   // Se estivermos em um login automático ou se a variável global não estiver pronta,
   // garantimos o carregamento. No primeiro login, 'dadosUsuario' já estará pronto.
+  const dadosUsuario = getDadosUsuario();
   if (!dadosUsuario) {
-    dadosUsuario = carregarDados();
+    return;
   }
 
   // 1. INTELIGÊNCIA: Calcular o estado atual
@@ -132,7 +132,17 @@ export function iniciarDashboard(nome) {
 
   // Mostra o nome e a meta
   userName.classList.replace("usuario-name-hidden", "usuario-name");
-  userName.innerHTML = `<i class="bi bi-person-badge-fill"></i>${nomeFinal}`;
+  
+  // CORREÇÃO DE SEGURANÇA: Evitar XSS usando textContent em vez de innerHTML
+  // Limpa o conteúdo anterior
+  userName.innerHTML = ''; 
+  // Cria o ícone de forma segura
+  const icon = document.createElement('i');
+  icon.className = 'bi bi-person-badge-fill';
+  // Adiciona o ícone e o texto do nome de forma segura
+  userName.appendChild(icon);
+  userName.appendChild(document.createTextNode(nomeFinal));
+
   metaData.classList.replace("meta-data-hidden", "meta-data");
 
   // 5. ATIVAÇÃO DO BOTÃO DE EDIÇÃO
@@ -141,6 +151,9 @@ export function iniciarDashboard(nome) {
   configurarLimiteInput();
   configurarModalHistorico();
   editoresBtnsListerner();
+  solicitarBtnListerner();
+  configurarToggleTema(); // NOVO: Ativa o botão de tema
+
 
   if (window.matchMedia("(min-width: 768px)").matches) {
     abrirModalHistorico();
@@ -160,6 +173,7 @@ export function iniciarDashboard(nome) {
 // Você precisa da função atualizarUIDashboard para injetar os dados
 // Ela deve usar os resultados do calc.js e o objeto dadosUsuario
 function atualizarUIDashboard(resultados) {
+  const dadosUsuario = getDadosUsuario();
   const PontotalElement = document.getElementById("ponto-total");
   if (PontotalElement) {
     const pontoTotal = dadosUsuario.realizadoTotal;
@@ -268,6 +282,7 @@ function validarESubmeterPontos() {
     return;
   }
 
+  const dadosUsuario = getDadosUsuario();
   // Decide o que fazer com base no modo atual
   if (modoAtual === "registro") {
     const { valido, mensagem, dataHojeKey } = validarPontosRegistro(pontoAdicionado, dadosUsuario.realizadoDiario);
@@ -286,7 +301,7 @@ function validarESubmeterPontos() {
     dadosUsuario.realizadoDiario[dataHojeKey] = pontoAdicionado;
     dadosUsuario.realizadoTotal += pontoAdicionado;
 
-    salvarDados(dadosUsuario);
+    atualizarDadosUsuario(dadosUsuario);
     inputPontosElement.value = "";
     document
       .getElementById("edita-pontos")
@@ -317,9 +332,10 @@ function ativarListenerMeta() {
         return;
       }
 
+      const dadosUsuario = getDadosUsuario();
       const novaMetaMensal = MAPA_METAS[metaAlterada];
       dadosUsuario.metaMensal = novaMetaMensal;
-      salvarDados(dadosUsuario);
+      atualizarDadosUsuario(dadosUsuario);
       iniciarDashboard(dadosUsuario.nome);
 
       notie.alert({
@@ -377,6 +393,7 @@ function ligarModoSimulacao() {
 }
 
 function executarCalculoRapidoSimulacao(pontoAdicionado) {
+  const dadosUsuario = getDadosUsuario();
   const dadosSimulados = {
     nome: dadosUsuario.nome, // Mantém o nome para consistência
     metaMensal: dadosUsuario.metaMensal,
@@ -387,10 +404,7 @@ function executarCalculoRapidoSimulacao(pontoAdicionado) {
   const resultadoSimulado = calcularEAtualizarDashboard(dadosSimulados);
 
   // --- ATUALIZAÇÃO VISUAL COMPLETA ---
-  const dadosOriginais = dadosUsuario; // Salva os dados reais
-  dadosUsuario = dadosSimulados; // Troca temporariamente para os dados simulados
   atualizarUIDashboard(resultadoSimulado); // Atualiza TODA a UI com os dados da simulação
-  dadosUsuario = dadosOriginais; // Restaura os dados reais para o resto da lógica
   // --- FIM DA ATUALIZAÇÃO VISUAL ---
 
   let mensagem = "";
@@ -459,4 +473,59 @@ function editoresBtnsListerner() {
 }
 
 
+function solicitarBtnListerner(){
+  const btnSolicitar = document.getElementById("btn-solicitar");
+  if (btnSolicitar) {
+    btnSolicitar.addEventListener("click", () => {
+      solicitarBonus()
+    });
+}}
 
+// =================================================================================
+// LÓGICA DE TEMA (DARK/LIGHT MODE)
+// =================================================================================
+
+function carregarTema() {
+  const temaSalvo = localStorage.getItem("tema") || "light";
+  document.documentElement.setAttribute("data-theme", temaSalvo);
+  atualizarIconeTema(temaSalvo);
+}
+
+function configurarToggleTema() {
+  const toggleButton = document.getElementById("theme-toggle");
+  if (toggleButton) {
+    toggleButton.addEventListener("click", () => {
+      let temaAtual = document.documentElement.getAttribute("data-theme");
+      const novoTema = temaAtual === "dark" ? "light" : "dark";
+
+      document.documentElement.setAttribute("data-theme", novoTema);
+      localStorage.setItem("tema", novoTema);
+      atualizarIconeTema(novoTema);
+    });
+  }
+}
+
+function atualizarIconeTema(tema) {
+  const iconElement = document.querySelector("#theme-toggle i");
+  if (iconElement) {
+    iconElement.className = tema === "dark" 
+      ? "bi bi-sun-fill"   // Ícone para passar para o modo claro
+      : "bi bi-moon-stars-fill"; // Ícone para passar para o modo escuro
+  }
+}
+
+// =================================================================================
+// REGISTRO DO SERVICE WORKER (PWA OFFLINE)
+// =================================================================================
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('Service Worker registrado com sucesso:', registration);
+      })
+      .catch(error => {
+        console.log('Falha ao registrar o Service Worker:', error);
+      });
+  });
+}

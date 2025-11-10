@@ -12,6 +12,7 @@ html {
   font-size: 1.6rem;
   font-family: "Montserrat", sans-serif;
   background-color: darken(clr(primary), 18%);
+  overflow-x: hidden;
 }
 
 .manual-header {
@@ -41,10 +42,6 @@ html {
 .manual-container {
   max-width: 90rem;
   background-image: linear-gradient(to top right, #ffffff, rgb(174, 216, 219));
-
-  box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5),
-    inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
- 
   height: auto;
   margin: 0 auto;
   padding: 3rem;
@@ -54,7 +51,7 @@ html {
   gap: 2.5rem;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 1rem 0.3rem rgba(133, 164, 199, 0.2);
+  box-shadow: 0 0 1rem 0.1rem rgba(211, 219, 228, 0.336);
   color: clr(gray);
 
   .manual-section {
@@ -121,10 +118,10 @@ html {
   .button-back-to-app {
     text-decoration: none;
     padding: 1rem;
-    background-image: linear-gradient(to right, clr(roxo), clr(blanco));
+    background-color:lighten(clr(danger),20%);
     border: 1px solid;
-    color: clr(black);
+    color: clr(blanco);
     border-radius: 1rem;
-    box-shadow: 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.2);
   }
 }

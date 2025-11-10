@@ -7,28 +7,20 @@
   min-height: 35vh;
   background-color: #ffff;
   padding: 2.5rem;
-  box-shadow: inset 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.4),
-    0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0.3rem 0.2rem rgba(0, 0, 0, 0.4);
   border-radius: 2rem;
   border: 1px solid hsl(209, 100%, 50%);
- 
+
   display: flex;
   gap: 2rem;
   flex-flow: column;
   align-items: start;
   justify-content: center;
   margin-top: 3rem;
-
-  // @include mobile-landscape {
-  //   width: 50%;
-  // }
-
-  
 }
 
 .input-meta-name-hidden {
   display: none;
- 
 }
 
 .input-meta-name {
@@ -70,14 +62,13 @@
     input {
       text-align: center;
       width: 100%;
-      &::placeholder{
+      &::placeholder {
         font-size: 1.1rem;
       }
     }
-
   }
 
-  .text-bemVindo{
+  .text-bemVindo {
     margin-top: 2rem;
   }
 }
@@ -103,8 +94,6 @@
   // flex-flow: column;
   align-items: center;
   justify-content: center;
-  
-   
 }
 
 .meta-data-hidden {
@@ -117,16 +106,14 @@
   font-size: 2rem;
   font-weight: 700;
   color: hsl(209, 100%, 57%);
-  
 
   span {
-    
     font-weight: 500;
     font-size: 1.6rem;
     color: hsl(29, 100%, 50%);
   }
 
-  .dias-restante{
+  .dias-restante {
     font-size: 1.2rem;
     font-weight: 700;
     background-color: hsl(204, 28%, 56%);
@@ -135,7 +122,7 @@
     padding: 0.3rem;
     margin-left: 0.2rem;
     translate: (0 -1rem);
-    box-shadow: inset  0 0 0.2rem 0 rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 0 0.2rem 0 rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -161,19 +148,24 @@
   border-right: 2px solid hsl(209, 100%, 50%);
 
   .bi {
-    margin-right: 0.5rem
+    margin-right: 0.5rem;
   }
 }
 
 .meta-opcao {
-  color: #ffff;
   position: absolute;
-  right: 0;
+  right: 2rem;
   top: 2rem;
-  margin-right: 2rem;
-  padding: 0.4rem;
+ 
+  padding: 0.8rem;
   border-radius: 1rem;
   background-color: hsl(209, 67%, 60%);
-  font-size: 1.4rem;
-  box-shadow: inset  0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.2);
+  color: #ffff;
+  font-size: 1.6rem; 
+  text-align: center;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  box-shadow: inset 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.2);
+ 
 }

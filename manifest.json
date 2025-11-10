@@ -2,20 +2,47 @@
   "name": "MD Focus: Gestão de Metas",
   "short_name": "MD Focus",
   "description": "Dashboard para controle e simulação de meta diária em dias úteis.",
-  "start_url": "/MD-Focus/index.html", 
-  "display": "standalone",
+  "scope": ".",
+  "start_url": ".", 
+  "display_override": ["standalone", "minimal-ui"],
+  "display": "minimal-ui",
   "background_color": "#1c0a5f", 
   "theme_color": "#ff9800", 
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Registrar Pontos",
+      "short_name": "Registrar",
+      "description": "Abre a tela para registrar os pontos do dia.",
+      "url": "/index.html?action=registrar",
+      "icons": [{ "src": "icon-shortcut-registrar.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ] 
 }

@@ -1,5 +1,19 @@
 // js/data.js (Versão Final para Consistência)
 
+let dadosUsuario = null;
+
+export function getDadosUsuario() {
+  if (!dadosUsuario) {
+    dadosUsuario = carregarDados();
+  }
+  return dadosUsuario;
+}
+
+export function atualizarDadosUsuario(novosDados) {
+  dadosUsuario = novosDados;
+  salvarDados(dadosUsuario);
+}
+
 /**
  * Mapeamento das Metas por nome de chave.
  * Nota: Os valores do SELECT (300, 400, etc.) devem ser usados como chaves,
@@ -44,6 +58,7 @@ export function carregarDados() {
     salvarDados(dados); // Salva os dados zerados
   }
 
+  dadosUsuario = dados;
   return dados;
 }
 
@@ -54,6 +69,7 @@ export function carregarDados() {
 export function salvarDados(dados) {
   const chave = getChaveDadosUsuario();
   localStorage.setItem(chave, JSON.stringify(dados));
+  dadosUsuario = dados;
 }
 
 /**
@@ -65,12 +81,14 @@ export function salvarDados(dados) {
 export function criarDadosIniciais(funcionario, metaDiariaBase) {
   const metaMensal = MAPA_METAS[metaDiariaBase] || 0;
 
-  return {
+  const dados = {
     nome: funcionario,
     metaMensal: metaMensal,
     realizadoDiario: {},
     realizadoTotal: 0,
     dataUltimoCalculo: new Date().toISOString().slice(0, 10),
   };
-}
 
+  dadosUsuario = dados;
+  return dados;
+}

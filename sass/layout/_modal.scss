@@ -13,10 +13,7 @@
 .modal-backdrop {
   display: block;
   position: fixed; // <-- Use fixed para garantir cobertura total
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
+  inset: 0 0 0 0;
   backdrop-filter: blur(1rem);
   background-color: rgba(15, 15, 15, 0.815);
 
@@ -167,7 +164,7 @@
   justify-content: space-between;
   padding: 1rem;
   font-size: 1.6;
-  z-index: 10;
+  z-index: 1;
 }
 
 /* Oculta o container inicialmente */
@@ -177,9 +174,11 @@
 
 .btn-corrigir {
   background-color: transparent;
-  color: black;
-  font-weight: 700;
-  font-size: 1.6rem;
+  color: clr(dark-blue);
+}
+
+.card-data-valor {
+  color: clr(dark-blue);
 }
 
 .edit-botoes {
@@ -226,4 +225,38 @@
       inset -0.5rem 0 0.5rem 0 rgba(8, 14, 17, 0.3);
     background-color: clr(primary);
   }
+}
+
+.form-group {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+
+  label{
+  color: clr(primary);
+  font-weight: 700;
+  }
+
+  .observacao-text {
+    width: 90%;
+    min-height: 3rem;
+    background-color: hsla(192, 11%, 91%, 0.767);
+   border-radius: 0.5rem;
+    outline: none;
+    padding: 1rem;
+    margin: 0 auto;
+    border: 1px solid clr(primary);
+  }
+}
+
+
+.btn-modal-solicitar{
+  padding: 1rem;
+  background-color: clr(tercery);
+  border-radius: 10rem;
+  color: clr(azul-claro);
+  margin-bottom: 2rem;
+  cursor: pointer;
 }
