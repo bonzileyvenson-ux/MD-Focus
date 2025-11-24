@@ -252,16 +252,28 @@
   right: 2rem;
   top: 2rem;
 
-  padding: 0.2rem;
+  padding: 0.5rem 1rem;
   border-radius: 1rem;
   background-image: linear-gradient(341deg, rgb(18 62 105), hsl(203deg 66.77% 45.89% / 97%));
-  color: #ffff;
+  color: #ffffff;
   font-size: 1.5rem;
+  font-weight: 600;
   text-align: center;
-  border: none;
+  border: 2px solid clr(secondary);
   outline: none;
   cursor: pointer;
   box-shadow: inset 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.2), 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.2);
+
+  option {
+    background-color: rgb(18, 59, 107);
+    color: #ffffff;
+    padding: 0.5rem;
+    font-weight: 500;
+    
+    &:hover {
+      background-color: rgb(52, 118, 194);
+    }
+  }
 
   @mixin landscape-desktop {
     padding: 2rem;

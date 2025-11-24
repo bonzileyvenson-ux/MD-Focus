@@ -66,10 +66,17 @@ function configurarCadastro() {
       // Verifica se é o primeiro acesso (novo usuário)
       const primeiroAcesso = !localStorage.getItem(`dados_${nome}`);
 
-      // Define o usuário atual (apenas local) e cria dados iniciais com meta padrão (300 -> 45000)
+      // Define o usuário atual
       setCurrentUser(nome);
-      const dadosUsuario = criarDadosIniciais(nome, "300");
-      salvarDados(dadosUsuario);
+
+      // Se for primeiro acesso, cria dados iniciais. Se não, carrega os existentes
+      let dadosUsuario;
+      if (primeiroAcesso) {
+        dadosUsuario = criarDadosIniciais(nome, "300");
+        salvarDados(dadosUsuario);
+      } else {
+        dadosUsuario = carregarDados();
+      }
 
       // Se for primeiro acesso, mostra aviso sobre política de uso
       if (primeiroAcesso) {
