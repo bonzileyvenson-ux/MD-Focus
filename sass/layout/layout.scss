@@ -10,18 +10,20 @@ html {
 .index-body {
   font-size: 1.6rem;
   font-family: "Montserrat", sans-serif;
-  background-image: linear-gradient(46deg, clr(blanco), clr(azul));
+  position: relative;
+  background-image: radial-gradient(
+      circle at 35% 40%,
+      rgb(18, 59, 107) 0%,
+      transparent 35%
+    ),
+    linear-gradient(41deg, rgb(32 90 145), hsl(203, 68%, 82%));
   width: 100vw;
   height: 100vh;
-
-  overflow: hidden;
-
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+  overflow: hidden;
 }
-
-
 
 @include landscape-desktop {
   .body {
@@ -31,6 +33,9 @@ html {
   main {
     width: 70%;
     margin: 0 auto;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
   }
 }
 
@@ -38,7 +43,7 @@ html {
   width: 100%;
   padding: 1rem;
   // margin-bottom: 2rem;
-  background-color: map-get($clrs, "primary");
+  background-color: rgb(39 63 91);
   font-size: 3rem;
 
   text-align: center;
@@ -53,23 +58,26 @@ html {
 }
 
 main {
-  @include landscape-desktop {
-    display: flex;
-    height: 100dvh;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    max-width: 70%;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  // Qualquer landscape (mobile ou desktop): ajustar distribuição de espaço
+  @include any-landscape {
+    justify-content: flex-start;
+    gap: 0.5rem;
   }
 
-  
+  @include landscape-desktop {
+    height: 100dvh;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 70vw;
+    border-right: solid 5px clr(primary);
+  }
 }
-
-// .section-modal-open {
-//   max-width: 70rem;
-//   margin: 0 auto;
-// }
 
 .container-progress {
   margin-top: 5rem;
@@ -96,7 +104,17 @@ main {
   cursor: pointer;
 
   @include landscape-desktop {
-    z-index: 98;
+    // tornar o botão relativo ao `main` em telas largas
+    position: absolute;
+    z-index: 95;
+    right: 11.5rem; // alinhamento na borda direita do main (mais à esquerda que a borda)
+    bottom: 3.5rem;
+    @supports (position: anchor) {
+      /* If browser supports anchor positioning, use it and inset relative to anchor */
+      position: anchor;
+      anchor-name: main-anchor;
+      inset: auto 20rem 3.5rem auto;
+    }
   }
 }
 
@@ -111,7 +129,9 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 1.5rem auto;
+  margin-top: 3rem;
+  margin-left: auto;
+  margin-right: auto;
 
   border: 1px solid map-get($clrs, "primary");
   border-radius: 3rem;
@@ -120,7 +140,7 @@ main {
   input {
     width: 70%;
     height: 3rem;
-    font-size: 1.6rem;
+    font-size: 1rem;
     padding: 0 1rem;
     border: none;
     outline: none;
@@ -140,65 +160,163 @@ main {
   }
 }
 
+/* Notie: modernized, non-intrusive styles (safe minimal change) */
+.notie-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(4px);
+  z-index: 11000;
+}
+
 .notie-container {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 99;
-  text-align: center;
-
-  font-size: 1.5rem;
-  font-family: sans-serif;
-  font-weight: 500;
-  border-radius: 0 1rem 0 1rem;
-  min-height: 8vh;
-  max-height: 8vh;
-  text-align: center;
-
-  padding: 1rem 1.5rem;
+  top: 6rem !important;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11001;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
+  min-height: 4.4rem;
+  max-width: min(96%, 64rem);
+  padding: 0.6rem 1rem;
+  border-radius: 0.9rem;
+  font-size: 1.45rem;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  font-weight: 600;
+  box-shadow: 0 0.8rem 1.6rem rgba(8, 14, 17, 0.08);
+  background-image: linear-gradient(135deg, rgb(18, 51, 88), rgb(52, 118, 194));
 }
 
-.notie-overlay {
-  background-color: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(20rem);
-  z-index: 94;
+.notie-container.with-icon {
+  padding-left: 4.6rem;
+  justify-content: flex-start;
+}
+
+.notie-container.with-icon::before {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 0.5rem; /* square */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  box-shadow: 1px 1px 0.3rem 0.2rem rgba(0, 0, 0, 0.5);
+  box-shadow: none;
+  border-right: 1px solid rgba(13, 185, 207, 0.925);
+  z-index: 11002;
+
+  background-image: var(--notie-icon, none);
+}
+
+@media (max-width: 520px) {
+  .notie-container.with-icon {
+    padding-left: 4rem;
+  }
+  .notie-container.with-icon::before {
+    left: 0.5rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    background-size: cover;
+  }
+}
+
+.notie-container.with-icon .notie-message,
+.notie-container.with-icon .notie-text {
+  margin-left: 0.6rem;
+  text-align: left;
 }
 
 .notie-background-success {
-  background-color: clr(success);
+  background: linear-gradient(90deg, clr-M("primary"), clr("azul"));
   color: clr(blanco);
 }
 
 .notie-background-error {
-  background-color: clr(danger);
+  background: linear-gradient(90deg, #ff5b73, #d91e3a);
   color: clr(blanco);
 }
 
 .notie-background-warning {
-  background-color: clr(warning);
+  background: linear-gradient(90deg, #ffb86b, #ff9a3c);
   color: clr(dark);
 }
 
 .notie-background-info {
-  width: clamp(70%, 100vw, 100%);
-  background-color: clr(info);
-  // border-radius:0  0 1rem 1rem ;
-  color: clr(blanco);
+  min-width: 70%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0a5877, hsl(184deg 49.42% 62.93%));
+  color: hsl(0, 0%, 100%);
 }
 
-
 .notie-button {
-  width: 10vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-width: 6.2rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.6rem;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0.5rem 1rem rgba(8, 14, 17, 0.06);
+}
 
-  
+@media (max-width: 520px) {
+  .notie-container {
+    top: 1rem;
+    padding: 0.45rem 0.7rem;
+    font-size: 1.25rem;
+  }
+  .notie-button {
+    min-width: 5rem;
+    padding: 0.35rem 0.6rem;
+  }
+}
 
+/* input placeholder hint handled via JS (uses input.placeholder) */
+
+/* Confirmation-specific tweaks: larger message, compact buttons */
+.notie-confirm,
+.notie-container[data-notie-type="confirm"],
+.notie-container.confirm {
+  background: linear-gradient(
+    135deg,
+    clr-M("primary"),
+    clr("primary")
+  ) !important;
+  border: 2px solid clr("secondary");
+  box-shadow: 0 1rem 2.5rem rgba(8, 14, 17, 0.6);
+  padding: 1.5rem 1.2rem;
+  backdrop-filter: none !important;
+
+  .notie-message,
+  .notie-text {
+    font-size: 1.6rem;
+    line-height: 1.4;
+    padding: 0.2rem 0.4rem;
+    text-align: center;
+    color: clr(blanco);
+  }
+
+  .notie-buttons,
+  .notie-actions {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.4rem;
+  }
+
+  .notie-button {
+    flex: 0 0 auto;
+    width: auto !important;
+    min-width: 5.2rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 0.6rem;
+    font-size: 1.25rem;
+  }
 }
 
 // .notie-button-success {
@@ -222,39 +340,48 @@ main {
 .btn-submitcalculator {
   background-color: clr(primary);
   color: clr(azul-claro);
+  border: 1px solid hsl(209, 100%, 50%);
+  box-shadow: 0 1.2rem 3rem rgba(8, 14, 17, 0.5);
+
   width: 3.5rem;
   height: 3.5rem;
   padding: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
   cursor: pointer;
   font-size: 2rem;
   border-radius: 50%;
   font-size: 2rem;
   position: fixed;
   @include landscape-desktop {
+    position: absolute;
+
     z-index: 3;
   }
-
-  
 }
 
 .btns-submit {
   position: relative;
-  width: 1rem;
-  height: 1rem;
 }
 
 .btn-submitcalculator {
   right: 6.8rem;
   bottom: 8.2rem;
+  @include landscape-desktop {
+    // offsets relativos ao `main` container
+    right: 3.5rem;
+    bottom: 3.5rem;
+  }
 }
 
 .lapis-edita {
   right: 8.8rem;
   bottom: 4rem;
+  @include landscape-desktop {
+    right: 7.5rem;
+    bottom: 3.5rem;
+  }
 }
 
 .lapis-edita,
@@ -263,45 +390,98 @@ main {
 }
 
 .footer-link {
-  position: absolute;
+  position: fixed; // Fixed no mobile para ficar no rodapé da tela
   left: 2rem;
   bottom: 2rem;
-  font-size: 1rem;
-  @include landscape-desktop {
-    width: 100%;
-    font-size: 1.2rem;
-  }
+  font-size: 2rem;
+  z-index: 90; // Acima do conteúdo mas abaixo dos botões
 
-  .icon-mobile {
+  .icon-desktop,
+  .footer-text {
     display: none;
   }
 
-  p {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: clr(tercery);
-    cursor: pointer;
-  }
-}
+  @include landscape-desktop {
+    position: fixed; // Absolute no desktop (relativo ao main)
+    width: 100%;
+    font-size: 1.2rem;
+    left: 2rem;
 
-@media (max-width: 768px) {
-  .footer-link {
-    .footer-text,
-    .icon-desktop {
+    .icon-mobile {
       display: none;
     }
 
-    .icon-mobile {
+    .icon-desktop,
+    .footer-text {
       display: inline;
-      font-size: 2rem; // Larger size for icon-only
+      font-size: 1.5rem;
+    }
+  }
+
+  p {
+    font-size: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: clr(primary);
+    cursor: pointer;
+
+    @include landscape-desktop {
+      color: hsl(203, 68%, 82%);
     }
   }
 }
 
 .section1 {
+  
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: auto;
+
+  // Qualquer landscape: ocupa mais espaço verticalmente
+  @include any-landscape {
+    flex: 1 1 60vh; // Ocupa pelo menos 60% da altura
+    // min-height: 60vh;
+  }
+
   @include landscape-desktop {
     width: 100%;
+    flex: 0 1 auto;
+  }
+}
+.section2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1; // Ocupa todo o espaço restante no portrait
+  width: 100%;
+  height: auto;
+  min-height: 0; // Permite encolher se necessário
+  position: relative;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  overflow: visible; // Não corta o conteúdo
+
+  // Qualquer landscape: altura menor e mais compacto
+  @include any-landscape {
+    flex: 0 1 auto; // Não cresce em landscape
+    height: auto;
+    // min-height: 180px;
+    max-height: 40vh; // Ajustado para landscape
+    padding: 1rem 0;
+    gap: 1rem;
+    overflow: visible; // Permite ver o círculo completo
+  }
+
+  @include landscape-desktop {
+    height: auto;
+    flex: 1 1 auto;
+    max-height: none;
+    // min-height: 300px;
+    justify-content: center;
+    gap: 2rem;
   }
 }
 
@@ -321,5 +501,173 @@ main {
   100% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+/* Login screen (moved from compiled CSS) */
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 44rem;
+
+  border-radius: 1.2rem;
+  padding: 2.4rem;
+  box-shadow: 0 1.2rem 3rem rgba(8, 14, 17, 0.5);
+  text-align: center;
+  background: rgb(39, 63, 91);
+}
+
+.login-brand .h2-title-login {
+  color: clr(blanco);
+  margin: 0 0 0.4rem 0;
+  font-size: 3.2rem;
+
+  span {
+    color: clr(tercery);
+  }
+}
+
+.login-subtitle {
+  margin: 0.2rem 0 1rem 0;
+  font-size: 1.6rem;
+  color: clr(azul-claro);
+  font-weight: 600;
+}
+
+.policy-warning {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 183, 77, 0.15),
+    rgba(255, 154, 60, 0.15)
+  );
+  border: 2px solid clr(tercery);
+  border-radius: 0.8rem;
+  padding: 1.2rem;
+  margin: 1.5rem 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.3);
+
+  i {
+    font-size: 2.4rem;
+    color: clr(tercery);
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1.4rem;
+    color: clr(blanco);
+    line-height: 1.5;
+
+    strong {
+      color: lighten(clr(tercery), 10%);
+
+      font-weight: 700;
+    }
+  }
+
+  .policy-description {
+    font-size: 1.2rem;
+    color: clr(azul-claro);
+    font-style: italic;
+  }
+
+  .policy-link {
+    color: lighten(clr(tercery), 10%);
+    text-decoration: underline;
+    font-weight: 600;
+    transition: color 0.2s;
+
+    &:hover {
+      color: lighten(clr(tercery), 10%);
+    }
+  }
+}
+
+.login-hint {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: #a8a3a3;
+}
+
+.login-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    270deg,
+    clr(tercery),
+    hsl(212.31deg 86.93% 16.09%)
+  );
+  color: clr(blanco);
+  border: none;
+  padding: 0.9rem 1.2rem;
+  border-radius: 0.9rem;
+  font-size: 1.8rem;
+  cursor: pointer;
+  box-shadow: 0.3rem 0.3rem 0.8rem 0.1rem rgba(16, 24, 27, 0.5);
+
+  i {
+    color: clr(blanco);
+  }
+}
+
+.login-cta i {
+  margin-left: 0.2rem;
+}
+
+.input-meta-name#login-input-container {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+.input-meta-name#login-input-container input#login-username {
+  flex: 1;
+  padding: 0.9rem 1rem;
+  font-size: 1.6rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(34, 34, 34, 0.08);
+  color: clr(blanco);
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 1.6rem;
+    border-radius: 1rem;
+  }
+  .login-brand .h1-title {
+    font-size: 2.6rem;
+  }
+  .login-subtitle {
+    font-size: 1.4rem;
+  }
+  .login-cta {
+    font-size: 1.5rem;
+    padding: 0.7rem 1rem;
   }
 }

@@ -6,7 +6,12 @@ import {
   chamarCorrecao,
 } from "./ui.js";
 import { calcularMediaSemanal } from "./calc.js";
-import { getDadosUsuario, atualizarDadosUsuario, salvarDados } from "./data.js";
+import {
+  getDadosUsuario,
+  atualizarDadosUsuario,
+  salvarDados,
+  MAPA_METAS,
+} from "./data.js";
 import { validarEdicao } from "./validation.js";
 import { iniciarDashboard } from "./app.js";
 
@@ -59,6 +64,9 @@ function gerarHistoricoDetalhado(realizadoDiario) {
   }
 
   if (realizadoDiario) {
+    const dadosUsuario = getDadosUsuario();
+    const diasAgendados = dadosUsuario?.diasOffAgendados || [];
+
     dataKeys.forEach((dataKey, index) => {
       const valor = realizadoDiario[dataKey];
       const data = new Date(dataKey + "T00:00:00");
@@ -69,6 +77,13 @@ function gerarHistoricoDetalhado(realizadoDiario) {
       const nomeDiaSemana = `${diasDaSemana[diaSemana]} ${diaDoMes}`;
 
       const liId = `historico-item-${index}`;
+
+      // Converter dataKey para formato BR para verificar agendamento
+      const dia = String(data.getDate()).padStart(2, "0");
+      const mes = String(data.getMonth() + 1).padStart(2, "0");
+      const ano = data.getFullYear();
+      const dataBR = `${dia}/${mes}/${ano}`;
+      const isDiaAgendado = diasAgendados.includes(dataBR);
 
       let isEditable = false;
       if (valor) {
@@ -84,44 +99,59 @@ function gerarHistoricoDetalhado(realizadoDiario) {
         isEditable =
           dataKey === ultimoRegistroDataKey && dataKey === hojeDataKey;
       } else {
-        isEditable = !isWeekend;
+        isEditable = !isWeekend && !isDiaAgendado;
+      }
+
+      // Determinar o texto a exibir quando não há valor
+      let textoSemValor = "registro não fornecido";
+      if (!valor) {
+        if (isDiaAgendado) {
+          textoSemValor = "🏥 dia agendado (folga/atestado)";
+        } else if (isWeekend) {
+          textoSemValor = "fim de semana";
+        }
       }
 
       htmlContent += `
                 <li class="historico-item-card position-relative" id="${liId}">
-                    <div class="historico-item-data" id="display-container-${liId}">
-                        <span class="card-data-valor">
-                            <strong>${nomeDiaSemana}</strong> : ${
-        valor
-          ? valor.toLocaleString("pt-BR", { style: "decimal" }) + " pontos"
-          : "registro não fornecido"
-      }
-                        </span>
-                        ${
-                          isEditable
-                            ? `
-                        <button class="btn-corrigir btn btn-sm btn-light" data-li-id="${liId}" aria-label="Corrigir Registro">
-                            <strong><i class="bi bi-pencil"></i></strong>
-                        </button>
-                        `
-                            : ""
-                        }
-                    </div>
-                    <div class="edicao-in-place edita-pontos-hidden" id="edicao-${liId}" data-valor-antigo="${
+                    <fieldset class="historico-item-fieldset">
+                        <legend class="historico-item-legend">${nomeDiaSemana}</legend>
+                        <div class="historico-item-data" id="display-container-${liId}">
+                            <span class="card-data-valor">
+                                ${
+                                  valor
+                                    ? valor.toLocaleString("pt-BR", {
+                                        style: "decimal",
+                                      }) + " pontos"
+                                    : textoSemValor
+                                }
+                            </span>
+                            ${
+                              isEditable
+                                ? `
+                            <button class="btn-corrigir btn btn-sm btn-light" data-li-id="${liId}" aria-label="Corrigir Registro">
+                                <strong><i class="bi bi-pencil"></i></strong>
+                            </button>
+                            `
+                                : ""
+                            }
+                        </div>
+                        <div class="edicao-in-place edita-pontos-hidden" id="edicao-${liId}" data-valor-antigo="${
         valor || ""
       }" data-date-key="${dataKey}">
-                        <input type="number" value="${
-                          valor || ""
-                        }" class="form-control input-correcao" placeholder="Insira o valor">
-                        <div class="edit-botoes">
-                            <button class="btn btn-success btn-sm btn-salvar-correcao" aria-label="Salvar Correção">
-                                <i class="bi bi-check-circle-fill"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm btn-cancelar-correcao" aria-label="Cancelar Correção">
-                                <i class="bi bi-x-lg"></i>
-                            </button>
+                            <input type="number" value="${
+                              valor || ""
+                            }" class="form-control input-correcao" placeholder="Insira o valor">
+                            <div class="edit-botoes">
+                                <button class="btn btn-success btn-sm btn-salvar-correcao" aria-label="Salvar Correção">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm btn-cancelar-correcao" aria-label="Cancelar Correção">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </fieldset>
                 </li>
             `;
     });
@@ -130,7 +160,7 @@ function gerarHistoricoDetalhado(realizadoDiario) {
   listaElement.innerHTML =
     htmlContent ||
     '<li class="list-group-item">Nenhum registro encontrado.</li>';
-  
+
   // REMOVIDO: Listeners antigos.
   // A delegação de eventos substitui a necessidade de ligar/desligar listeners.
 }
@@ -154,7 +184,8 @@ export function configurarModalHistorico() {
 
   // NOVO: Centralizando os listeners do modal com delegação de eventos.
   const listaHistorico = document.getElementById("historico-lista");
-  if (listaHistorico) listaHistorico.addEventListener("click", handleHistoricoClick);
+  if (listaHistorico)
+    listaHistorico.addEventListener("click", handleHistoricoClick);
 
   if (btnAbrir) {
     btnAbrir.addEventListener("click", abrirModalHistorico);
@@ -204,40 +235,105 @@ function corrigirRegistro(dataKey, novoValor, valorAntigo, liId) {
 /**
  * Processa o texto de observação em busca de comandos específicos usando uma abordagem baseada em regras.
  * @param {string} obsText O texto a ser processado.
- * @returns {{totalBonus: number, agendamentoOff: string|null, limparDados: boolean, remocaoAgendamento: string|null}}
+ * @returns {{totalBonus: number, agendamentoOff: string|null, limparDados: boolean, remocaoAgendamento: string|null, errosCaixa: number, caixaFechada: number, atestado: object|null}}
  */
 function processarObservacao(obsText) {
   const resultados = {
     totalBonus: 0,
+    caixaFechada: 0,
+    errosCaixa: 0,
     agendamentoOff: null,
     limparDados: false,
     remocaoAgendamento: null,
+    atestado: null,
   };
 
   const regrasDeComando = [
     {
+      // Detecta comando: meta alterado (45000, 55000, 65000, 90000)
+      // Exige exatamente 4 valores separados por vírgula dentro dos parênteses.
+      regex:
+        /meta\s*alterada\s*\(\s*(\d{3,6})\s*,\s*(\d{3,6})\s*,\s*(\d{3,6})\s*,\s*(\d{3,6})\s*\)/i,
+      processar: (match, res) => {
+        const a = Number(match[1]);
+        const b = Number(match[2]);
+        const c = Number(match[3]);
+        const d = Number(match[4]);
+        if ([a, b, c, d].every((v) => !isNaN(v) && v > 0)) {
+          res.metaAlteradaArray = [a, b, c, d];
+        }
+      },
+    },
+    {
       regex: /ajudar\s*no\s*recebimento/g,
-      processar: (match, res) => { res.totalBonus += 100; },
+      processar: (match, res) => {
+        res.totalBonus += 100;
+      },
     },
     {
       regex: /outro\s*sector\s*#?(\d+)/g,
-      processar: (match, res) => { res.totalBonus += Number(match[1]) || 0; },
+      processar: (match, res) => {
+        res.totalBonus += Number(match[1]) || 0;
+      },
     },
     {
       regex: /(?:feriado|aniversário)\s*(\d{2}\/\d{2}\/\d{4})/gi,
-      processar: (match, res) => { res.agendamentoOff = match[1]; },
+      processar: (match, res) => {
+        res.agendamentoOff = match[1];
+      },
     },
     {
-      regex: /(?:remover|cancelar|excluir)\s*(?:feriado|aniversário|agendamento)?\s*(\d{2}\/\d{2}\/\d{4})/gi,
-      processar: (match, res) => { res.remocaoAgendamento = match[1]; },
+      regex:
+        /(?:remover|cancelar|excluir)\s*(?:feriado|aniversário|agendamento)?\s*(\d{2}\/\d{2}\/\d{4})/gi,
+      processar: (match, res) => {
+        res.remocaoAgendamento = match[1];
+      },
     },
     {
       regex: /limpar\s*dados/i,
-      processar: (match, res) => { res.limparDados = true; },
+      processar: (match, res) => {
+        res.limparDados = true;
+      },
+    },
+
+    {
+      regex: /(?:caixas|caixa fechada)\s*\((\d{1,4})\)/i,
+      processar: (match, res) => {
+        res.caixaFechada += Number(match[1]) || 0;
+      },
+    },
+
+    {
+      regex: /erros\s*\((\d+)\)/i,
+      processar: (match, res) => {
+        res.errosCaixa += Number(match[1]) || 0;
+      },
+    },
+    {
+      // Detecta atestado médico com duração e/ou período específico
+      // Formatos aceitos:
+      // - atestado (1 dia)
+      // - atestado 3 dias
+      // - atestado de 23/11 a 25/11
+      // - atestado de 23/11/2025 até 25/11/2025
+      regex:
+        /(?:atestado|afastamento)(?:\s+(?:médico|de\s+saúde|saúde))?\s*(?:(\d+)\s*(?:dias?|d))?\s*(?:(?:de|em)\s*(\d{1,2}\/\d{1,2}(?:\/\d{4})?))?(?:\s*(?:a|até|ao)\s*(\d{1,2}\/\d{1,2}(?:\/\d{4})?))?/gi,
+      processar: (match, res) => {
+        const dias = match[1] ? parseInt(match[1]) : 1;
+        const dataInicio = match[2] || null;
+        const dataFim = match[3] || null;
+
+        res.atestado = {
+          dias,
+          dataInicio,
+          dataFim,
+          textoOriginal: match[0],
+        };
+      },
     },
   ];
 
-  regrasDeComando.forEach(regra => {
+  regrasDeComando.forEach((regra) => {
     // Para regex com a flag 'g', usamos um loop. Para as outras, um simples 'exec'.
     if (regra.regex.global) {
       let match;
@@ -256,9 +352,9 @@ function processarObservacao(obsText) {
 }
 
 export function solicitarBonus() {
-  const dadosusuario = getDadosUsuario();
+  let dadosUsuario = getDadosUsuario();
 
-  if (!dadosusuario) {
+  if (!dadosUsuario) {
     notie.alert({
       type: "error",
       text: "Dados do usuário não encontrados. Por favor, configure seu perfil primeiro.",
@@ -267,9 +363,8 @@ export function solicitarBonus() {
     return;
   }
 
-  const observacoes = document
-    .getElementById("texterarea-obervacoes")
-    .value.trim();
+  const observacoesElement = document.getElementById("texterarea-obervacoes");
+  const observacoes = observacoesElement.value.trim();
 
   if (!observacoes) {
     notie.alert({
@@ -281,6 +376,90 @@ export function solicitarBonus() {
   }
 
   const resultadoDosProcessamentos = processarObservacao(observacoes);
+
+  // Trigger: if the observation mentions 'relatório' open the report page (simple substring, no complex regex)
+  const obsLower = observacoes.toLowerCase();
+  if (obsLower.includes("relat") || obsLower.includes("relatório")) {
+    try {
+      // Abre em nova aba a página de relatório
+      window.open("report.html", "_blank");
+    } catch (e) {
+      console.warn("Não foi possível abrir a página de relatório:", e);
+    }
+    // Não processa outros comandos quando o usuário apenas solicitou o relatório
+    return;
+  }
+
+  // Se a observação contiver comando de alteração de meta com 4 valores, aplicamos imediatamente
+  if (resultadoDosProcessamentos.metaAlteradaArray) {
+    const arr = resultadoDosProcessamentos.metaAlteradaArray;
+    // Mapear as posições para as chaves fixas de R$
+    const chaves = ["300", "400", "500", "600"];
+    if (arr.length === 4) {
+      // Validação de intervalo (evita valores absurdos)
+      const MIN_META = 10000;
+      const MAX_META = 100000;
+      const foraDoIntervalo = arr.some(
+        (v) => v < MIN_META || v > MAX_META || isNaN(v)
+      );
+      if (foraDoIntervalo) {
+        notie.alert({
+          type: "error",
+          text: `Valores inválidos: informe 4 números entre ${MIN_META.toLocaleString(
+            "pt-BR"
+          )} e ${MAX_META.toLocaleString("pt-BR")}.`,
+          time: 5,
+        });
+      } else {
+        // Pedir confirmação antes de sobrescrever o mapa de metas do usuário
+        const resumo = `300→${arr[0]}, 400→${arr[1]}, 500→${arr[2]}, 600→${arr[3]}`;
+        notie.confirm({
+          text: `Confirma sobrescrever as metas atuais com: ${resumo}?`,
+          submitText: "Sim, substituir",
+          cancelText: "Cancelar",
+          submitCallback: () => {
+            if (!dadosUsuario.mapaMetas) dadosUsuario.mapaMetas = {};
+            for (let i = 0; i < 4; i++) {
+              dadosUsuario.mapaMetas[chaves[i]] = Number(arr[i]);
+            }
+
+            // Atualiza metaMensal para a chave atualmente selecionada no dropdown, se existir,
+            // caso contrário define para a primeira opção (300)
+            const selectedKey =
+              (document.getElementById("meta-dropdown") || {}).value || "300";
+            const novaMetaMensal =
+              (dadosUsuario.mapaMetas && dadosUsuario.mapaMetas[selectedKey]) ||
+              arr[0];
+            dadosUsuario.metaMensal = novaMetaMensal;
+
+            salvarDados(dadosUsuario);
+            iniciarDashboard(null);
+
+            notie.alert({
+              type: "success",
+              text: `Mapeamento de metas atualizado. Novas metas: ${arr.join(
+                ", "
+              )}`,
+              time: 4,
+            });
+          },
+          cancelCallback: () => {
+            notie.alert({
+              type: "info",
+              text: "Operação cancelada. Nenhuma alteração foi feita.",
+              time: 3,
+            });
+          },
+        });
+      }
+    } else {
+      notie.alert({
+        type: "error",
+        text: "Comando inválido: informe exatamente 4 valores entre parênteses separados por vírgula.",
+        time: 4,
+      });
+    }
+  }
 
   if (resultadoDosProcessamentos.limparDados) {
     notie.confirm({
@@ -305,8 +484,20 @@ export function solicitarBonus() {
   const valorBonus = resultadoDosProcessamentos.totalBonus;
   const diaOff = resultadoDosProcessamentos.agendamentoOff;
   const remocaoAgendamento = resultadoDosProcessamentos.remocaoAgendamento;
+  const erros = resultadoDosProcessamentos.errosCaixa;
+  const caixaFechada = resultadoDosProcessamentos.caixaFechada;
+  const atestado = resultadoDosProcessamentos.atestado;
 
-  if (valorBonus <= 0 && !diaOff && !remocaoAgendamento) {
+  const isValid =
+    valorBonus > 0 ||
+    diaOff ||
+    remocaoAgendamento ||
+    erros > 0 ||
+    caixaFechada > 0 ||
+    atestado ||
+    resultadoDosProcessamentos.metaAlteradaArray;
+
+  if (!isValid) {
     notie.alert({
       type: "info",
       text: "Nenhum comando válido (bônus, agendamento ou remoção) encontrado na observação.",
@@ -318,7 +509,56 @@ export function solicitarBonus() {
 
   let hoje = new Date();
   const dataKey = hoje.toISOString().slice(0, 10);
-  let dadosUsuario = getDadosUsuario();
+
+  // Lógica do Top 5: Acumula caixas e erros
+  if (caixaFechada > 0 || erros > 0) {
+    if (dadosUsuario.totalCaixas === undefined) {
+      dadosUsuario.totalCaixas = 0;
+    }
+    if (dadosUsuario.totalErros === undefined) {
+      dadosUsuario.totalErros = 0;
+    }
+
+    // Validação de valores suspeitos de caixas
+    if (caixaFechada > 0) {
+      if (caixaFechada < 10) {
+        notie.alert({
+          type: "warning",
+          text: `⚠️ Valor muito baixo: ${caixaFechada.toLocaleString(
+            "pt-BR"
+          )} caixas. Mínimo recomendado: 10.`,
+          time: 4,
+        });
+      } else if (caixaFechada > 4999) {
+        notie.alert({
+          type: "warning",
+          text: `⚠️ Valor muito alto: ${caixaFechada.toLocaleString(
+            "pt-BR"
+          )} caixas. Valores normais para a atividade: até 4999.`,
+          time: 4,
+        });
+      } else {
+        notie.alert({
+          type: "info",
+          text: `📦 ${caixaFechada.toLocaleString(
+            "pt-BR"
+          )} caixas registradas com sucesso!`,
+          time: 3,
+        });
+      }
+    }
+
+    if (erros > 0) {
+      notie.alert({
+        type: "info",
+        text: `⚠️ ${erros} erro(s) registrado(s).`,
+        time: 2,
+      });
+    }
+
+    dadosUsuario.totalCaixas += caixaFechada;
+    dadosUsuario.totalErros += erros;
+  }
 
   if (valorBonus > 0) {
     // Garante que o campo de observações exista para não quebrar o app para usuários antigos
@@ -346,6 +586,10 @@ export function solicitarBonus() {
     dadosUsuario = removerDiaOffAgendado(remocaoAgendamento, dadosUsuario);
   }
 
+  if (atestado) {
+    dadosUsuario = processarAtestado(atestado, dadosUsuario, observacoes);
+  }
+
   salvarDados(dadosUsuario);
   iniciarDashboard(null); // Atualiza o dashboard
 
@@ -356,6 +600,95 @@ export function solicitarBonus() {
       time: 3,
     });
   }
+  observacoesElement.value = "";
+}
+
+/**
+ * Processa atestado médico e agenda os dias automaticamente
+ */
+function processarAtestado(atestado, dadosUsuario, observacaoTexto) {
+  const hoje = new Date();
+  let dataInicio, dataFim;
+
+  // Determina data de início
+  if (atestado.dataInicio) {
+    dataInicio = parseDateBR(atestado.dataInicio);
+  } else {
+    dataInicio = new Date(hoje);
+  }
+
+  // Determina data de fim
+  if (atestado.dataFim) {
+    dataFim = parseDateBR(atestado.dataFim);
+  } else if (atestado.dias > 1) {
+    dataFim = new Date(dataInicio);
+    dataFim.setDate(dataFim.getDate() + atestado.dias - 1);
+  } else {
+    dataFim = new Date(dataInicio);
+  }
+
+  // Agenda todos os dias do período
+  const datasAtestado = [];
+  const dataAtual = new Date(dataInicio);
+
+  while (dataAtual <= dataFim) {
+    const dataBR = formatDateToBR(dataAtual);
+    datasAtestado.push(dataBR);
+
+    // Agenda o dia se ainda não estiver agendado
+    if (!dadosUsuario.diasOffAgendados) {
+      dadosUsuario.diasOffAgendados = [];
+    }
+    if (!dadosUsuario.diasOffAgendados.includes(dataBR)) {
+      dadosUsuario.diasOffAgendados.push(dataBR);
+    }
+
+    // Adiciona observação no dia
+    const dataISO = dataAtual.toISOString().slice(0, 10);
+    if (!dadosUsuario.observacoesDiarias) {
+      dadosUsuario.observacoesDiarias = {};
+    }
+    const obsAtual = dadosUsuario.observacoesDiarias[dataISO] || "";
+    const obsAtestado = `🏥 Atestado médico (${atestado.dias} dia${
+      atestado.dias > 1 ? "s" : ""
+    })`;
+    dadosUsuario.observacoesDiarias[dataISO] =
+      obsAtual + (obsAtual ? "\n" : "") + obsAtestado;
+
+    dataAtual.setDate(dataAtual.getDate() + 1);
+  }
+
+  notie.alert({
+    type: "success",
+    text: `Atestado registrado: ${datasAtestado.length} dia(s) agendado(s) - ${
+      datasAtestado[0]
+    } a ${datasAtestado[datasAtestado.length - 1]}`,
+    time: 4,
+  });
+
+  return dadosUsuario;
+}
+
+/**
+ * Converte data no formato DD/MM ou DD/MM/YYYY para objeto Date
+ */
+function parseDateBR(dataBR) {
+  const partes = dataBR.split("/");
+  const dia = parseInt(partes[0]);
+  const mes = parseInt(partes[1]) - 1;
+  const ano = partes[2] ? parseInt(partes[2]) : new Date().getFullYear();
+
+  return new Date(ano, mes, dia);
+}
+
+/**
+ * Formata objeto Date para DD/MM/YYYY
+ */
+function formatDateToBR(date) {
+  const dia = String(date.getDate()).padStart(2, "0");
+  const mes = String(date.getMonth() + 1).padStart(2, "0");
+  const ano = date.getFullYear();
+  return `${dia}/${mes}/${ano}`;
 }
 
 function salvarDiaOffAgendado(dataOff, dadosUsuario) {
@@ -384,6 +717,9 @@ function salvarDiaOffAgendado(dataOff, dadosUsuario) {
     time: 3,
   });
 
+  // Observação: não há variáveis locais `errosCaixa` ou `caixaFechada` aqui;
+  // mensagens relacionadas a erros/caixas são tratadas em outro fluxo.
+
   return dadosUsuario;
 }
 
@@ -397,7 +733,9 @@ function atualizarItemHistoricoUI(liId, novoValor, nomeDiaSemana) {
   const valorSpan = displayContainer.querySelector(".card-data-valor");
 
   // Atualiza o texto do display
-  valorSpan.innerHTML = `<strong>${nomeDiaSemana}</strong> : ${novoValor.toLocaleString("pt-BR", { style: "decimal" })} pontos`;
+  valorSpan.textContent = `${novoValor.toLocaleString("pt-BR", {
+    style: "decimal",
+  })} pontos`;
 
   // Atualiza os atributos para futuras edições
   edicaoDiv.setAttribute("data-valor-antigo", novoValor);
@@ -444,11 +782,19 @@ function handleHistoricoClick(event) {
 
     // Validações
     if (isNaN(novoValor) || novoValor < 100 || novoValor > 10000) {
-      notie.alert({ type: "error", text: "Valor inválido. Insira um valor entre 100 e 10.000.", time: 3 });
+      notie.alert({
+        type: "error",
+        text: "Valor inválido. Insira um valor entre 100 e 10.000.",
+        time: 3,
+      });
       return;
     }
     if (novoValor === valorAntigo) {
-      notie.alert({ type: "warning", text: "O valor inserido é o mesmo que o anterior.", time: 2 });
+      notie.alert({
+        type: "warning",
+        text: "O valor inserido é o mesmo que o anterior.",
+        time: 2,
+      });
       ocultarEdicaoInPlace(edicaoDiv); // Cancela a edição
       return;
     }
@@ -456,7 +802,11 @@ function handleHistoricoClick(event) {
     const data = new Date(dataKey + "T00:00:00");
     const diaSemana = data.getDay();
     if (diaSemana === 0 || diaSemana === 6) {
-      notie.alert({ type: "error", text: "Registros não são permitidos aos sábados e domingos.", time: 4 });
+      notie.alert({
+        type: "error",
+        text: "Registros não são permitidos aos sábados e domingos.",
+        time: 4,
+      });
       return;
     }
 
@@ -464,7 +814,9 @@ function handleHistoricoClick(event) {
     const nomeDiaSemana = `${diasDaSemana[diaSemana]} ${data.getDate()}`;
 
     notie.confirm({
-      text: `Confirma o registro de <strong>${novoValor.toLocaleString("pt-BR")}</strong> pontos para <strong>${nomeDiaSemana}</strong>?`,
+      text: `Confirma o registro de <strong>${novoValor.toLocaleString(
+        "pt-BR"
+      )}</strong> pontos para <strong>${nomeDiaSemana}</strong>?`,
       submitText: "Sim",
       cancelText: "Não",
       submitCallback: () => {
@@ -472,7 +824,7 @@ function handleHistoricoClick(event) {
       },
       cancelCallback: () => {
         ocultarEdicaoInPlace(edicaoDiv);
-      }
+      },
     });
   }
 

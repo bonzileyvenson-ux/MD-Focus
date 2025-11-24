@@ -1,21 +1,25 @@
 @mixin box-shadow-primary {
-    box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5),
+  box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5),
     inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
- 
 }
 
+$reakpoint-landscape: 768px;
 
-$reakpoint-landscape: 48em;
-
-@mixin landscape-desktop{
-    @media screen and (orientation: landscape) and (min-width: $reakpoint-landscape){
-        @content;
-    
-    }
+@mixin landscape-desktop {
+  @media screen and (orientation: landscape) and (min-width: $reakpoint-landscape) {
+    @content;
+  }
 }
 
 @mixin mobile-landscape {
   @media (max-width: $reakpoint-landscape) and (orientation: landscape) {
+    @content;
+  }
+}
+
+// Mixin para qualquer orientação landscape (global)
+@mixin any-landscape {
+  @media screen and (orientation: landscape) {
     @content;
   }
 }

@@ -14,7 +14,7 @@
 
     <link rel="apple-touch-icon" href="touch-icon.png" />
 
-    <link rel="manifest" href="manifest.json" />
+    <!-- Manifest removed: offline/PWA disabled -->
 
     <meta name="theme-color" content="#1c0a5f" />
   </head>
@@ -193,44 +193,813 @@
       </section>
 
       <section class="manual-section">
-        <h2 class="section-title">4. Funcionalidades Avançadas e Privacidade</h2>
+        <h2 class="section-title">4. Sistema de Comandos por Observações</h2>
+
+        <p>
+          O campo de observações é uma ferramenta poderosa que aceita comandos
+          especiais. Digite os comandos durante o registro ou histórico para
+          executar ações automáticas.
+        </p>
 
         <div class="manual-subsection">
-          <h3 class="subsection-title">Comandos na Observação</h3>
-          <p>
-            O campo de observação é uma ferramenta poderosa que permite executar ações usando palavras-chave.
-          </p>
+          <h3 class="subsection-title">📋 Tabela Completa de Comandos</h3>
+
+          <table class="commands-table">
+            <thead>
+              <tr>
+                <th>Comando</th>
+                <th>Formato</th>
+                <th>Exemplo</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Bônus Fixo</strong></td>
+                <td><code>ajudar no recebimento</code></td>
+                <td>"ajudar no recebimento hoje"</td>
+                <td>
+                  Adiciona <strong>100 pontos</strong> de bônus automático
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Bônus Variável</strong></td>
+                <td><code>outro setor #VALOR</code></td>
+                <td>"outro setor #2500"</td>
+                <td>Adiciona valor personalizado de pontos extras</td>
+              </tr>
+              <tr>
+                <td><strong>Meta Alterada</strong></td>
+                <td><code>meta alterada #VALOR</code></td>
+                <td>"meta alterada #3000"</td>
+                <td>Ajusta meta mensal com valor customizado</td>
+              </tr>
+              <tr>
+                <td><strong>Feriado/Folga</strong></td>
+                <td>
+                  <code>feriado DD/MM/AAAA</code><br /><code
+                    >aniversário DD/MM/AAAA</code
+                  >
+                </td>
+                <td>"feriado 25/12/2025"<br />"aniversário 15/11/2025"</td>
+                <td>Remove o dia do cálculo de dias úteis restantes</td>
+              </tr>
+              <tr>
+                <td><strong>Atestado Médico</strong></td>
+                <td>
+                  <code>atestado</code><br /><code>atestado X dias</code
+                  ><br /><code>atestado de DD/MM a DD/MM</code>
+                </td>
+                <td>
+                  "atestado"<br />"atestado 3 dias"<br />"atestado de 23/11 a
+                  25/11"
+                </td>
+                <td>
+                  🏥 Registra afastamento médico automaticamente. Remove os dias
+                  da contagem útil. Bloqueia registro nesses dias.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Caixas Fechadas</strong></td>
+                <td>
+                  <code>caixas (NÚMERO)</code><br /><code
+                    >caixa fechada (NÚMERO)</code
+                  >
+                </td>
+                <td>"caixas (3500)"<br />"caixa fechada (4200)"</td>
+                <td>
+                  📦 Registra quantidade de caixas processadas (max 9999).
+                  Valida se está entre 10-4999.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Erros de Caixa</strong></td>
+                <td><code>erros (NÚMERO)</code></td>
+                <td>"erros (5)"</td>
+                <td>
+                  ⚠️ Registra erros cometidos. Afeta o cálculo do Top
+                  Funcionário (máx 1.8%)
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Remover Agendamento</strong></td>
+                <td>
+                  <code>remover DD/MM/AAAA</code><br /><code
+                    >cancelar DD/MM/AAAA</code
+                  ><br /><code>excluir DD/MM/AAAA</code>
+                </td>
+                <td>"remover 25/12/2025"<br />"cancelar feriado 15/11/2025"</td>
+                <td>Remove um dia previamente agendado como folga/feriado</td>
+              </tr>
+              <tr>
+                <td><strong>Limpar Tudo</strong></td>
+                <td><code>limpar dados</code></td>
+                <td>"limpar dados"</td>
+                <td>
+                  🗑️ Apaga PERMANENTEMENTE todo histórico. Requer confirmação.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">💡 Exemplos Práticos de Uso</h3>
+
           <dl>
-            <dt>Solicitar Bônus Fixo</dt>
-            <dd>Use a palavra-chave <code>ajudar no recebimento</code> para adicionar <strong>100 pontos</strong> de bônus ao seu registro do dia.</dd>
+            <dt>Combinando Comandos:</dt>
+            <dd>
+              <code
+                >"Hoje ajudei no recebimento e caixas (3200) com erros
+                (2)"</code
+              >
+            </dd>
+            <dd>
+              ✅ Adiciona 100 pontos de bônus + registra 3200 caixas + 2 erros
+            </dd>
 
-            <dt>Registrar Pontos de Outro Setor</dt>
-            <dd>Use o formato <code>outro setor #VALOR</code> (ex: <code>outro setor #2500</code>) para adicionar um valor de pontos variável.</dd>
+            <dt>Atestado com Período:</dt>
+            <dd><code>"atestado médico de 20/11 a 22/11"</code></dd>
+            <dd>
+              ✅ Bloqueia registro nos dias 20, 21 e 22/11. Não conta como dias
+              úteis.
+            </dd>
 
-            <dt>Agendar Folga ou Feriado</dt>
-            <dd>Use <code>feriado DD/MM/AAAA</code> ou <code>aniversário DD/MM/AAAA</code> para que o sistema não conte esse dia como um dia útil no cálculo da sua meta.</dd>
+            <dt>Registro Completo:</dt>
+            <dd><code>"Produzi hoje, caixas (4000) erros (3)"</code></dd>
+            <dd>✅ Registra produtividade do dia com controle de qualidade</dd>
+          </dl>
+        </div>
+      </section>
 
-            <dt>Remover Agendamento</dt>
-            <dd>Use <code>remover DD/MM/AAAA</code>, <code>cancelar DD/MM/AAAA</code> ou <code>excluir DD/MM/AAAA</code> para remover uma folga ou feriado previamente agendado.</dd>
+      <section class="manual-section">
+        <h2 class="section-title">5. Dashboard e Indicadores em Tempo Real</h2>
 
-            <dt>Limpar Dados do Aplicativo</dt>
-            <dd>Digite <code>limpar dados</code> para apagar permanentemente seu histórico. Uma confirmação será solicitada.</dd>
-           
-            <dt>Correção de Pontos:</dt> <dd>A edição de um registro é permitida apenas no <span>mesmo dia</span> em que ele foi criado e apenas para o <span>último registro</span></dd>
-          
+        <div class="manual-subsection">
+          <h3 class="subsection-title">📊 Elementos do Dashboard</h3>
+
+          <dl>
+            <dt>🎯 Meta Mensal Total:</dt>
+            <dd>
+              Valor total que você precisa atingir no mês (ex: 45.000 pontos
+              para meta de R$ 300)
+            </dd>
+
+            <dt>📈 Pontos Realizados:</dt>
+            <dd>Total acumulado de todos os seus registros diários + bônus</dd>
+
+            <dt>📅 Meta Diária Necessária:</dt>
+            <dd>
+              <strong>INDICADOR MAIS IMPORTANTE:</strong> Quanto você precisa
+              fazer por dia útil restante para atingir a meta no prazo
+            </dd>
+
+            <dt>⏳ Dias Úteis Restantes:</dt>
+            <dd>
+              Quantidade de dias úteis (seg-sex) que faltam no mês, descontando
+              fins de semana e dias agendados
+            </dd>
+
+            <dt>🔵 Gráfico Circular:</dt>
+            <dd>
+              Visualização do progresso percentual em relação à meta mensal
+            </dd>
+
+            <dt>🏆 Status Top Funcionário:</dt>
+            <dd>
+              Mostra se você está concorrendo ao Top Funcionário (meta primeira
+              + ≤1.8% de erros)
+            </dd>
           </dl>
         </div>
 
         <div class="manual-subsection">
-          <h3 class="subsection-title">Privacidade e Reset</h3>
-          <p>
-            <strong class="importante">Privacidade:</strong> Seus dados (nome, metas, histórico) são armazenados <strong>apenas neste navegador</strong> (Local Storage) e nunca são enviados para um servidor. Seus dados são privados e acessíveis somente neste dispositivo.
-          </p>
-          
+          <h3 class="subsection-title">🏆 Critérios para Top Funcionário</h3>
           <p class="destacado">
-            ⚠️  a palavra <span class="importante"> limpar dados"</span> limpa permanentemente todos os seus dados de metas e histórico. Use com extrema cautela.
+            Para alcançar o status de Top Funcionário, você precisa:
+          </p>
+          <ol>
+            <li>
+              <strong>Atingir a Meta Primeira:</strong> Completar o valor
+              correspondente a R$ 300 (normalmente 45.000 pontos, mas pode
+              variar mensalmente)
+            </li>
+            <li>
+              <strong>Manter Taxa de Erro ≤ 1.8%:</strong> Total de Erros /
+              Total de Caixas ≤ 0.018
+            </li>
+          </ol>
+          <p>
+            Quando ambos os critérios são atendidos, o indicador fica
+            <span style="color: hsl(29, 85%, 37%)">laranja</span> com o texto:
+            <strong>"🏆 Top Funcionário! (X% erros)"</strong>
           </p>
         </div>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">6. Modal de Histórico e Correções</h2>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">📜 Funcionalidades do Histórico</h3>
+
+          <p>
+            <strong>Acesso:</strong> Clique no seu nome de usuário no topo do
+            dashboard
+          </p>
+
+          <dl>
+            <dt>🕒 Últimos 5 Dias Úteis:</dt>
+            <dd>
+              Mostra o histórico dos últimos 5 dias úteis registrados com
+              valores e datas
+            </dd>
+
+            <dt>📊 Média Semanal:</dt>
+            <dd>
+              Calcula automaticamente a média dos seus pontos diários da última
+              semana
+            </dd>
+
+            <dt>✏️ Botão de Correção:</dt>
+            <dd>
+              Aparece APENAS no último registro E APENAS se for o mesmo dia
+            </dd>
+            <dd>Permite corrigir erros de digitação rapidamente</dd>
+
+            <dt>🏥 Indicador de Dias Agendados:</dt>
+            <dd>
+              Dias com folga/atestado mostram
+              <code>"🏥 dia agendado (folga/atestado)"</code>
+            </dd>
+            <dd>Fins de semana mostram <code>"fim de semana"</code></dd>
+
+            <dt>❌ Dias Não Informados:</dt>
+            <dd>
+              Dias úteis sem registro mostram
+              <code>"registro não fornecido"</code>
+            </dd>
+          </dl>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🔒 Regras de Segurança</h3>
+
+          <ul class="rules-list">
+            <li class="rule-item">
+              <div class="revisado">Registro Único:</div>
+              Apenas UM registro por dia útil permitido
+            </li>
+            <li class="rule-item">
+              <div class="revisado">Bloqueio de Fim de Semana:</div>
+              Sábados e domingos não permitem registro
+            </li>
+            <li class="rule-item">
+              <div class="revisado">Bloqueio de Dias Agendados:</div>
+              Dias com atestado/folga/feriado não aceitam registros
+            </li>
+            <li class="rule-item">
+              <div class="revisado">Correção Restrita:</div>
+              Edição permitida APENAS no último registro E no mesmo dia
+            </li>
+            <li class="rule-item">
+              <div class="revisado">Valor Mínimo:</div>
+              Registro deve ser maior que 100 pontos
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">7. Modo Simulação vs Modo Registro</h2>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🎮 Desktop (Teclado e Mouse)</h3>
+
+          <p>
+            No desktop, o campo de entrada está sempre visível com dois modos:
+          </p>
+
+          <dl>
+            <dt>✅ Modo Registro (Ctrl+Enter):</dt>
+            <dd>
+              Pressione <kbd>Ctrl</kbd> + <kbd>Enter</kbd> ou clique no botão
+              Lápis <i class="bi bi-pen"></i>
+            </dd>
+            <dd>Salva o valor PERMANENTEMENTE no histórico</dd>
+            <dd>Atualiza todos os cálculos e gráficos</dd>
+
+            <dt>🧮 Modo Simulação (Enter):</dt>
+            <dd>
+              Pressione apenas <kbd>Enter</kbd> ou clique no botão Calculadora
+              <i class="bi bi-calculator"></i>
+            </dd>
+            <dd>Mostra uma PREVISÃO temporária de como ficaria sua meta</dd>
+            <dd>Não altera seus dados reais</dd>
+            <dd>Dashboard volta ao normal após 15 segundos</dd>
+          </dl>
+
+          <p class="destacado">
+            💡 Dica: Use a simulação para planejar quanto precisa fazer nos
+            próximos dias!
+          </p>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">📱 Mobile (Touch)</h3>
+
+          <p>
+            No mobile, os botões flutuantes controlam a visibilidade do campo:
+          </p>
+
+          <ul>
+            <li><strong>Botão ☰:</strong> Expande/oculta os botões de ação</li>
+            <li>
+              <strong>Botão Lápis <i class="bi bi-pen"></i>:</strong> Abre campo
+              em modo registro
+            </li>
+            <li>
+              <strong
+                >Botão Calculadora <i class="bi bi-calculator"></i>:</strong
+              >
+              Abre campo em modo simulação
+            </li>
+            <li>
+              <strong>Botão Check <i class="bi bi-check-circle"></i>:</strong>
+              Confirma a ação do modo ativo
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">8. Relatório Mensal Completo</h2>
+
+        <p><strong>Acesso:</strong> Botão "Relatório" no menu superior</p>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">📄 Conteúdo do Relatório</h3>
+
+          <dl>
+            <dt>📋 Resumo Geral:</dt>
+            <dd>Nome, período, meta selecionada, pontos totais realizados</dd>
+
+            <dt>📊 Tabela de Movimentação:</dt>
+            <dd>
+              <strong>4 Colunas:</strong> Data | Tipo | Pontos | Observações
+            </dd>
+            <dd><strong>Cores por Tipo:</strong></dd>
+            <dd style="color: #28a745">• Verde: Dia de trabalho normal</dd>
+            <dd style="color: #ffc107">
+              • Amarelo: Dia agendado (folga/feriado)
+            </dd>
+            <dd style="color: #2196f3">• Azul: Atestado médico</dd>
+            <dd style="color: #dc3545">
+              • Vermelho: Dia útil não informado (já passou)
+            </dd>
+
+            <dt>📝 Observações por Data:</dt>
+            <dd>Lista todas as observações registradas agrupadas por dia</dd>
+
+            <dt>📌 Rodapé com Totais:</dt>
+            <dd>
+              <strong>Total de Pontos:</strong> Soma de todos os pontos do mês
+            </dd>
+            <dd>
+              <strong>Dias Trabalhados:</strong> Quantidade de dias com registro
+            </dd>
+            <dd>
+              <strong>Dias Não Trabalhados:</strong> Agendamentos + Atestados +
+              Faltas
+            </dd>
+
+            <dt>✍️ Campos de Assinatura:</dt>
+            <dd>Espaços para assinatura do colaborador e coordenador</dd>
+            <dd>
+              Nomes aparecem automaticamente abaixo das linhas quando
+              preenchidos
+            </dd>
+          </dl>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🖨️ Ações do Relatório</h3>
+
+          <ul>
+            <li>
+              <strong>🖨️ Imprimir:</strong> Abre diálogo de impressão otimizado
+              para A4
+            </li>
+            <li>
+              <strong>📥 Download PDF:</strong> Gera arquivo PDF do relatório
+              completo
+            </li>
+            <li>
+              <strong>📧 Enviar Email:</strong> Abre cliente de email com
+              relatório (fallback para download)
+            </li>
+          </ul>
+
+          <p class="destacado">
+            💡 Botões de ação são automaticamente ocultados na impressão/PDF
+          </p>
+        </div>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">9. Notificações e Feedback Visual</h2>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🔔 Sistema de Notificações</h3>
+
+          <p>O aplicativo fornece feedback imediato para todas as ações:</p>
+
+          <table class="commands-table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Cor</th>
+                <th>Quando Aparece</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>✅ Sucesso</strong></td>
+                <td
+                  style="
+                    background: linear-gradient(
+                      90deg,
+                      rgb(18, 51, 88),
+                      rgb(60, 79, 250)
+                    );
+                    color: white;
+                    padding: 0.5rem;
+                  "
+                >
+                  Azul Gradiente
+                </td>
+                <td>Registro salvo, comando executado com sucesso</td>
+              </tr>
+              <tr>
+                <td><strong>ℹ️ Informação</strong></td>
+                <td
+                  style="
+                    background: linear-gradient(
+                      90deg,
+                      #1e9bcc,
+                      hsl(184, 61%, 56%)
+                    );
+                    color: white;
+                    padding: 0.5rem;
+                  "
+                >
+                  Ciano Gradiente
+                </td>
+                <td>
+                  Quantidade de caixas/erros registrada, modo simulação ativo
+                </td>
+              </tr>
+              <tr>
+                <td><strong>⚠️ Aviso</strong></td>
+                <td
+                  style="
+                    background: linear-gradient(90deg, #ffb86b, #ff9a3c);
+                    padding: 0.5rem;
+                  "
+                >
+                  Laranja Gradiente
+                </td>
+                <td>Valor de caixas suspeito (muito alto/baixo)</td>
+              </tr>
+              <tr>
+                <td><strong>❌ Erro</strong></td>
+                <td
+                  style="
+                    background: linear-gradient(90deg, #ff5b73, #d91e3a);
+                    color: white;
+                    padding: 0.5rem;
+                  "
+                >
+                  Vermelho Gradiente
+                </td>
+                <td>
+                  Registro bloqueado, validação falhou, ação não permitida
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">📦 Validação Inteligente de Caixas</h3>
+
+          <ul>
+            <li>
+              <strong>&lt; 10 caixas:</strong> ⚠️ "Valor muito baixo" (mínimo
+              recomendado: 10)
+            </li>
+            <li>
+              <strong>10-4999 caixas:</strong> ✅ "X caixas registradas com
+              sucesso!"
+            </li>
+            <li>
+              <strong>&gt; 4999 caixas:</strong> ⚠️ "Valor muito alto" (valores
+              normais: até 4999)
+            </li>
+          </ul>
+
+          <p>
+            A validação ajuda a detectar erros de digitação antes que afetem
+            seus dados!
+          </p>
+        </div>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">10. Temas e Personalização</h2>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🌓 Modo Claro/Escuro</h3>
+
+          <p>
+            <strong>Acesso:</strong> Botão no canto superior direito com ícone
+            de sol/lua
+          </p>
+
+          <ul>
+            <li>
+              <strong>🌙 Modo Escuro:</strong> Fundo escuro, ideal para uso
+              noturno
+            </li>
+            <li>
+              <strong>☀️ Modo Claro:</strong> Fundo claro, ideal para ambientes
+              iluminados
+            </li>
+            <li>
+              <strong>💾 Memória:</strong> Preferência salva automaticamente
+            </li>
+          </ul>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🎯 Troca de Meta</h3>
+
+          <p>
+            Você pode alterar sua meta selecionada a qualquer momento usando o
+            dropdown no header:
+          </p>
+
+          <ul>
+            <li>
+              <strong>R$ 300:</strong> Meta mensal varia conforme personalização
+            </li>
+            <li><strong>R$ 400:</strong> Meta mensal automática</li>
+            <li><strong>R$ 500:</strong> Meta mensal automática</li>
+            <li><strong>R$ 600:</strong> Meta mensal automática</li>
+          </ul>
+
+          <p class="destacado">
+            ⚠️ Trocar a meta recalcula IMEDIATAMENTE a Meta Diária Necessária
+            com base no seu progresso atual
+          </p>
+        </div>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">11. Privacidade e Segurança de Dados</h2>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🔒 Armazenamento Local</h3>
+
+          <p>
+            <strong class="importante">Privacidade Total:</strong> Todos os seus
+            dados são armazenados <strong>APENAS neste navegador</strong> usando
+            LocalStorage.
+          </p>
+
+          <ul>
+            <li>❌ Nenhum dado é enviado para servidores externos</li>
+            <li>❌ Não há conexão com banco de dados online</li>
+            <li>❌ Não coletamos informações pessoais</li>
+            <li>✅ Funciona 100% offline após o primeiro carregamento</li>
+            <li>✅ Você tem controle total sobre seus dados</li>
+          </ul>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🚪 Logout e Multi-usuário</h3>
+
+          <p>O aplicativo suporta múltiplos usuários no mesmo dispositivo:</p>
+
+          <ul>
+            <li>
+              <strong>Logout:</strong> Clique no botão "Sair" ou no seu nome de
+              usuário
+            </li>
+            <li>
+              <strong>Sessão Isolada:</strong> Cada usuário tem seus próprios
+              dados separados
+            </li>
+            <li>
+              <strong>Troca Rápida:</strong> Faça logout e entre com outro nome
+              para acessar outra conta
+            </li>
+          </ul>
+
+          <p class="destacado">
+            💡 Dados de cada usuário ficam salvos independentemente no navegador
+          </p>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">⚠️ Comando de Limpeza</h3>
+
+          <p class="destacado importante">
+            🗑️ O comando <code>"limpar dados"</code> apaga PERMANENTEMENTE todos
+            os registros, observações, caixas e erros do usuário atual.
+          </p>
+
+          <ul>
+            <li>Uma confirmação será solicitada antes da exclusão</li>
+            <li>A ação é IRREVERSÍVEL</li>
+            <li>Use apenas se quiser recomeçar do zero</li>
+          </ul>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">📅 Reset Automático Mensal</h3>
+
+          <p>No primeiro dia de cada mês novo, o aplicativo automaticamente:</p>
+
+          <ul>
+            <li>✅ Zera o realizadoDiario (histórico de pontos diários)</li>
+            <li>✅ Zera o realizadoTotal (total acumulado)</li>
+            <li>✅ Mantém sua meta selecionada</li>
+            <li>✅ Mantém seu nome de usuário</li>
+            <li>✅ Mantém configurações (tema, etc.)</li>
+          </ul>
+
+          <p>Isso garante que você sempre comece o mês com dados limpos!</p>
+        </div>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">12. Dicas e Melhores Práticas</h2>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">💡 Uso Eficiente do Aplicativo</h3>
+
+          <ol>
+            <li>
+              <strong>Registre Diariamente:</strong> Não deixe acumular.
+              Registre seus pontos todo dia ao final do expediente.
+            </li>
+            <li>
+              <strong>Use Observações:</strong> Anote informações importantes
+              como "Ajudei outro setor", "Demanda alta", etc.
+            </li>
+            <li>
+              <strong>Agende Folgas com Antecedência:</strong> Use o comando de
+              feriado/atestado assim que souber da data.
+            </li>
+            <li>
+              <strong>Monitore a Meta Diária:</strong> Esse é o número mais
+              importante - ele te diz quanto fazer hoje.
+            </li>
+            <li>
+              <strong>Acompanhe o Top Funcionário:</strong> Registre caixas e
+              erros para ver seu progresso em tempo real.
+            </li>
+            <li>
+              <strong>Simule Cenários:</strong> Use o modo simulação para
+              planejar sua semana.
+            </li>
+            <li>
+              <strong>Corrija Erros Imediatamente:</strong> Se errou na
+              digitação, corrija no mesmo dia usando o botão lápis do histórico.
+            </li>
+            <li>
+              <strong>Exporte Relatórios:</strong> No fim do mês, gere o PDF do
+              relatório para seus registros.
+            </li>
+          </ol>
+        </div>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🎯 Estratégias para Atingir Metas</h3>
+
+          <ul>
+            <li>
+              <strong>Adiantamento Estratégico:</strong> Faça mais no início do
+              mês para ter folga depois
+            </li>
+            <li>
+              <strong>Compensação Rápida:</strong> Se atrasou um dia, o
+              aplicativo mostra exatamente quanto precisa compensar
+            </li>
+            <li>
+              <strong>Visualize Tendências:</strong> Use a média semanal do
+              histórico para avaliar seu ritmo
+            </li>
+            <li>
+              <strong>Registre Bônus:</strong> Não esqueça de registrar ajudas e
+              trabalho em outros setores
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">13. Perguntas Frequentes (FAQ)</h2>
+
+        <div class="manual-subsection">
+          <dl>
+            <dt>
+              <strong
+                >❓ Posso usar o aplicativo em vários dispositivos?</strong
+              >
+            </dt>
+            <dd>
+              Não. Os dados ficam salvos apenas no navegador do dispositivo
+              atual. Cada dispositivo terá dados independentes.
+            </dd>
+
+            <dt><strong>❓ E se eu limpar o cache do navegador?</strong></dt>
+            <dd>
+              ⚠️ Seus dados serão perdidos. Recomendamos exportar o relatório em
+              PDF periodicamente.
+            </dd>
+
+            <dt>
+              <strong>❓ Posso registrar pontos de dias anteriores?</strong>
+            </dt>
+            <dd>
+              Não através do botão principal. Mas você pode usar o histórico
+              para visualizar e o sistema registra corretamente quando você faz
+              um registro tardio.
+            </dd>
+
+            <dt><strong>❓ Como funciona o cálculo da Meta Diária?</strong></dt>
+            <dd>
+              Fórmula: (Meta Mensal - Pontos Realizados) / Dias Úteis Restantes.
+              Recalculado a cada registro.
+            </dd>
+
+            <dt><strong>❓ Posso mudar minha meta no meio do mês?</strong></dt>
+            <dd>
+              Sim! Use o dropdown no header. O sistema recalcula automaticamente
+              a Meta Diária Necessária.
+            </dd>
+
+            <dt>
+              <strong>❓ O que acontece se eu não atingir a meta?</strong>
+            </dt>
+            <dd>
+              O aplicativo é apenas uma ferramenta de controle. Ele te mostra
+              claramente quanto falta, mas não aplica penalidades.
+            </dd>
+
+            <dt><strong>❓ Como funciona o Top Funcionário?</strong></dt>
+            <dd>
+              Você precisa: (1) Atingir a meta primeira (R$ 300) E (2) Manter
+              taxa de erros ≤ 1.8%. Ambos critérios devem ser cumpridos.
+            </dd>
+
+            <dt>
+              <strong>❓ Posso registrar caixas por hora ou por semana?</strong>
+            </dt>
+            <dd>
+              Sim! O sistema aceita de 10 a 9999 caixas. Use como preferir
+              (hora: 50, dia: 3500, semana: 9000).
+            </dd>
+          </dl>
+        </div>
+      </section>
+
+      <section class="manual-section">
+        <h2 class="section-title">14. Suporte e Atualizações</h2>
+
+        <p>
+          Este aplicativo é desenvolvido e mantido para facilitar o controle de
+          metas de produtividade.
+        </p>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🆕 Funcionalidades Recentes</h3>
+          <ul>
+            <li>✨ Sistema de atestados médicos com bloqueio automático</li>
+            <li>✨ Validação inteligente de quantidade de caixas</li>
+            <li>✨ Notificações com feedback visual aprimorado</li>
+            <li>✨ Status Top Funcionário em tempo real</li>
+            <li>✨ Relatório mensal com contadores completos</li>
+            <li>✨ Tema claro/escuro com persistência</li>
+          </ul>
+        </div>
+
+        <p class="destacado">
+          📱 O aplicativo é totalmente responsivo e funciona perfeitamente em
+          mobile, tablet e desktop!
+        </p>
       </section>
 
       <a href="index.html" class="button-back-to-app">Voltar ao Dashboard</a>

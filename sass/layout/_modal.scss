@@ -1,37 +1,42 @@
 .modal-backdrop-hidden {
   display: none;
-  @include landscape-desktop {
-    display: block;
-    position: relative;
-
-    background-color: transparent;
-
-    width: 30%;
-  }
 }
 
 .modal-backdrop {
   display: block;
-  position: fixed; // <-- Use fixed para garantir cobertura total
+  position: fixed;
   inset: 0 0 0 0;
-  backdrop-filter: blur(1rem);
-  background-color: rgba(15, 15, 15, 0.815);
+  z-index: 10000;
+  backdrop-filter: blur(5rem);
+  // background-color: rgba(15, 15, 15, 0.363);
 
   @include landscape-desktop {
+    overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
     backdrop-filter: none;
     background-color: transparent;
-    width: 30%;
+    width: 30vw;
+    height: 100vh; // Altura fixa para permitir scroll
+    max-height: 100vh;
+
+    // Ocultar scrollbar no Firefox
+    scrollbar-width: none;
+
+    // Ocultar scrollbar no Chrome, Safari, Edge
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
 .modal-header {
-  background-color: clr-M(primary);
+  background-color: rgb(39 63 91);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 2rem;
-  @include box-shadow-primary;
+  // @include box-shadow-primary;
   color: rgb(255, 255, 255);
   max-height: 10vh;
   min-height: 6.8rem;
@@ -42,9 +47,6 @@
   .titulo-modal {
     font-size: 2.5rem;
     max-width: 70rem;
-
-    text-align: center;
-
     text-align: center;
   }
 
@@ -66,57 +68,54 @@
 
 .modal-body {
   width: 100vw;
-
-  box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5),
-    inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
+  padding-bottom: 4rem; // Espaço no final para permitir scroll completo
 
   @include landscape-desktop {
     width: 100%;
     box-shadow: none;
     background-color: none;
-    border-left: 5px solid clr(primary);
-    height: 100vh;
+    // border-left: 5px solid clr(primary);
+    padding-bottom: 8rem; // Espaço extra no final para garantir que o botão apareça
+  }
+}
+.mt-4 {
+  text-align: center;
+  padding-top: 2rem;
+  font-size: 2rem;
+  color: rgb(18, 51, 88);
+  margin-bottom: 1rem;
+  @include landscape-desktop {
+    color: rgb(39, 63, 91);
+  }
+}
+
+.list-group {
+  width: 90%;
+  max-width: 60rem; /* Adicionado max-width para controlar a largura máxima no desktop */
+  margin: 0 auto;
+  padding: 1rem;
+  border: 1px solid clr-M(secondary);
+  border-radius: 2rem;
+  li {
+    list-style: none;
   }
 
-  .mt-4 {
-    text-align: center;
-    padding-top: 2rem;
-    font-size: 2rem;
-    color: clr-M(secondary);
-    margin-bottom: 1rem;
-    @include landscape-desktop {
-      color: clr(primary);
-    }
+  @include landscape-desktop {
+    border: 1px solid clr(primary);
+    position: relative;
+    box-shadow: 0 1.2rem 1.6rem -0.6rem rgba(8, 14, 17, 0.35);
   }
+}
 
-  .list-group {
-    width: 90%;
-    margin: 0 auto;
-    padding: 3rem;
-    border: 1px solid clr-M(secondary);
-    border-radius: 2rem;
-    li {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: hsla(0, 9%, 90%, 0.747);
-      list-style: decimal;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      border-radius: 1rem;
-    }
-  }
+.mt-5 {
+  text-align: center;
+  padding-top: 2rem;
+  font-size: 1.6rem;
 
-  .mt-5 {
-    text-align: center;
-    padding-top: 2rem;
-    font-size: 1.6rem;
+  color: clr-M(primary);
 
-    color: hsl(0, 7%, 70%);
-
-    @include landscape-desktop {
-      color: clr(primary);
-    }
+  @include landscape-desktop {
+    color: clr(primary);
   }
 }
 
@@ -155,15 +154,15 @@
   left: 0;
   width: 100%;
   height: 100%;
-
-  background-color: hsla(0, 15%, 81%, 0.685);
-  border-radius: 1rem;
+  background-color: hsl(202.86deg 29.58% 86.08%);
+  box-shadow: 0.4rem 0.3rem 0.3rem 0 rgba(8, 14, 17, 0.35);
+  border-radius: 0.5rem;
   display: flex;
   gap: 1rem;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  font-size: 1.6;
+  padding: 1.5rem;
+
   z-index: 1;
 }
 
@@ -179,6 +178,7 @@
 
 .card-data-valor {
   color: clr(dark-blue);
+  font-size: 1.5rem;
 }
 
 .edit-botoes {
@@ -233,17 +233,25 @@
   align-items: center;
   gap: 1rem;
   margin-top: 2rem;
+  @include landscape-desktop {
+    max-width: 60rem;
+    margin: 0 auto;
+  }
 
-  label{
-  color: clr(primary);
-  font-weight: 700;
+  label {
+    color: clr-M(primary);
+    font-weight: 700;
+    @include landscape-desktop {
+      color: clr(primary);
+      margin-top: 1rem;
+    }
   }
 
   .observacao-text {
     width: 90%;
     min-height: 3rem;
     background-color: hsla(192, 11%, 91%, 0.767);
-   border-radius: 0.5rem;
+    border-radius: 0.5rem;
     outline: none;
     padding: 1rem;
     margin: 0 auto;
@@ -251,12 +259,58 @@
   }
 }
 
-
-.btn-modal-solicitar{
-  padding: 1rem;
-  background-color: clr(tercery);
-  border-radius: 10rem;
-  color: clr(azul-claro);
+.btn-modal-solicitar {
+  padding: 1.2rem 2.4rem;
+  background: linear-gradient(135deg, clr(tercery), darken(clr(tercery), 8%));
+  border: none;
+  border-right: 3px solid darken(clr(tercery), 15%);
+  border-radius: 0.8rem;
+  color: clr(blanco);
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+  margin-top: 1.5rem;
   margin-bottom: 2rem;
   cursor: pointer;
+  box-shadow: 0 0.4rem 1.2rem rgba(218, 131, 18, 0.4);
+  transition: all 0.3s ease;
+  width: auto;
+  display: inline-block;
+
+  &:hover {
+    background: linear-gradient(
+      135deg,
+      lighten(clr(tercery), 5%),
+      clr(tercery)
+    );
+    box-shadow: 0 0.6rem 1.8rem rgba(218, 131, 18, 0.6);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 0.2rem 0.8rem rgba(218, 131, 18, 0.5);
+  }
+}
+
+.historico-item-fieldset {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  position: relative;
+  width: 100%;
+  background-color: clr(light);
+  box-shadow: 1px 1px 0.3rem 0.2rem rgba(0, 0, 0, 0.4);
+}
+
+.historico-item-legend {
+  width: auto;
+  padding: 0.1rem 0.5rem;
+  margin: auto;
+  font-size: 1.4rem;
+  color: clr(blanco);
+  border-radius: 0 1rem 0 1rem;
+
+  background-color: rgb(39 63 91);
 }

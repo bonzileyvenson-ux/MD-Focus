@@ -1,10 +1,6 @@
 // js/app.js
 
-import {
-  destacarElemento,
-  alternarDisplay,
- 
-} from "./ui.js";
+import { destacarElemento, alternarDisplay } from "./ui.js";
 
 const notie = window.notie;
 
@@ -15,20 +11,26 @@ import {
   MAPA_METAS,
   getDadosUsuario,
   atualizarDadosUsuario,
+  setCurrentUser,
+  clearCurrentUser,
+  getDiasAgendados,
 } from "./data.js";
 
 // CORREÇÃO 1: Renomear a função no import para o nome correto
 import {
   calcularEAtualizarDashboard,
   atualizarGraficoCircular,
- 
 } from "./calc.js";
 import {
   validarNome,
   validarMeta,
   validarPontosRegistro,
 } from "./validation.js";
-import { configurarModalHistorico, abrirModalHistorico,solicitarBonus } from "./history.js";
+import {
+  configurarModalHistorico,
+  abrirModalHistorico,
+  solicitarBonus,
+} from "./history.js";
 
 // Importar a função de atualização do gráfico
 let modoAtual = "registro";
@@ -45,53 +47,56 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function configurarCadastro() {
-  const btnConfirmar = document.getElementById("btn-confirmar");
+  // Apenas configuramos o botão de login rápido (nome único)
+  const loginBtn = document.getElementById("login-button");
+  const loginInput = document.getElementById("login-username");
 
-  if (btnConfirmar) {
-    // Chamamos a função de validação quando o botão é clicado
-    btnConfirmar.addEventListener("click", validarECadastrar);
+  if (loginBtn && loginInput) {
+    loginBtn.addEventListener("click", () => {
+      const nome = loginInput.value ? loginInput.value.trim() : "";
+      if (!validarNome(nome)) {
+        notie.alert({
+          type: "error",
+          text: "Por favor, digite um nome válido (3 a 10 letras).",
+          time: 3,
+        });
+        return;
+      }
+
+      // Verifica se é o primeiro acesso (novo usuário)
+      const primeiroAcesso = !localStorage.getItem(`dados_${nome}`);
+
+      // Define o usuário atual (apenas local) e cria dados iniciais com meta padrão (300 -> 45000)
+      setCurrentUser(nome);
+      const dadosUsuario = criarDadosIniciais(nome, "300");
+      salvarDados(dadosUsuario);
+
+      // Se for primeiro acesso, mostra aviso sobre política de uso
+      if (primeiroAcesso) {
+        notie.confirm({
+          text: "📋 Bem-vindo(a)! Recomendamos fortemente a leitura da <strong>Política de Uso</strong> para entender todas as funcionalidades do aplicativo. Deseja ler agora?",
+          submitText: "Sim, ler agora",
+          cancelText: "Depois",
+          submitCallback: () => {
+            window.open("uso_privacidade.html", "_blank");
+            iniciarDashboard(nome);
+          },
+          cancelCallback: () => {
+            notie.alert({
+              type: "info",
+              text: "💡 Acesse a Política de Uso a qualquer momento através do menu Relatório.",
+              time: 5,
+            });
+            iniciarDashboard(nome);
+          },
+        });
+      } else {
+        iniciarDashboard(nome);
+      }
+    });
   }
 }
-
-// CORREÇÃO 3: Renomear e unificar 'validarCadastro' e 'daddosUsuario'
-function validarECadastrar() {
-  const inputNomeElement = document.getElementById("input-name");
-  const metaDropdownElement = document.getElementById("meta-dropdown");
-
-  const nomeFuncionario = inputNomeElement ? inputNomeElement.value.trim() : "";
-  const metaValorString = metaDropdownElement
-    ? metaDropdownElement.value
-    : "none";
-
-  if (!validarNome(nomeFuncionario)) {
-    notie.alert({
-      type: "error",
-      text: "Por favor, digite um nome valído e legível (3 a 10 letras, sem repetição tripla).",
-      time: 4,
-    });
-    return;
-  }
-
-  if (!validarMeta(metaValorString)) {
-    notie.alert({
-      type: "error",
-      text: "Opa!, você esqueceu de selecionar uma meta válida.",
-      time: 3,
-    });
-    return;
-  }
-
-  // --- LÓGICA CRÍTICA DE SALVAMENTO (PRIMEIRO LOGIN) ---
-
-  // 1. CRIAÇÃO do novo objeto de dados
-  const dadosUsuario = criarDadosIniciais(nomeFuncionario, metaValorString);
-
-  // 2. SALVAMENTO do objeto no data.js (localStorage)
-  salvarDados(dadosUsuario);
-
-  // 3. INÍCIO do Dashboard
-  iniciarDashboard(nomeFuncionario);
-}
+// End of configurarCadastro
 
 export function iniciarDashboard(nome) {
   // Se estivermos em um login automático ou se a variável global não estiver pronta,
@@ -100,6 +105,12 @@ export function iniciarDashboard(nome) {
   if (!dadosUsuario) {
     return;
   }
+
+  // Mostrar o conteúdo principal e esconder a tela de login
+  const loginScreen = document.getElementById("login-screen");
+  const mainContent = document.getElementById("main-content");
+  if (loginScreen) loginScreen.classList.add("hidden");
+  if (mainContent) mainContent.classList.remove("hidden");
 
   // 1. INTELIGÊNCIA: Calcular o estado atual
 
@@ -132,18 +143,26 @@ export function iniciarDashboard(nome) {
 
   // Mostra o nome e a meta
   userName.classList.replace("usuario-name-hidden", "usuario-name");
-  
+
   // CORREÇÃO DE SEGURANÇA: Evitar XSS usando textContent em vez de innerHTML
   // Limpa o conteúdo anterior
-  userName.innerHTML = ''; 
+  userName.innerHTML = "";
   // Cria o ícone de forma segura
-  const icon = document.createElement('i');
-  icon.className = 'bi bi-person-badge-fill';
+  const icon = document.createElement("i");
+  icon.className = "bi bi-person-badge-fill";
   // Adiciona o ícone e o texto do nome de forma segura
   userName.appendChild(icon);
   userName.appendChild(document.createTextNode(nomeFinal));
 
   metaData.classList.replace("meta-data-hidden", "meta-data");
+
+  // Exibir o dropdown de meta para que o usuário possa "brincar" com as metas
+  const metaDropdown = document.getElementById("meta-dropdown");
+  if (metaDropdown) {
+    metaDropdown.classList.remove("hidden");
+    // Atualiza labels do dropdown com os valores atuais do mapa de metas do usuário
+    refreshMetaDropdownLabels();
+  }
 
   // 5. ATIVAÇÃO DO BOTÃO DE EDIÇÃO
   ativarBotaoEdit();
@@ -154,6 +173,11 @@ export function iniciarDashboard(nome) {
   solicitarBtnListerner();
   configurarToggleTema(); // NOVO: Ativa o botão de tema
 
+  // Configura o logout (botão aparece junto ao nome do usuário)
+  configurarLogout();
+
+  // Ajustes responsivos para comportamento dos botões/input (mobile vs desktop)
+  setupResponsiveMode();
 
   if (window.matchMedia("(min-width: 768px)").matches) {
     abrirModalHistorico();
@@ -167,6 +191,32 @@ export function iniciarDashboard(nome) {
       text: `Bem-vindo(a), ${nomeFinal}! Dashboard pronta.`,
       time: 3,
     });
+  }
+}
+
+// Atualiza os textos das opções do dropdown para mostrar o valor mensal atual do mapaMetas
+export function refreshMetaDropdownLabels() {
+  const metaDropdown = document.getElementById("meta-dropdown");
+  const dadosUsuario = getDadosUsuario();
+  if (!metaDropdown || !dadosUsuario) return;
+
+  // keys esperadas na ordem visual
+  const keys = ["300", "400", "500", "600"];
+  for (let i = 0; i < metaDropdown.options.length; i++) {
+    const opt = metaDropdown.options[i];
+    const val = opt.value;
+    if (keys.includes(val)) {
+      const mensal =
+        (dadosUsuario.mapaMetas && dadosUsuario.mapaMetas[val]) ||
+        MAPA_METAS[val] ||
+        0;
+      opt.textContent = `R$ ${val},00`;
+    }
+  }
+
+  // Restaura a seleção que o usuário tinha
+  if (dadosUsuario.selectedMetaKey) {
+    metaDropdown.value = dadosUsuario.selectedMetaKey;
   }
 }
 
@@ -225,6 +275,8 @@ function atualizarUIDashboard(resultados) {
     resultados.percentualProgresso,
     resultados.metaDiariaNecessaria
   );
+
+  atualizarStatusTop5();
 }
 
 function ativarBotaoEdit() {
@@ -239,8 +291,22 @@ function ativarBotaoEdit() {
     btnEdit.parentNode.replaceChild(newBtnEdit, btnEdit);
     newBtnEdit.addEventListener("click", () => {
       modoAtual = "registro"; // Garante o modo correto
-      inputEdit.classList.toggle("edita-pontos-hidden");
-      inputEdit.focus();
+      // Detectar landscape (qualquer largura) ou desktop largo
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+      const isDesktop = window.matchMedia("(min-width: 769px)").matches;
+
+      if (isLandscape || isDesktop) {
+        // No landscape ou desktop: sempre mostrar o input (não dar toggle)
+        inputEdit.classList.remove("edita-pontos-hidden");
+        inputEdit.focus();
+      } else {
+        // No portrait mobile: comportamento antigo (toggle)
+        inputEdit.classList.toggle("edita-pontos-hidden");
+        if (!inputEdit.classList.contains("edita-pontos-hidden")) {
+          inputEdit.focus();
+        }
+      }
+
       notie.alert({
         type: "info",
         text: "Modo Registro: O valor inserido será salvo.",
@@ -285,17 +351,27 @@ function validarESubmeterPontos() {
   const dadosUsuario = getDadosUsuario();
   // Decide o que fazer com base no modo atual
   if (modoAtual === "registro") {
-    const { valido, mensagem, dataHojeKey } = validarPontosRegistro(pontoAdicionado, dadosUsuario.realizadoDiario);
+    const diasAgendados = getDiasAgendados();
+    const { valido, mensagem, dataHojeKey } = validarPontosRegistro(
+      pontoAdicionado,
+      dadosUsuario.realizadoDiario,
+      diasAgendados
+    );
     if (!valido) {
-        notie.alert({
-            type: "error",
-            text: mensagem,
-            time: 4,
-        });
-        if (mensagem.includes("bloqueado")) {
-            document.getElementById("edita-pontos").classList.add("edita-pontos-hidden");
+      notie.alert({
+        type: "error",
+        text: mensagem,
+        time: 4,
+      });
+      // Apenas no mobile escondemos o input quando a validação bloquear o registro
+      if (mensagem.includes("bloqueado")) {
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+        if (isMobile) {
+          const editaEl = document.getElementById("edita-pontos");
+          if (editaEl) editaEl.classList.add("edita-pontos-hidden");
         }
-        return;
+      }
+      return;
     }
 
     dadosUsuario.realizadoDiario[dataHojeKey] = pontoAdicionado;
@@ -303,9 +379,12 @@ function validarESubmeterPontos() {
 
     atualizarDadosUsuario(dadosUsuario);
     inputPontosElement.value = "";
-    document
-      .getElementById("edita-pontos")
-      .classList.add("edita-pontos-hidden");
+    // Ao registrar, no mobile escondemos o editor; no desktop mantemos visível
+    const isMobileAfter = window.matchMedia("(max-width: 768px)").matches;
+    if (isMobileAfter) {
+      const editaEl = document.getElementById("edita-pontos");
+      if (editaEl) editaEl.classList.add("edita-pontos-hidden");
+    }
     iniciarDashboard(null); // Atualiza o dashboard sem msg de boas-vindas
 
     notie.alert({
@@ -333,14 +412,26 @@ function ativarListenerMeta() {
       }
 
       const dadosUsuario = getDadosUsuario();
-      const novaMetaMensal = MAPA_METAS[metaAlterada];
+      const novaMetaMensal =
+        (dadosUsuario.mapaMetas && dadosUsuario.mapaMetas[metaAlterada]) ||
+        MAPA_METAS[metaAlterada];
+      const anterior = dadosUsuario.metaMensal;
       dadosUsuario.metaMensal = novaMetaMensal;
+      // Persistir a opção selecionada para manter entre sessões
+      dadosUsuario.selectedMetaKey = metaAlterada;
       atualizarDadosUsuario(dadosUsuario);
+      console.log(
+        `[MD-Focus] Meta selecionada alterada por usuário: key=${metaAlterada}, mensal=${novaMetaMensal} (antes=${anterior})`
+      );
+      // Atualiza labels caso o mapa de metas tenha valores customizados
+      refreshMetaDropdownLabels();
       iniciarDashboard(dadosUsuario.nome);
 
       notie.alert({
         type: "success",
-        text: `Nova meta de R$ ${metaAlterada},00 selecionada! Cálculos atualizados.`,
+        text: `Opção selecionada: R$ ${metaAlterada},00 — meta mensal ${novaMetaMensal.toLocaleString(
+          "pt-BR"
+        )}.`,
         time: 3,
       });
     });
@@ -353,20 +444,172 @@ function configurarLimiteInput() {
   if (inputPontosElement) {
     inputPontosElement.addEventListener("input", function () {
       let maxLength = 5;
-      if (modoAtual === 'registro') {
+
+      if (modoAtual === "registro") {
         maxLength = 4;
       }
-      
+
       if (this.value.length > maxLength) {
         this.value = this.value.slice(0, maxLength);
       }
     });
+
+    // Key handling: Enter/Ctrl+Enter should trigger the same submit flow as the button click
+    inputPontosElement.addEventListener("keydown", function (ev) {
+      if (ev.key !== "Enter") return;
+      ev.preventDefault();
+
+      const isDesktop = window.matchMedia("(min-width: 769px)").matches;
+      const submitButton = document.getElementById("btn-pontos-submit");
+
+      if (isDesktop) {
+        if (ev.ctrlKey || ev.metaKey) {
+          // Ctrl/⌘ + Enter -> Registro path
+          modoAtual = "registro";
+          if (submitButton) {
+            submitButton.click();
+          } else {
+            validarESubmeterPontos();
+          }
+          return;
+        }
+
+        // Enter alone on desktop -> Simulação (set mode then trigger the same submit)
+        modoAtual = "simulacao";
+        if (submitButton) {
+          submitButton.click();
+        } else {
+          // fallback: call simulation directly using current input value
+          const val = Number(this.value.trim());
+          if (!val || isNaN(val) || val <= 0) {
+            notie.alert({
+              type: "error",
+              text: "Insira um valor válido para simular.",
+              time: 3,
+            });
+            return;
+          }
+          executarCalculoRapidoSimulacao(val);
+        }
+        return;
+      }
+
+      // Mobile: Enter behaves like registro (submit)
+      modoAtual = "registro";
+      if (submitButton) {
+        submitButton.click();
+      } else {
+        validarESubmeterPontos();
+      }
+    });
+
+    // Placeholder hint will be set by setupResponsiveMode (desktop only)
   }
 }
 
+function atualizarStatusTop5() {
+  const dadosUsuario = getDadosUsuario();
 
+  const statusElement = document.getElementById("top-5-status");
 
+  const statusContainer = document.getElementById("top-5-status-container");
 
+  if (!statusContainer) return;
+
+  const totalPontos = dadosUsuario ? dadosUsuario.realizadoTotal || 0 : 0;
+
+  const totalCaixas = dadosUsuario ? dadosUsuario.totalCaixas || 0 : 0;
+
+  const totalErros = dadosUsuario ? dadosUsuario.totalErros || 0 : 0;
+
+  if (!totalCaixas && !totalErros && !totalPontos) {
+    statusContainer.style.display = "none";
+
+    return;
+  }
+
+  statusContainer.style.display = "block";
+
+  // Critérios para Top Funcionário:
+  // 1. Bater a primeira meta (R$ 300) - valor pode mudar mensalmente mas sempre será o primeiro do MAPA_METAS
+  // 2. Manter taxa de erro <= 1.8%
+
+  // Busca o valor da primeira meta (300) do mapaMetas personalizado do usuário ou do MAPA_METAS padrão
+  const metaPrimeira =
+    (dadosUsuario.mapaMetas && dadosUsuario.mapaMetas["300"]) ||
+    MAPA_METAS["300"];
+  const MAX_ERRO_PERCENT = 0.018; // 1.8% de erros permitidos
+
+  const erroRatio = totalCaixas > 0 ? totalErros / totalCaixas : 0;
+  const erroPercent = erroRatio * 100;
+
+  let statusHtml = "";
+  let statusColor = "var(--cor-texto-padrao)";
+
+  const pontosOk = totalPontos >= metaPrimeira;
+  const errosOk = erroRatio <= MAX_ERRO_PERCENT;
+
+  // Calcula progresso percentual para cada critério
+  const progressoPontos = Math.min((totalPontos / metaPrimeira) * 100, 100);
+  const progressoErros =
+    erroRatio <= MAX_ERRO_PERCENT
+      ? 100
+      : Math.max(
+          100 - ((erroRatio - MAX_ERRO_PERCENT) / MAX_ERRO_PERCENT) * 100,
+          0
+        );
+
+  // Verifica se ambos os critérios foram atingidos
+  if (pontosOk && errosOk) {
+    statusHtml = `
+      <i class="bi bi-trophy-fill" style="font-size: 1.4em; animation: pulse 1.5s ease-in-out infinite;"></i> 
+      <strong>TOP FUNCIONÁRIO!</strong> 
+      <span style="font-size: 0.9em; opacity: 0.9;">✨ ${erroPercent.toFixed(
+        1
+      )}% erros</span>
+    `;
+    statusColor = "hsl(29, 85%, 37%)"; // cor terciária (laranja-avermelhado)
+    statusElement.style.fontWeight = "bold";
+    statusElement.style.textShadow = "0 0 10px rgba(218, 131, 18, 0.3)";
+  } else {
+    statusElement.style.textShadow = "none";
+    statusElement.style.fontWeight = "normal";
+
+    // Feedback específico sobre o que falta
+    if (!pontosOk && !errosOk) {
+      const faltaPontos = metaPrimeira - totalPontos;
+      statusHtml = `
+        <i class="bi bi-graph-up-arrow"></i> 
+        Falta <strong>${faltaPontos.toLocaleString("pt-BR")}</strong> pts 
+        · <i class="bi bi-exclamation-circle"></i> ${erroPercent.toFixed(
+          1
+        )}% erros (máx 1.8%)
+      `;
+      statusColor = "#ffc107"; // amarelo/aviso
+    } else if (!pontosOk) {
+      const faltaPontos = metaPrimeira - totalPontos;
+      const percentualFalta = ((faltaPontos / metaPrimeira) * 100).toFixed(0);
+      statusHtml = `
+        <i class="bi bi-graph-up-arrow"></i> 
+        Faltam <strong>${faltaPontos.toLocaleString("pt-BR")}</strong> pts 
+        <span style="font-size: 0.85em; opacity: 0.8;">(${percentualFalta}% restante)</span>
+      `;
+      statusColor = "#17a2b8"; // azul info
+    } else {
+      // pontosOk mas !errosOk
+      const excedenteErro = ((erroRatio - MAX_ERRO_PERCENT) * 100).toFixed(2);
+      statusHtml = `
+        <i class="bi bi-exclamation-triangle-fill"></i> 
+        Meta atingida, mas <strong>${erroPercent.toFixed(1)}% erros</strong> 
+        <span style="font-size: 0.85em;">(+${excedenteErro}% acima do limite)</span>
+      `;
+      statusColor = "#dc3545"; // vermelho
+    }
+  }
+
+  statusElement.innerHTML = statusHtml;
+  statusElement.style.setProperty("color", statusColor, "important");
+}
 
 // LÓGICA DE SIMULAÇÃO
 // =================================================================================
@@ -438,17 +681,28 @@ function executarCalculoRapidoSimulacao(pontoAdicionado) {
         `;
   }
 
+  // Save previous mode and switch to simulation while showing results
+  const modoAnterior = modoAtual;
+  modoAtual = "simulacao";
+
   notie.alert({
     type: "info",
     text: mensagem,
     time: 15,
   });
 
-  modoAtual = "registro";
-  document.getElementById("edita-pontos").classList.add("edita-pontos-hidden");
+  // Only hide the input on mobile; on desktop keep it visible so user can continue simulating
+  const isMobileNow = window.matchMedia("(max-width: 768px)").matches;
+  if (isMobileNow) {
+    const edita = document.getElementById("edita-pontos");
+    if (edita) edita.classList.add("edita-pontos-hidden");
+  }
+
   const TEMPO_REINICIALIZACAO = 15000;
   setTimeout(() => {
     iniciarDashboard(null);
+    // restore previous mode
+    modoAtual = modoAnterior;
     notie.alert({
       type: "success",
       text: "Dashboard restaurado para os dados reais.",
@@ -468,18 +722,79 @@ function editoresBtnsListerner() {
     document.getElementById("btn-principal").addEventListener("click", () => {
       alternarDisplay(btnCalculadora);
       alternarDisplay(btnLapis);
+
+      // Se estivermos em mobile e os botões forem escondidos, também esconder o input ativo
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+      if (isMobile) {
+        const inputContainer = document.getElementById("edita-pontos");
+        const calcHidden = btnCalculadora.classList.contains("hidden");
+        const lapisHidden = btnLapis.classList.contains("hidden");
+
+        // Se ambos os botões estiverem escondidos (estado compacto), esconder o input também
+        if (calcHidden && lapisHidden) {
+          if (inputContainer)
+            inputContainer.classList.add("edita-pontos-hidden");
+        }
+      }
     });
   }
 }
 
-
-function solicitarBtnListerner(){
+function solicitarBtnListerner() {
   const btnSolicitar = document.getElementById("btn-solicitar");
   if (btnSolicitar) {
-    btnSolicitar.addEventListener("click", () => {
-      solicitarBonus()
+    const newBtn = btnSolicitar.cloneNode(true);
+    btnSolicitar.parentNode.replaceChild(newBtn, btnSolicitar);
+    newBtn.addEventListener("click", () => {
+      solicitarBonus();
     });
-}}
+  }
+}
+
+// Logout behavior: clears current user and returns to login screen
+function configurarLogout() {
+  const btnLogout = document.getElementById("btn-logout");
+  const userNameEl = document.getElementById("usuario-nome");
+
+  if (btnLogout) {
+    btnLogout.addEventListener("click", () => {
+      notie.confirm({
+        text: "Deseja encerrar a sessão e voltar para a tela inicial?",
+        submitText: "Sair",
+        cancelText: "Cancelar",
+        submitCallback: () => {
+          clearCurrentUser();
+          // Exibir a tela de login e esconder o conteúdo principal
+          const loginScreen = document.getElementById("login-screen");
+          const mainContent = document.getElementById("main-content");
+          if (loginScreen) loginScreen.classList.remove("hidden");
+          if (mainContent) mainContent.classList.add("hidden");
+          notie.alert({ type: "success", text: "Sessão encerrada.", time: 2 });
+        },
+        cancelCallback: () => {
+          // nada a fazer
+        },
+      });
+    });
+  } else if (userNameEl) {
+    // fallback: clicar no nome também abre confirmação
+    userNameEl.addEventListener("click", () => {
+      notie.confirm({
+        text: "Deseja encerrar a sessão e voltar para a tela inicial?",
+        submitText: "Sair",
+        cancelText: "Cancelar",
+        submitCallback: () => {
+          clearCurrentUser();
+          const loginScreen = document.getElementById("login-screen");
+          const mainContent = document.getElementById("main-content");
+          if (loginScreen) loginScreen.classList.remove("hidden");
+          if (mainContent) mainContent.classList.add("hidden");
+          notie.alert({ type: "success", text: "Sessão encerrada.", time: 2 });
+        },
+      });
+    });
+  }
+}
 
 // =================================================================================
 // LÓGICA DE TEMA (DARK/LIGHT MODE)
@@ -505,27 +820,63 @@ function configurarToggleTema() {
   }
 }
 
-function atualizarIconeTema(tema) {
-  const iconElement = document.querySelector("#theme-toggle i");
-  if (iconElement) {
-    iconElement.className = tema === "dark" 
-      ? "bi bi-sun-fill"   // Ícone para passar para o modo claro
-      : "bi bi-moon-stars-fill"; // Ícone para passar para o modo escuro
+// Responsive mode: toggles visibility/behavior between mobile and desktop widths
+function setupResponsiveMode() {
+  const mq = window.matchMedia("(max-width: 768px)");
+
+  function applyMode(m) {
+    const isMobile = m.matches;
+    const btnEdit = document.getElementById("btn-edit");
+    const btnCalculadora = document.getElementById("calculo-rapido");
+    const btnPrincipal = document.getElementById("btn-principal");
+    const inputContainer = document.getElementById("edita-pontos");
+    const inputPontosElement = document.getElementById("input-pontos");
+
+    // Mobile: keep floating buttons visible, keep input hidden until user toggles
+    if (isMobile) {
+      if (btnEdit) btnEdit.classList.remove("hidden");
+      if (btnCalculadora) btnCalculadora.classList.remove("hidden");
+      if (btnPrincipal) btnPrincipal.classList.remove("hidden");
+      if (inputContainer) inputContainer.classList.add("edita-pontos-hidden");
+      if (inputPontosElement) {
+        inputPontosElement.placeholder = ""; // no hint on mobile (keeps compact)
+      }
+    } else {
+      // Desktop / landscape: hide mobile-only buttons and show input always
+      if (btnEdit) btnEdit.classList.add("hidden");
+      if (btnCalculadora) btnCalculadora.classList.add("hidden");
+      if (btnPrincipal) btnPrincipal.classList.add("hidden");
+      if (inputContainer)
+        inputContainer.classList.remove("edita-pontos-hidden");
+      // On desktop we default to simulation mode (desktop users simulate more often)
+      modoAtual = "simulacao";
+      if (inputPontosElement) {
+        inputPontosElement.placeholder =
+          "Enter → Simular · Ctrl+Enter → Registrar";
+      }
+    }
+  }
+
+  // Initial apply
+  applyMode(mq);
+
+  // Listen for changes
+  if (typeof mq.addEventListener === "function") {
+    mq.addEventListener("change", (e) => applyMode(e));
+  } else if (typeof mq.addListener === "function") {
+    mq.addListener((e) => applyMode(e));
   }
 }
 
-// =================================================================================
-// REGISTRO DO SERVICE WORKER (PWA OFFLINE)
-// =================================================================================
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('Service Worker registrado com sucesso:', registration);
-      })
-      .catch(error => {
-        console.log('Falha ao registrar o Service Worker:', error);
-      });
-  });
+function atualizarIconeTema(tema) {
+  const iconElement = document.querySelector("#theme-toggle i");
+  if (iconElement) {
+    iconElement.className =
+      tema === "dark"
+        ? "bi bi-sun-fill" // Ícone para passar para o modo claro
+        : "bi bi-moon-stars-fill"; // Ícone para passar para o modo escuro
+  }
 }
+
+// Service worker / PWA offline support removed per user request.
+// Registration and manifest were deleted to disable offline mode.

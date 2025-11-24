@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Relatório de Movimentos — MD-Focus</title>
+    <link rel="stylesheet" href="css/report.css">
+
+  </head>
+  <body>
+    <main id="report-root" class="relatorio-container">
+      <header class="report-header">
+        <div class="report-logo"><span>MD</span>-Focus</div>
+        <h1>Relatório de Registro</h1>
+        <div class="report-meta">
+          <span id="report-usuario">Usuário:__</span>
+          <span id="report-data">Gerado em:__</span>
+        </div>
+      </header>
+
+      <section class="report-summary">
+        <h2>Resumo</h2>
+        <div class="summary-grid">
+          <p class="summary-item">
+            <strong class="item-title">Meta Mensal:</strong> <span id="report-meta-mensal">—</span>
+          </p>
+          <p class="summary-item item-value">
+            <strong class="item-title">Total Realizado:</strong>
+            <span id="report-total-realizado">—</span>
+          </p>
+          <p class="summary-item">
+            <strong class="item-title">Atividades:</strong>
+            <span id="report-atividades">—</span>
+          </p>
+          <p class="summary-item item-value">
+            <strong class="item-title">Erros:</strong>
+            <span id="report-erros">—</span>
+        </p>
+      </section>
+
+      <section class="report-table">
+        <h2>Movimentos</h2>
+        <table class="table table-striped" id="report-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Pontos</th>
+              <th>Observações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table>
+        <div class="report-observations" id="report-observations" aria-live="polite"></div>
+      </section>
+
+      <section class="report-footer">
+        <div class="report-notes">
+          
+
+          <div>
+            <h3>Instruções para uso do relatório</h3>
+            <ol class="report-notes-content">
+              <li>Revise os dados apresentados para garantir precisão.</li>
+              <li>Utilize as informações para ajustar suas metas futuras.</li>
+              <li>Compartilhe o relatório com seu gestor, se necessário.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="report-signatures">
+          <div class="signature" id="signature-colaborador">
+            <div class="label">Colaborador</div>
+            <div class="line"></div>
+            <span class="signed-name" id="signed-colaborador-nome"></span>
+            <span class="signed-cargo" id="signed-colaborador-cargo"></span>
+            <div class="field">
+              <input
+                type="text"
+                id="sig-colaborador-nome"
+                placeholder="Nome do colaborador"
+              />
+              <input
+                type="text"
+                id="sig-colaborador-cargo"
+                placeholder="Cargo"
+              />
+            </div>
+          </div>
+
+          <div class="signature" id="signature-coordenador">
+            <div class="label">Coordenador</div>
+            <div class="line"></div>
+            <span class="signed-name" id="signed-coordenador-nome"></span>
+            <span class="signed-cargo" id="signed-coordenador-cargo"></span>
+            <div class="field">
+              <input 
+                type="text" 
+                id="sig-coordenador-nome" 
+                placeholder="Nome do coordenador" 
+              />
+              <input 
+                type="text" 
+                id="sig-coordenador-cargo" 
+                placeholder="Cargo" 
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="report-actions">
+          <button id="btn-print" class="btn btn-primary btn-report">
+            <i class="bi bi-printer"></i> Imprimir
+          </button>
+          <button id="btn-download" class="btn btn-secondary btn-report">
+            <i class="bi bi-download"></i> Baixar PDF
+          </button>
+          <button id="btn-email" class="btn btn-outline-primary btn-report">
+            <i class="bi bi-envelope"></i> Enviar por e-mail
+          </button>
+          <a href="index.html" class="btn btn-link btn-report"
+            >Voltar ao Dashboard</a
+          >
+        </div>
+      </section>
+      
+    </main>
+
+    
+    <!-- html2pdf: gera PDF a partir do DOM (usado para baixar/compartilhar o relatório) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+    <!-- Painel de fallback para o envio por email (quando mailto falhar) -->
+    <div id="email-fallback-panel" style="display:none; position:fixed; right:12px; bottom:12px; background:#fff; border:1px solid #ccc; padding:12px; z-index:9999; max-width:320px; box-shadow:0 6px 18px rgba(0,0,0,0.12);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <strong>Link de e-mail</strong>
+        <button id="email-fallback-close" style="background:none;border:0;color:#888;cursor:pointer;">Fechar</button>
+      </div>
+      <textarea id="email-fallback-link" style="width:100%;height:80px;font-size:12px;padding:6px;">""</textarea>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button id="email-fallback-copy" class="btn">Copiar link</button>
+        <a id="email-fallback-open" class="btn" href="#" target="_blank">Abrir no cliente</a>
+      </div>
+    </div>
+
+    <script type="module" src="js/report.js"></script>
+  </body>
+</html>

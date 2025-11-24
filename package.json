@@ -4,12 +4,13 @@
   "description": "Acompanhamento de metas",
   "main": "index.js",
   "scripts": {
-    "watch:sass": "npx sass sass/main.scss:css/style.css sass/privacidade.scss:css/privacidade.css -w --load-path node_modules",
+    "watch:sass": "npx sass --watch sass/main.scss:css/style.css sass/privacidade.scss:css/privacidade.css sass/report.scss:css/report.css --load-path node_modules",
     "compile:privacidade": "npx sass sass/privacidade.scss css/privacidade.css",
+    "compile:relatorio": "npx sass sass/report.scss css/report.css",
     "compile:sass": "npx sass sass/main.scss css/style.comp.css",
     "prefix:css": "npx  postcss --use autoprefixer -b 'last 10 versions' css/style.comp.css -o css/style.prefix.css",
     "compress:css": "npx sass css/style.prefix.css css/style.css --style compressed --load-path node_modules",
-    "build:css": "npx run-s compile:sass prefix:css compress:css compile:privacidade"
+    "build:css": "npx run-s compile:sass prefix:css compress:css compile:privacidade compile:relatorio"
   },
   "author": "Bonyve",
   "license": "ISC",

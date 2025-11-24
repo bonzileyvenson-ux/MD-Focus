@@ -9,6 +9,19 @@ export function getDadosUsuario() {
   return dadosUsuario;
 }
 
+export function setCurrentUser(nome) {
+  localStorage.setItem("currentUser", nome);
+}
+
+export function getCurrentUser() {
+  return localStorage.getItem("currentUser");
+}
+
+export function clearCurrentUser() {
+  localStorage.removeItem("currentUser");
+  dadosUsuario = null;
+}
+
 export function atualizarDadosUsuario(novosDados) {
   dadosUsuario = novosDados;
   salvarDados(dadosUsuario);
@@ -31,7 +44,8 @@ export const MAPA_METAS = {
  * @returns {string} Chave formatada para localStorage.
  */
 export function getChaveDadosUsuario() {
-  const nome = localStorage.getItem("nomeFuncionario") || "default";
+  const nome = localStorage.getItem("currentUser");
+  if (!nome) return null;
   return `dados_${nome}`;
 }
 
@@ -41,6 +55,9 @@ export function getChaveDadosUsuario() {
  */
 export function carregarDados() {
   const chave = getChaveDadosUsuario();
+  if (!chave) {
+    return null;
+  }
   const dadosJSON = localStorage.getItem(chave);
   if (!dadosJSON) {
     return null;
@@ -84,11 +101,63 @@ export function criarDadosIniciais(funcionario, metaDiariaBase) {
   const dados = {
     nome: funcionario,
     metaMensal: metaMensal,
+    // mapa de metas personalizável por usuário (chaves em R$ como strings -> valor mensal)
+    mapaMetas: Object.assign({}, MAPA_METAS),
+    // chave selecionada do dropdown (300/400/500/600)
+    selectedMetaKey: metaDiariaBase || "300",
     realizadoDiario: {},
     realizadoTotal: 0,
     dataUltimoCalculo: new Date().toISOString().slice(0, 10),
+    observacoes: [], // [{ date: 'YYYY-MM-DD', text: '...' }]
   };
 
   dadosUsuario = dados;
   return dados;
+}
+
+/** Observações helpers **/
+export function getObservacoesUsuario() {
+  const dados = getDadosUsuario();
+  if (!dados) return [];
+  return dados.observacoes || [];
+}
+
+export function adicionarObservacao(dateISO, text) {
+  const chave = getChaveDadosUsuario();
+  if (!chave) return null;
+  const dados =
+    getDadosUsuario() ||
+    criarDadosIniciais(localStorage.getItem("currentUser") || "Usuário", "300");
+  if (!dados.observacoes) dados.observacoes = [];
+  dados.observacoes.push({ date: dateISO, text: text });
+  salvarDados(dados);
+  return dados.observacoes;
+}
+
+export function limparObservacoes() {
+  const dados = getDadosUsuario();
+  if (!dados) return;
+  dados.observacoes = [];
+  salvarDados(dados);
+}
+
+/**
+ * Verifica se uma data específica está agendada como dia off
+ * @param {string} dataBR - Data no formato DD/MM/YYYY
+ * @returns {boolean} true se a data está agendada, false caso contrário
+ */
+export function isDiaAgendado(dataBR) {
+  const dados = getDadosUsuario();
+  if (!dados || !dados.diasOffAgendados) return false;
+  return dados.diasOffAgendados.includes(dataBR);
+}
+
+/**
+ * Retorna lista de todos os dias agendados
+ * @returns {string[]} Array de datas no formato DD/MM/YYYY
+ */
+export function getDiasAgendados() {
+  const dados = getDadosUsuario();
+  if (!dados || !dados.diasOffAgendados) return [];
+  return dados.diasOffAgendados;
 }

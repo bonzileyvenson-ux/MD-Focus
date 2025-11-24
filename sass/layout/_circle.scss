@@ -3,20 +3,42 @@ $stroke-width: 8; // A espessura do anel
 $raio: 45;
 // Circunferência (2 * PI * Raio): 2 * 3.14159 * 45 = ~283
 
+.progress-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto; // Não cresce, usa espaço necessário
+  width: 100%;
+  min-height: 0;
+  padding: 1rem 0; // Padding reduzido para não ocupar muito espaço
 
+  @include any-landscape {
+    padding: 0.5rem 0;
+  }
 
- 
-
+  @include landscape-desktop {
+    padding: 1.5rem 0;
+  }
+}
 
 .progress-container {
   position: relative;
-  width: $circle-size;
-  height: $circle-size;
-  margin: 3rem auto;
-@include landscape-desktop {
- 
-}
- 
+  // Tamanho responsivo: usa o menor valor entre largura disponível e altura disponível
+  // Portrait: usa mais espaço vertical disponível
+  width: min(50vw, 28vh, 18rem);
+  height: min(50vw, 28vh, 18rem);
+  margin: 0 auto;
+  flex-shrink: 0;
+
+  @include any-landscape {
+    width: min(28vw, 22vh, 13rem);
+    height: min(28vw, 22vh, 13rem);
+  }
+
+  @include landscape-desktop {
+    width: min(25vw, 35vh, 20rem);
+    height: min(25vw, 35vh, 20rem);
+  }
 }
 
 svg {
@@ -48,8 +70,7 @@ svg {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 2rem;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
   font-weight: bold;
   color: #333;
-  z-index: 10;
 }
