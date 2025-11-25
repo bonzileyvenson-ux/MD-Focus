@@ -317,7 +317,7 @@ function ativarBotaoEdit() {
       notie.alert({
         type: "info",
         text: "Modo Registro: O valor inserido será salvo.",
-        time: 2,
+        time: 4,
       });
     });
   }
@@ -350,7 +350,7 @@ function validarESubmeterPontos() {
     notie.alert({
       type: "error",
       text: "Insira um valor numérico válido e maior que zero.",
-      time: 3,
+      time: 5,
     });
     return;
   }
@@ -368,7 +368,7 @@ function validarESubmeterPontos() {
       notie.alert({
         type: "error",
         text: mensagem,
-        time: 4,
+        time: 6,
       });
       // Apenas no mobile escondemos o input quando a validação bloquear o registro
       if (mensagem.includes("bloqueado")) {
@@ -638,7 +638,7 @@ function ligarModoSimulacao() {
   notie.alert({
     type: "info",
     text: "Modo Simulação Ativo. Insira um valor para recalcular as metas.",
-    time: 3,
+    time: 5,
   });
 }
 
@@ -695,7 +695,7 @@ function executarCalculoRapidoSimulacao(pontoAdicionado) {
   notie.alert({
     type: "info",
     text: mensagem,
-    time: 15,
+    time: 20,
   });
 
   // Only hide the input on mobile; on desktop keep it visible so user can continue simulating

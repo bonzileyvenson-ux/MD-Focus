@@ -608,6 +608,7 @@ export function solicitarBonus() {
  */
 function processarAtestado(atestado, dadosUsuario, observacaoTexto) {
   const hoje = new Date();
+  hoje.setHours(12, 0, 0, 0); // Normaliza para meio-dia
   let dataInicio, dataFim;
 
   // Determina data de início
@@ -678,7 +679,9 @@ function parseDateBR(dataBR) {
   const mes = parseInt(partes[1]) - 1;
   const ano = partes[2] ? parseInt(partes[2]) : new Date().getFullYear();
 
-  return new Date(ano, mes, dia);
+  // Cria a data ao meio-dia para evitar problemas de fuso horário
+  const date = new Date(ano, mes, dia, 12, 0, 0, 0);
+  return date;
 }
 
 /**

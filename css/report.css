@@ -234,22 +234,38 @@ body {
   gap: 0.8rem;
   margin-top: 1.5rem;
 }
+.signature .field label {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: rgb(18, 59, 107);
+  margin-bottom: 0.3rem;
+}
 .signature .field input {
-  padding: 0.8rem 1rem;
-  border: 1px solid rgb(16, 59, 201);
-  background: rgb(54, 97, 153);
-  color: #fff;
-  border-radius: 0.4rem;
-  font-size: 1.4rem;
+  padding: 1rem 1.4rem;
+  border: none;
+  border-left: 3px solid rgb(18, 59, 107);
+  border-bottom: 3px solid rgb(18, 59, 107);
+  background: rgba(255, 255, 255, 0.8);
+  color: rgb(18, 59, 107);
+  border-radius: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
   transition: all 0.3s ease;
 }
 .signature .field input::placeholder {
-  color: rgb(5, 3, 26);
+  color: rgba(39, 63, 91, 0.5);
+  font-weight: 400;
 }
 .signature .field input:focus {
   outline: none;
-  border-color: rgb(18, 51, 88);
-  background: rgb(161, 211, 219);
+  border-left-color: hsl(29, 85%, 37%);
+  border-bottom-color: hsl(29, 85%, 37%);
+  background: rgb(255, 255, 255);
+  box-shadow: -3px 3px 8px rgba(39, 63, 91, 0.15);
+}
+.signature .field input:hover {
+  border-left-color: hsl(29, 85%, 37%);
+  border-bottom-color: hsl(29, 85%, 37%);
 }
 .signature.is-signed .field {
   display: none;
@@ -263,9 +279,10 @@ body {
   margin-top: 2rem;
   text-align: center;
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
-  justify-content: center;
 }
 .report-actions button {
   background-color: hsl(29, 85%, 37%);
@@ -279,12 +296,20 @@ body {
   transition: all 0.3s ease;
   flex: 0 1 auto;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.report-actions button i {
+  font-size: 1.8rem;
 }
 .report-actions button:hover {
   background-color: hsl(29, 85%, 27%);
+  transform: translateY(-2px);
+  box-shadow: 0 1.5rem 3.5rem rgba(8, 14, 17, 0.6);
 }
 .report-actions button:active {
-  transform: scale(0.98);
+  transform: scale(0.98) translateY(0);
 }
 
 /* Responsividade Mobile */
@@ -406,8 +431,103 @@ body {
     padding: 1.2rem 1.5rem;
   }
 }
+/* Seção de Análise e Recomendações */
+.report-analysis {
+  margin: 3rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 1rem;
+  border-left: 4px solid rgb(18, 59, 107);
+}
+.report-analysis h2 {
+  color: rgb(18, 59, 107);
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.report-analysis .analysis-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.report-analysis .analysis-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 3px solid;
+}
+.report-analysis .analysis-card.warning {
+  border-color: #ffc107;
+}
+.report-analysis .analysis-card.warning .card-icon {
+  color: #ffc107;
+}
+.report-analysis .analysis-card.danger {
+  border-color: #dc3545;
+}
+.report-analysis .analysis-card.danger .card-icon {
+  color: #dc3545;
+}
+.report-analysis .analysis-card.success {
+  border-color: #28a745;
+}
+.report-analysis .analysis-card.success .card-icon {
+  color: #28a745;
+}
+.report-analysis .analysis-card.info {
+  border-color: #17a2b8;
+}
+.report-analysis .analysis-card.info .card-icon {
+  color: #17a2b8;
+}
+.report-analysis .analysis-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.report-analysis .analysis-card .card-header .card-icon {
+  font-size: 2.4rem;
+}
+.report-analysis .analysis-card .card-header .card-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+}
+.report-analysis .analysis-card .card-body {
+  font-size: 1.5rem;
+  color: #555;
+  line-height: 1.6;
+}
+.report-analysis .analysis-card .card-body strong {
+  color: #333;
+  font-weight: 700;
+}
+.report-analysis .analysis-card .card-body .highlight {
+  background-color: #fff3cd;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+  font-weight: 600;
+}
+.report-analysis .analysis-card .card-recommendation {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  font-size: 1.4rem;
+  color: #666;
+}
+.report-analysis .analysis-card .card-recommendation .recommendation-icon {
+  margin-right: 0.5rem;
+}
+
 /* Estilos para impressão e PDF */
 @media print {
+  .no-print,
+  .report-analysis {
+    display: none !important;
+  }
   @page {
     size: A4;
     margin: 1.5cm;
@@ -642,6 +762,202 @@ body {
     font-style: italic;
     color: #555;
     margin-top: 0.2rem;
+  }
+}
+.report-insights {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 1rem;
+  border-left: 4px solid hsl(29, 85%, 37%);
+}
+.report-insights h2 {
+  color: rgb(18, 59, 107);
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+}
+.report-insights .insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.report-insights .insight-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 3px solid hsl(29, 85%, 37%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.report-insights .insight-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.report-insights .insight-card .insight-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.8rem;
+}
+.report-insights .insight-card .insight-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: rgb(18, 59, 107);
+  margin-bottom: 0.5rem;
+}
+.report-insights .insight-card .insight-description {
+  font-size: 1.3rem;
+  color: #555;
+  line-height: 1.5;
+}
+.report-insights .insight-card .insight-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: hsl(29, 85%, 37%);
+  margin-top: 0.5rem;
+}
+
+.report-ranking {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fff5e6 0%, #ffe4b3 100%);
+  border-radius: 1rem;
+  border-left: 4px solid #ffc107;
+}
+.report-ranking h2 {
+  color: rgb(18, 59, 107);
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+}
+.report-ranking .ranking-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.report-ranking .ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.2rem;
+  background: white;
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+}
+.report-ranking .ranking-item:hover {
+  transform: translateX(5px);
+}
+.report-ranking .ranking-item .ranking-position {
+  font-size: 2rem;
+  font-weight: bold;
+  min-width: 3rem;
+  text-align: center;
+}
+.report-ranking .ranking-item .ranking-position.top-1 {
+  color: #ffd700;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+.report-ranking .ranking-item .ranking-position.top-2 {
+  color: #c0c0c0;
+}
+.report-ranking .ranking-item .ranking-position.top-3 {
+  color: #cd7f32;
+}
+.report-ranking .ranking-item .ranking-day {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgb(18, 59, 107);
+  flex: 1;
+}
+.report-ranking .ranking-item .ranking-value {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: hsl(29, 85%, 37%);
+}
+
+.report-comparison {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 1rem;
+  border-left: 4px solid #4caf50;
+}
+.report-comparison h2 {
+  color: rgb(18, 59, 107);
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+}
+.report-comparison .comparison-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+.report-comparison .comparison-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+.report-comparison .comparison-card .comparison-label {
+  font-size: 1.3rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+.report-comparison .comparison-card .comparison-value {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: rgb(18, 59, 107);
+  margin-bottom: 0.8rem;
+}
+.report-comparison .comparison-card .comparison-change {
+  font-size: 1.4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.report-comparison .comparison-card .comparison-change.positive {
+  color: #4caf50;
+}
+.report-comparison .comparison-card .comparison-change.negative {
+  color: #f44336;
+}
+.report-comparison .comparison-card .comparison-change.neutral {
+  color: #999;
+}
+.report-comparison .comparison-card .comparison-change i {
+  font-size: 1.6rem;
+}
+
+@media screen and (max-width: 768px) {
+  .report-insights,
+  .report-ranking,
+  .report-comparison {
+    padding: 1.5rem;
+  }
+  .report-insights h2,
+  .report-ranking h2,
+  .report-comparison h2 {
+    font-size: 1.8rem;
+  }
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+  .ranking-item {
+    padding: 1rem;
+  }
+  .ranking-item .ranking-position {
+    font-size: 1.6rem;
+    min-width: 2.5rem;
+  }
+  .ranking-item .ranking-day {
+    font-size: 1.3rem;
+  }
+  .ranking-item .ranking-value {
+    font-size: 1.4rem;
+  }
+  .comparison-content {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -60,8 +60,7 @@ html {
 main {
   width: 100%;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
+  @include flex-column;
   overflow: hidden;
 
   // Qualquer landscape (mobile ou desktop): ajustar distribuição de espaço
@@ -81,9 +80,8 @@ main {
 
 .container-progress {
   margin-top: 5rem;
-  display: flex;
+  @include flex-column;
   align-items: center;
-  flex-direction: column;
 }
 
 .edit-icon {
@@ -97,9 +95,7 @@ main {
   font-size: 2.5rem;
   color: clr(azul-claro);
   background-color: clr(primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   box-shadow: inset 0 0 0.5rem 0.2rem rgba(0, 0, 0, 0.5);
   cursor: pointer;
 
@@ -175,9 +171,7 @@ main {
   left: 50%;
   transform: translateX(-50%);
   z-index: 11001;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   gap: 1rem;
   min-height: 4.4rem;
   max-width: min(96%, 64rem);
@@ -217,14 +211,28 @@ main {
 }
 
 @media (max-width: 520px) {
-  .notie-container.with-icon {
-    padding-left: 4rem;
+  .notie-container {
+    font-size: 1.6rem;
+    padding: 0.8rem 1.2rem;
+    max-width: 98%;
+    line-height: 1.5;
   }
+
+  .notie-container.with-icon {
+    padding-left: 4.5rem;
+  }
+
   .notie-container.with-icon::before {
     left: 0.5rem;
-    width: 2.6rem;
-    height: 2.6rem;
+    width: 3rem;
+    height: 3rem;
     background-size: cover;
+  }
+
+  .notie-button {
+    min-width: 6rem;
+    padding: 0.6rem 1rem;
+    font-size: 1.5rem;
   }
 }
 
@@ -266,18 +274,6 @@ main {
   box-shadow: 0 0.5rem 1rem rgba(8, 14, 17, 0.06);
 }
 
-@media (max-width: 520px) {
-  .notie-container {
-    top: 1rem;
-    padding: 0.45rem 0.7rem;
-    font-size: 1.25rem;
-  }
-  .notie-button {
-    min-width: 5rem;
-    padding: 0.35rem 0.6rem;
-  }
-}
-
 /* input placeholder hint handled via JS (uses input.placeholder) */
 
 /* Confirmation-specific tweaks: larger message, compact buttons */
@@ -305,10 +301,8 @@ main {
 
   .notie-buttons,
   .notie-actions {
-    display: flex;
+    @include flex-center;
     gap: 0.8rem;
-    align-items: center;
-    justify-content: center;
     margin-top: 0.4rem;
   }
 
@@ -349,9 +343,7 @@ main {
   width: 3.5rem;
   height: 3.5rem;
   padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   cursor: pointer;
   font-size: 2rem;
   border-radius: 50%;
@@ -668,6 +660,7 @@ main {
   }
 }
 
+// Media query para mobile - melhor legibilidade
 @media (max-width: 480px) {
   .login-card {
     padding: 1.6rem;
@@ -682,5 +675,57 @@ main {
   .login-cta {
     font-size: 1.5rem;
     padding: 0.7rem 1rem;
+  }
+
+  // Aumenta botões flutuantes para melhor toque
+  .edit-icon {
+    width: 3.2rem;
+    height: 3.2rem;
+    padding: 3.2rem;
+    font-size: 3rem;
+    right: 1.5rem;
+    bottom: 2.5rem;
+  }
+
+  .lapis-edita,
+  .btn-submitcalculator {
+    width: 4.2rem;
+    height: 4.2rem;
+    padding: 1.2rem;
+    font-size: 2.4rem;
+  }
+
+  .btn-submitcalculator {
+    right: 7.2rem;
+    bottom: 8.8rem;
+  }
+
+  .lapis-edita {
+    right: 9.5rem;
+    bottom: 4.2rem;
+  }
+
+  // Input de edição maior
+  .edita-pontos {
+    width: 85%;
+    max-width: 35rem;
+
+    input {
+      height: 4rem;
+      font-size: 1.6rem;
+      padding: 0 1.5rem;
+    }
+
+    button {
+      height: 4rem;
+      font-size: 1.8rem;
+    }
+  }
+
+  // Footer link maior
+  .footer-link {
+    font-size: 2.6rem;
+    left: 1.5rem;
+    bottom: 1.5rem;
   }
 }

@@ -267,28 +267,45 @@ body {
 
   // Inputs ficam abaixo quando visíveis
   .field {
-    display: flex;
-    flex-direction: column;
+    @include flex-column;
     gap: 0.8rem;
     margin-top: 1.5rem;
 
+    label {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: clr(primary);
+      margin-bottom: 0.3rem;
+    }
+
     input {
-      padding: 0.8rem 1rem;
-      border: 1px solid rgb(16, 59, 201);
-      background: rgb(54, 97, 153);
-      color: #fff;
-      border-radius: 0.4rem;
-      font-size: 1.4rem;
-      transition: all 0.3s ease;
+      padding: 1rem 1.4rem;
+      border: none;
+      border-left: 3px solid clr(primary);
+      border-bottom: 3px solid clr(primary);
+      background: rgba(255, 255, 255, 0.8);
+      color: clr(dark-blue);
+      border-radius: 0;
+      font-size: 1.5rem;
+      font-weight: 500;
+      @include transition;
 
       &::placeholder {
-        color: rgb(5, 3, 26);
+        color: rgba(39, 63, 91, 0.5);
+        font-weight: 400;
       }
 
       &:focus {
         outline: none;
-        border-color: clr-M(primary);
-        background: rgb(161, 211, 219);
+        border-left-color: clr(tercery);
+        border-bottom-color: clr(tercery);
+        background: rgba(255, 255, 255, 1);
+        box-shadow: -3px 3px 8px rgba(39, 63, 91, 0.15);
+      }
+
+      &:hover {
+        border-left-color: clr(tercery);
+        border-bottom-color: clr(tercery);
       }
     }
   }
@@ -309,10 +326,9 @@ body {
 .report-actions {
   margin-top: 2rem;
   text-align: center;
-  display: flex;
+  @include flex-center;
   gap: 1rem;
   flex-wrap: wrap;
-  justify-content: center;
 
   button {
     background-color: clr(tercery);
@@ -323,16 +339,25 @@ body {
     border-radius: 2rem;
     cursor: pointer;
     box-shadow: 0 1.2rem 3rem rgba(8, 14, 17, 0.5);
-    transition: all 0.3s ease;
+    @include transition;
     flex: 0 1 auto;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+
+    i {
+      font-size: 1.8rem;
+    }
 
     &:hover {
       background-color: darken(clr(tercery), 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 1.5rem 3.5rem rgba(8, 14, 17, 0.6);
     }
 
     &:active {
-      transform: scale(0.98);
+      transform: scale(0.98) translateY(0);
     }
   }
 }
@@ -492,8 +517,119 @@ body {
   }
 }
 
+/* Seção de Análise e Recomendações */
+.report-analysis {
+  margin: 3rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 1rem;
+  border-left: 4px solid clr(primary);
+
+  h2 {
+    color: clr(primary);
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .analysis-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .analysis-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 3px solid;
+
+    &.warning {
+      border-color: #ffc107;
+      .card-icon {
+        color: #ffc107;
+      }
+    }
+
+    &.danger {
+      border-color: #dc3545;
+      .card-icon {
+        color: #dc3545;
+      }
+    }
+
+    &.success {
+      border-color: #28a745;
+      .card-icon {
+        color: #28a745;
+      }
+    }
+
+    &.info {
+      border-color: #17a2b8;
+      .card-icon {
+        color: #17a2b8;
+      }
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+
+      .card-icon {
+        font-size: 2.4rem;
+      }
+
+      .card-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+      }
+    }
+
+    .card-body {
+      font-size: 1.5rem;
+      color: #555;
+      line-height: 1.6;
+
+      strong {
+        color: #333;
+        font-weight: 700;
+      }
+
+      .highlight {
+        background-color: #fff3cd;
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.3rem;
+        font-weight: 600;
+      }
+    }
+
+    .card-recommendation {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 0.5rem;
+      font-size: 1.4rem;
+      color: #666;
+
+      .recommendation-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
 /* Estilos para impressão e PDF */
 @media print {
+  // Oculta seção de análise no print
+  .no-print,
+  .report-analysis {
+    display: none !important;
+  }
   @page {
     size: A4;
     margin: 1.5cm;
@@ -777,5 +913,237 @@ body {
         margin-top: 0.2rem;
       }
     }
+  }
+}
+
+// Seção de Insights Inteligentes
+.report-insights {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 1rem;
+  border-left: 4px solid clr(tercery);
+
+  h2 {
+    color: clr(primary);
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+  }
+
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .insight-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 3px solid clr(tercery);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .insight-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .insight-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: clr(primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .insight-description {
+      font-size: 1.3rem;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .insight-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: clr(tercery);
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+// Ranking de Dias
+.report-ranking {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fff5e6 0%, #ffe4b3 100%);
+  border-radius: 1rem;
+  border-left: 4px solid #ffc107;
+
+  h2 {
+    color: clr(primary);
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+  }
+
+  .ranking-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .ranking-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.2rem;
+    background: white;
+    border-radius: 0.8rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateX(5px);
+    }
+
+    .ranking-position {
+      font-size: 2rem;
+      font-weight: bold;
+      min-width: 3rem;
+      text-align: center;
+
+      &.top-1 {
+        color: #ffd700;
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+      }
+      &.top-2 {
+        color: #c0c0c0;
+      }
+      &.top-3 {
+        color: #cd7f32;
+      }
+    }
+
+    .ranking-day {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: clr(primary);
+      flex: 1;
+    }
+
+    .ranking-value {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: clr(tercery);
+    }
+  }
+}
+
+// Comparativo Mensal
+.report-comparison {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 1rem;
+  border-left: 4px solid #4caf50;
+
+  h2 {
+    color: clr(primary);
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+  }
+
+  .comparison-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .comparison-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+    .comparison-label {
+      font-size: 1.3rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .comparison-value {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: clr(primary);
+      margin-bottom: 0.8rem;
+    }
+
+    .comparison-change {
+      font-size: 1.4rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+
+      &.positive {
+        color: #4caf50;
+      }
+
+      &.negative {
+        color: #f44336;
+      }
+
+      &.neutral {
+        color: #999;
+      }
+
+      i {
+        font-size: 1.6rem;
+      }
+    }
+  }
+}
+
+// Responsividade mobile para novas seções
+@media screen and (max-width: 768px) {
+  .report-insights,
+  .report-ranking,
+  .report-comparison {
+    padding: 1.5rem;
+
+    h2 {
+      font-size: 1.8rem;
+    }
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ranking-item {
+    padding: 1rem;
+
+    .ranking-position {
+      font-size: 1.6rem;
+      min-width: 2.5rem;
+    }
+
+    .ranking-day {
+      font-size: 1.3rem;
+    }
+
+    .ranking-value {
+      font-size: 1.4rem;
+    }
+  }
+
+  .comparison-content {
+    grid-template-columns: 1fr;
   }
 }

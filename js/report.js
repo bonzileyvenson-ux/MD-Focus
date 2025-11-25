@@ -112,6 +112,164 @@ function renderReport() {
   }
 
   renderObservations(dados);
+  renderAnalysis(dados);
+}
+
+/**
+ * Renderiza a seção de análise e recomendações
+ */
+function renderAnalysis(dados) {
+  const analysisContent = document.getElementById("analysis-content");
+  if (!analysisContent) return;
+
+  const totalCaixas = dados.totalCaixas || 0;
+  const totalErros = dados.totalErros || 0;
+  const totalPontos = dados.realizadoTotal || 0;
+  const metaMensal = dados.metaMensal || 0;
+
+  const cards = [];
+
+  // Análise de erros
+  if (totalCaixas > 0) {
+    const MAX_ERRO_PERCENT = 0.018; // 1.8%
+    const erroRatio = totalErros / totalCaixas;
+    const erroPercent = (erroRatio * 100).toFixed(2);
+    const errosOk = erroRatio <= MAX_ERRO_PERCENT;
+
+    if (!errosOk) {
+      // Calcular quantas caixas sem erros são necessárias
+      let caixasExtras = 0;
+      let taxaNova = erroRatio;
+
+      while (taxaNova > MAX_ERRO_PERCENT) {
+        caixasExtras += 10;
+        const novoTotalCaixas = totalCaixas + caixasExtras;
+        taxaNova = totalErros / novoTotalCaixas;
+        if (caixasExtras > 2000) break; // Limite de segurança
+      }
+
+      const totalFinal = totalCaixas + caixasExtras;
+      const taxaFinal = ((totalErros / totalFinal) * 100).toFixed(2);
+
+      cards.push({
+        type: "danger",
+        icon: "bi-exclamation-triangle-fill",
+        title: "Taxa de Erros Acima do Limite",
+        body: `
+          Sua taxa atual de erros é <strong class="highlight">${erroPercent}%</strong>, 
+          acima do limite de <strong>1.8%</strong>.
+          <br><br>
+          Com <strong>${totalErros}</strong> erros em <strong>${totalCaixas}</strong> caixas, 
+          você está cometendo aproximadamente <strong>${(
+            (totalErros / totalCaixas) *
+            100
+          ).toFixed(2)} erros a cada 100 caixas</strong>.
+        `,
+        recommendation: `
+          <i class="bi bi-lightbulb recommendation-icon"></i>
+          <strong>Recomendação:</strong> Faça <strong>${caixasExtras} caixas sem erros</strong> 
+          para baixar sua taxa para ${taxaFinal}% (dentro do limite).
+          <br>Total final: ${totalFinal.toLocaleString(
+            "pt-BR"
+          )} caixas com ${totalErros} erros.
+        `,
+      });
+    } else {
+      cards.push({
+        type: "success",
+        icon: "bi-check-circle-fill",
+        title: "Taxa de Erros Excelente",
+        body: `
+          Parabéns! Sua taxa de erros está em <strong class="highlight">${erroPercent}%</strong>, 
+          bem dentro do limite de <strong>1.8%</strong>.
+          <br><br>
+          Continue mantendo esse padrão de qualidade!
+        `,
+      });
+    }
+  }
+
+  // Análise de meta
+  if (metaMensal > 0) {
+    const pontosOk = totalPontos >= metaMensal;
+    const faltaPontos = metaMensal - totalPontos;
+    const percentualAtingido = ((totalPontos / metaMensal) * 100).toFixed(1);
+
+    if (!pontosOk && faltaPontos > 0) {
+      // Calcular dias úteis restantes do mês
+      const hoje = new Date();
+      const ultimoDia = new Date(
+        hoje.getFullYear(),
+        hoje.getMonth() + 1,
+        0
+      ).getDate();
+      const diasRestantes = ultimoDia - hoje.getDate();
+      const pontosPorDia = Math.ceil(faltaPontos / Math.max(diasRestantes, 1));
+
+      cards.push({
+        type: "warning",
+        icon: "bi-graph-up-arrow",
+        title: "Meta Mensal em Andamento",
+        body: `
+          Você atingiu <strong class="highlight">${percentualAtingido}%</strong> da meta mensal.
+          <br><br>
+          Faltam <strong>${faltaPontos.toLocaleString("pt-BR")} pontos</strong> 
+          para completar os <strong>${metaMensal.toLocaleString(
+            "pt-BR"
+          )} pontos</strong> da meta.
+        `,
+        recommendation: `
+          <i class="bi bi-lightbulb recommendation-icon"></i>
+          <strong>Recomendação:</strong> Com aproximadamente <strong>${diasRestantes} dias restantes</strong> no mês, 
+          você precisa fazer em média <strong>${pontosPorDia.toLocaleString(
+            "pt-BR"
+          )} pontos por dia</strong> para atingir sua meta.
+        `,
+      });
+    } else if (pontosOk) {
+      const excedente = totalPontos - metaMensal;
+      cards.push({
+        type: "success",
+        icon: "bi-trophy-fill",
+        title: "Meta Mensal Atingida",
+        body: `
+          Excelente! Você atingiu <strong class="highlight">${percentualAtingido}%</strong> da meta mensal.
+          <br><br>
+          Você superou a meta em <strong>${excedente.toLocaleString(
+            "pt-BR"
+          )} pontos</strong>!
+        `,
+      });
+    }
+  }
+
+  // Renderizar cards
+  if (cards.length === 0) {
+    analysisContent.innerHTML =
+      '<p style="text-align:center; color: #666;">Nenhuma análise disponível no momento.</p>';
+    return;
+  }
+
+  analysisContent.innerHTML = cards
+    .map(
+      (card) => `
+    <div class="analysis-card ${card.type}">
+      <div class="card-header">
+        <i class="bi ${card.icon} card-icon"></i>
+        <div class="card-title">${card.title}</div>
+      </div>
+      <div class="card-body">
+        ${card.body}
+        ${
+          card.recommendation
+            ? `<div class="card-recommendation">${card.recommendation}</div>`
+            : ""
+        }
+      </div>
+    </div>
+  `
+    )
+    .join("");
 }
 
 /**
@@ -570,10 +728,509 @@ function setupEmailFallback() {
 }
 
 // ========================================
+// INSIGHTS E ANÁLISES AVANÇADAS
+// ========================================
+
+/**
+ * Gera insights inteligentes baseados nos dados do usuário
+ */
+function generateInsights(dados) {
+  const insightsContainer = document.getElementById("insights-grid");
+  if (!insightsContainer) return;
+
+  const historico = dados.historico || [];
+  const realizadoDiario = dados.realizadoDiario || {};
+
+  if (historico.length === 0) {
+    insightsContainer.innerHTML =
+      '<p style="text-align: center; color: #666;">Sem dados suficientes para gerar insights.</p>';
+    return;
+  }
+
+  // Análise por dia da semana
+  const porDiaSemana = {};
+  const diasSemana = [
+    "Domingo",
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado",
+  ];
+
+  Object.entries(realizadoDiario).forEach(([dataKey, pontos]) => {
+    const [ano, mes, dia] = dataKey.split("-");
+    const data = new Date(ano, mes - 1, dia, 12, 0, 0);
+    const diaSemana = data.getDay();
+
+    if (!porDiaSemana[diaSemana]) {
+      porDiaSemana[diaSemana] = { total: 0, count: 0 };
+    }
+    porDiaSemana[diaSemana].total += pontos;
+    porDiaSemana[diaSemana].count += 1;
+  });
+
+  // Encontra melhor dia da semana
+  let melhorDia = { nome: "", media: 0, diaSemana: 0 };
+  Object.entries(porDiaSemana).forEach(([dia, dados]) => {
+    const media = dados.total / dados.count;
+    if (media > melhorDia.media) {
+      melhorDia = { nome: diasSemana[dia], media, diaSemana: parseInt(dia) };
+    }
+  });
+
+  // Calcula média geral
+  const diasTrabalhados = Object.keys(realizadoDiario).length;
+  const mediaGeral =
+    diasTrabalhados > 0 ? dados.realizadoTotal / diasTrabalhados : 0;
+
+  // Calcula sequência atual
+  const datasOrdenadas = Object.keys(realizadoDiario).sort();
+  let sequenciaAtual = 0;
+  const hoje = new Date();
+  hoje.setHours(12, 0, 0, 0);
+
+  for (let i = datasOrdenadas.length - 1; i >= 0; i--) {
+    const [ano, mes, dia] = datasOrdenadas[i].split("-");
+    const data = new Date(ano, mes - 1, dia, 12, 0, 0);
+    const diffDias = Math.floor((hoje - data) / (1000 * 60 * 60 * 24));
+
+    if (diffDias === sequenciaAtual) {
+      sequenciaAtual++;
+    } else {
+      break;
+    }
+  }
+
+  // Tendência (últimos 7 dias vs 7 dias anteriores)
+  const ultimos7 =
+    datasOrdenadas
+      .slice(-7)
+      .reduce((sum, key) => sum + realizadoDiario[key], 0) / 7;
+  const anteriores7 =
+    datasOrdenadas
+      .slice(-14, -7)
+      .reduce((sum, key) => sum + realizadoDiario[key], 0) / 7;
+  const tendencia =
+    ultimos7 > anteriores7
+      ? "crescente"
+      : ultimos7 < anteriores7
+      ? "decrescente"
+      : "estável";
+
+  // Gera cards de insights
+  const insights = [
+    {
+      icon: "📅",
+      title: "Melhor Dia da Semana",
+      description: `Você trabalha melhor às ${melhorDia.nome}s`,
+      value: `${melhorDia.media.toFixed(0)} pts/dia`,
+    },
+    {
+      icon: "📊",
+      title: "Média Diária",
+      description: "Produtividade média por dia",
+      value: `${mediaGeral.toFixed(0)} pts`,
+    },
+    {
+      icon: "🔥",
+      title: "Sequência Ativa",
+      description:
+        sequenciaAtual > 0
+          ? "Dias consecutivos trabalhando"
+          : "Nenhuma sequência ativa",
+      value: `${sequenciaAtual} dias`,
+    },
+    {
+      icon:
+        tendencia === "crescente"
+          ? "📈"
+          : tendencia === "decrescente"
+          ? "📉"
+          : "➡️",
+      title: "Tendência",
+      description: "Últimos 7 dias vs anteriores",
+      value:
+        tendencia === "crescente"
+          ? "Crescente"
+          : tendencia === "decrescente"
+          ? "Decrescente"
+          : "Estável",
+    },
+  ];
+
+  insightsContainer.innerHTML = insights
+    .map(
+      (insight) => `
+    <div class="insight-card">
+      <div class="insight-icon">${insight.icon}</div>
+      <div class="insight-title">${insight.title}</div>
+      <div class="insight-description">${insight.description}</div>
+      <div class="insight-value">${insight.value}</div>
+    </div>
+  `
+    )
+    .join("");
+}
+
+/**
+ * Gera ranking dos melhores dias
+ */
+function generateRanking(dados) {
+  const rankingContainer = document.getElementById("ranking-content");
+  if (!rankingContainer) return;
+
+  const realizadoDiario = dados.realizadoDiario || {};
+
+  if (Object.keys(realizadoDiario).length === 0) {
+    rankingContainer.innerHTML =
+      '<p style="text-align: center; color: #666;">Sem dados para ranking.</p>';
+    return;
+  }
+
+  // Converte para array e ordena
+  const diasOrdenados = Object.entries(realizadoDiario)
+    .map(([dataKey, pontos]) => {
+      const [ano, mes, dia] = dataKey.split("-");
+      const data = new Date(ano, mes - 1, dia, 12, 0, 0);
+      return {
+        dataKey,
+        dataFormatada: `${dia}/${mes}/${ano}`,
+        pontos,
+        diaSemana: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][
+          data.getDay()
+        ],
+      };
+    })
+    .sort((a, b) => b.pontos - a.pontos)
+    .slice(0, 10); // Top 10
+
+  rankingContainer.innerHTML = diasOrdenados
+    .map((dia, index) => {
+      const positionClass =
+        index === 0
+          ? "top-1"
+          : index === 1
+          ? "top-2"
+          : index === 2
+          ? "top-3"
+          : "";
+      const medal =
+        index === 0
+          ? "🥇"
+          : index === 1
+          ? "🥈"
+          : index === 2
+          ? "🥉"
+          : `${index + 1}º`;
+
+      return `
+      <div class="ranking-item">
+        <div class="ranking-position ${positionClass}">${medal}</div>
+        <div class="ranking-day">
+          ${dia.dataFormatada} (${dia.diaSemana})
+        </div>
+        <div class="ranking-value">${dia.pontos.toLocaleString(
+          "pt-BR"
+        )} pts</div>
+      </div>
+    `;
+    })
+    .join("");
+}
+
+/**
+ * Gera comparativo mensal (mês atual vs mês anterior)
+ */
+function generateComparison(dados) {
+  const comparisonContainer = document.getElementById("comparison-content");
+  if (!comparisonContainer) return;
+
+  const realizadoDiario = dados.realizadoDiario || {};
+  const historico = dados.historico || [];
+
+  if (Object.keys(realizadoDiario).length === 0) {
+    comparisonContainer.innerHTML =
+      '<p style="text-align: center; color: #666;">Sem dados para comparação.</p>';
+    return;
+  }
+
+  const hoje = new Date();
+  const mesAtual = hoje.getMonth();
+  const anoAtual = hoje.getFullYear();
+  const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
+  const anoAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
+
+  let pontosAtual = 0,
+    diasAtual = 0,
+    errosAtual = 0;
+  let pontosAnterior = 0,
+    diasAnterior = 0,
+    errosAnterior = 0;
+
+  // Conta dados do mês atual
+  Object.entries(realizadoDiario).forEach(([dataKey, pontos]) => {
+    const [ano, mes] = dataKey.split("-");
+    if (parseInt(ano) === anoAtual && parseInt(mes) - 1 === mesAtual) {
+      pontosAtual += pontos;
+      diasAtual++;
+    } else if (
+      parseInt(ano) === anoAnterior &&
+      parseInt(mes) - 1 === mesAnterior
+    ) {
+      pontosAnterior += pontos;
+      diasAnterior++;
+    }
+  });
+
+  // Conta erros
+  historico.forEach((item) => {
+    if (!item.date) return;
+    const [dia, mes, ano] = item.date.split("/");
+    if (parseInt(ano) === anoAtual && parseInt(mes) - 1 === mesAtual) {
+      if (item.obs && item.obs.match(/erros?\s*\((\d+)\)/i)) {
+        const match = item.obs.match(/erros?\s*\((\d+)\)/i);
+        errosAtual += parseInt(match[1]);
+      }
+    } else if (
+      parseInt(ano) === anoAnterior &&
+      parseInt(mes) - 1 === mesAnterior
+    ) {
+      if (item.obs && item.obs.match(/erros?\s*\((\d+)\)/i)) {
+        const match = item.obs.match(/erros?\s*\((\d+)\)/i);
+        errosAnterior += parseInt(match[1]);
+      }
+    }
+  });
+
+  const mediaAtual = diasAtual > 0 ? pontosAtual / diasAtual : 0;
+  const mediaAnterior = diasAnterior > 0 ? pontosAnterior / diasAnterior : 0;
+
+  // Calcula variações
+  const variacaoPontos =
+    pontosAnterior > 0
+      ? ((pontosAtual - pontosAnterior) / pontosAnterior) * 100
+      : 0;
+  const variacaoMedia =
+    mediaAnterior > 0
+      ? ((mediaAtual - mediaAnterior) / mediaAnterior) * 100
+      : 0;
+  const variacaoErros =
+    errosAnterior > 0
+      ? ((errosAtual - errosAnterior) / errosAnterior) * 100
+      : 0;
+
+  const nomesMeses = [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
+  ];
+
+  const comparacoes = [
+    {
+      label: `Total ${nomesMeses[mesAtual]}`,
+      value: pontosAtual.toLocaleString("pt-BR"),
+      change: variacaoPontos,
+      icon:
+        variacaoPontos > 0
+          ? "bi-arrow-up"
+          : variacaoPontos < 0
+          ? "bi-arrow-down"
+          : "bi-dash",
+    },
+    {
+      label: "Média Diária",
+      value: mediaAtual.toFixed(0),
+      change: variacaoMedia,
+      icon:
+        variacaoMedia > 0
+          ? "bi-arrow-up"
+          : variacaoMedia < 0
+          ? "bi-arrow-down"
+          : "bi-dash",
+    },
+    {
+      label: "Dias Trabalhados",
+      value: diasAtual,
+      change:
+        diasAnterior > 0
+          ? ((diasAtual - diasAnterior) / diasAnterior) * 100
+          : 0,
+      icon:
+        diasAtual > diasAnterior
+          ? "bi-arrow-up"
+          : diasAtual < diasAnterior
+          ? "bi-arrow-down"
+          : "bi-dash",
+    },
+    {
+      label: "Erros",
+      value: errosAtual,
+      change: variacaoErros,
+      icon:
+        variacaoErros > 0
+          ? "bi-arrow-up"
+          : variacaoErros < 0
+          ? "bi-arrow-down"
+          : "bi-dash",
+      invertColor: true, // Para erros, vermelho = ruim
+    },
+  ];
+
+  comparisonContainer.innerHTML = comparacoes
+    .map((comp) => {
+      const changeClass =
+        comp.change > 0
+          ? comp.invertColor
+            ? "negative"
+            : "positive"
+          : comp.change < 0
+          ? comp.invertColor
+            ? "positive"
+            : "negative"
+          : "neutral";
+
+      const changeText =
+        comp.change === 0
+          ? "Sem alteração"
+          : `${comp.change > 0 ? "+" : ""}${comp.change.toFixed(1)}% vs ${
+              nomesMeses[mesAnterior]
+            }`;
+
+      return `
+      <div class="comparison-card">
+        <div class="comparison-label">${comp.label}</div>
+        <div class="comparison-value">${comp.value}</div>
+        <div class="comparison-change ${changeClass}">
+          <i class="bi ${comp.icon}"></i>
+          ${changeText}
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+}
+
+// ========================================
+// DADOS FICTÍCIOS PARA DEMONSTRAÇÃO
+// ========================================
+function gerarDadosFicticios() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = hoje.getMonth();
+
+  const historico = [];
+  const realizadoDiario = {};
+  const observacoesDiarias = {};
+
+  // Gera 20 dias de dados do mês atual
+  for (let i = 1; i <= 20; i++) {
+    const data = new Date(ano, mes, i);
+    const diaSemana = data.getDay();
+
+    // Pula finais de semana
+    if (diaSemana === 0 || diaSemana === 6) continue;
+
+    const dataKey = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(
+      i
+    ).padStart(2, "0")}`;
+    const dataBR = `${String(i).padStart(2, "0")}/${String(mes + 1).padStart(
+      2,
+      "0"
+    )}/${ano}`;
+
+    // Varia pontos entre 15 e 25
+    const pontos = Math.floor(Math.random() * 11) + 15;
+    realizadoDiario[dataKey] = pontos;
+
+    // Adiciona alguns erros aleatoriamente
+    let obs = "";
+    if (Math.random() > 0.7) {
+      const erros = Math.floor(Math.random() * 2) + 1;
+      obs = `Erros (${erros})`;
+      observacoesDiarias[dataKey] = obs;
+    }
+
+    historico.push({
+      data: dataBR,
+      valor: pontos,
+      obs: obs,
+    });
+  }
+
+  // Adiciona dados do mês anterior para comparação
+  for (let i = 1; i <= 22; i++) {
+    const data = new Date(ano, mes - 1, i);
+    const diaSemana = data.getDay();
+
+    if (diaSemana === 0 || diaSemana === 6) continue;
+
+    const dataBR = `${String(i).padStart(2, "0")}/${String(mes).padStart(
+      2,
+      "0"
+    )}/${ano}`;
+    const pontos = Math.floor(Math.random() * 10) + 13;
+
+    let obs = "";
+    if (Math.random() > 0.65) {
+      const erros = Math.floor(Math.random() * 3) + 1;
+      obs = `Erros (${erros})`;
+    }
+
+    historico.push({
+      data: dataBR,
+      valor: pontos,
+      obs: obs,
+    });
+  }
+
+  const totalPontos = Object.values(realizadoDiario).reduce((a, b) => a + b, 0);
+
+  return {
+    nome: "Usuário Demo",
+    metaMensal: 300,
+    realizadoTotal: totalPontos,
+    totalCaixas: Math.floor(totalPontos * 8.5),
+    totalErros: Math.floor(Math.random() * 15) + 8,
+    historico: historico,
+    realizadoDiario: realizadoDiario,
+    observacoesDiarias: observacoesDiarias,
+    diasOffAgendados: [],
+  };
+}
+
+// ========================================
 // INICIALIZAÇÃO
 // ========================================
 document.addEventListener("DOMContentLoaded", () => {
+  // Verifica se há parâmetro ?demo na URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const modoDemo = urlParams.get("demo") === "true";
+
+  let dados;
+  if (modoDemo) {
+    dados = gerarDadosFicticios();
+    console.log("📊 Modo demonstração ativado com dados fictícios");
+  } else {
+    dados = safeGetDadosUsuario();
+  }
+
   renderReport();
+  if (dados) {
+    generateInsights(dados);
+    generateRanking(dados);
+    generateComparison(dados);
+  }
   setupActions();
   setupSignatures();
   setupEmailFallback();

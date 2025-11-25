@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Relatório de Movimentos — MD-Focus</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/report.css">
 
   </head>
@@ -53,6 +54,38 @@
           <tfoot></tfoot>
         </table>
         <div class="report-observations" id="report-observations" aria-live="polite"></div>
+      </section>
+
+      <!-- Seção de Análise - NÃO aparece no print -->
+      <section class="report-analysis no-print" id="report-analysis">
+        <h2>📊 Análise e Recomendações</h2>
+        <div class="analysis-content" id="analysis-content">
+          <!-- Será preenchido dinamicamente pelo JavaScript -->
+        </div>
+      </section>
+
+      <!-- Seção de Insights Automáticos - NÃO aparece no print -->
+      <section class="report-insights no-print" id="report-insights">
+        <h2>💡 Insights Inteligentes</h2>
+        <div class="insights-grid" id="insights-grid">
+          <!-- Será preenchido dinamicamente -->
+        </div>
+      </section>
+
+      <!-- Ranking de Melhores Dias - NÃO aparece no print -->
+      <section class="report-ranking no-print" id="report-ranking">
+        <h2>🏆 Ranking de Dias</h2>
+        <div class="ranking-content" id="ranking-content">
+          <!-- Será preenchido dinamicamente -->
+        </div>
+      </section>
+
+      <!-- Comparativo Mensal - NÃO aparece no print -->
+      <section class="report-comparison no-print" id="report-comparison">
+        <h2>📈 Comparativo Mensal</h2>
+        <div class="comparison-content" id="comparison-content">
+          <!-- Será preenchido dinamicamente -->
+        </div>
       </section>
 
       <section class="report-footer">
@@ -119,9 +152,9 @@
           <button id="btn-email" class="btn btn-outline-primary btn-report">
             <i class="bi bi-envelope"></i> Enviar por e-mail
           </button>
-          <a href="index.html" class="btn btn-link btn-report"
-            >Voltar ao Dashboard</a
-          >
+          <a href="index.html" class="btn btn-link btn-report">
+            <i class="bi bi-arrow-left-circle"></i> Voltar ao Dashboard
+          </a>
         </div>
       </section>
       

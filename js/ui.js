@@ -188,7 +188,7 @@ export function enableGlobalNotieIcon(options = {}) {
   } catch (e) {}
 }
 
-// Enable default global icon using favicon.png automatically
+// Enable default global icon using touch-icon.png automatically
 try {
   if (typeof window !== "undefined") {
     // small delay to avoid race with module loading
@@ -196,7 +196,7 @@ try {
       ? "https://bonzileyvenson-ux.github.io/MD-Focus"
       : window.location.origin;
     setTimeout(
-      () => enableGlobalNotieIcon({ iconUrl: `${baseUrl}/favicon.png` }),
+      () => enableGlobalNotieIcon({ iconUrl: `${baseUrl}/touch-icon.png` }),
       120
     );
   }

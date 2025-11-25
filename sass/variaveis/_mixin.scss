@@ -1,25 +1,424 @@
-@mixin box-shadow-primary {
-  box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5),
-    inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
+// ============================================
+// BREAKPOINTS E MEDIA QUERIES
+// ============================================
+$breakpoint-mobile: 480px;
+$breakpoint-tablet: 768px;
+$breakpoint-desktop: 1024px;
+
+// Responsive mixins
+@mixin mobile {
+  @media (max-width: $breakpoint-mobile) {
+    @content;
+  }
 }
 
-$reakpoint-landscape: 768px;
+@mixin tablet {
+  @media (min-width: #{$breakpoint-mobile + 1}) and (max-width: $breakpoint-tablet) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$breakpoint-tablet + 1}) {
+    @content;
+  }
+}
 
 @mixin landscape-desktop {
-  @media screen and (orientation: landscape) and (min-width: $reakpoint-landscape) {
+  @media screen and (orientation: landscape) and (min-width: $breakpoint-tablet) {
     @content;
   }
 }
 
 @mixin mobile-landscape {
-  @media (max-width: $reakpoint-landscape) and (orientation: landscape) {
+  @media (max-width: $breakpoint-tablet) and (orientation: landscape) {
     @content;
   }
 }
 
-// Mixin para qualquer orientação landscape (global)
 @mixin any-landscape {
   @media screen and (orientation: landscape) {
     @content;
+  }
+}
+
+@mixin portrait {
+  @media screen and (orientation: portrait) {
+    @content;
+  }
+}
+
+// ============================================
+// FLEXBOX UTILITIES
+// ============================================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// ============================================
+// BOTÕES E INTERAÇÕES
+// ============================================
+@mixin button-base {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+@mixin button-round {
+  @include flex-center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  padding: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+  }
+}
+
+@mixin floating-button {
+  position: fixed;
+  @include flex-center;
+  border-radius: 50%;
+  box-shadow: 0 1.2rem 3rem rgba(8, 14, 17, 0.5);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  z-index: 90;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 1.5rem 4rem rgba(8, 14, 17, 0.6);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// INPUTS E FORMULÁRIOS
+// ============================================
+@mixin input-base {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: 2px solid clr(secondary);
+  border-radius: 0.5rem;
+  font-size: 1.5rem;
+  outline: none;
+  transition: all 0.3s ease;
+  background: white;
+
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  &:focus {
+    border-color: clr(tercery);
+    box-shadow: 0 0 0 3px rgba(218, 131, 18, 0.1);
+  }
+}
+
+@mixin input-minimal {
+  border: none;
+  border-left: 3px solid clr(primary);
+  border-bottom: 3px solid clr(primary);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 1rem 1.4rem;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-left-color: clr(tercery);
+    border-bottom-color: clr(tercery);
+    background: white;
+    box-shadow: -3px 3px 8px rgba(39, 63, 91, 0.15);
+  }
+}
+
+// ============================================
+// CARDS E CONTAINERS
+// ============================================
+@mixin card-base {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+@mixin card-hover {
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+@mixin glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@mixin gradient-primary {
+  background: linear-gradient(135deg, clr(primary), clr(secondary));
+}
+
+@mixin gradient-accent {
+  background: linear-gradient(90deg, clr(tercery), lighten(clr(tercery), 10%));
+}
+
+// ============================================
+// SOMBRAS
+// ============================================
+@mixin box-shadow-primary {
+  box-shadow: inset 1rem 0 1rem 0 rgba(8, 14, 17, 0.5),
+    inset -1rem 0 1rem 0 rgba(8, 14, 17, 0.5);
+}
+
+@mixin shadow-sm {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@mixin shadow-md {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@mixin shadow-lg {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+@mixin shadow-inset {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+// ============================================
+// TEXTOS E TIPOGRAFIA
+// ============================================
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-gradient($color1, $color2) {
+  background: linear-gradient(135deg, $color1, $color2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@mixin heading-primary {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: clr(primary);
+  margin-bottom: 1rem;
+}
+
+@mixin heading-secondary {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 600;
+  color: clr(secondary);
+  margin-bottom: 0.8rem;
+}
+
+// ============================================
+// ANIMAÇÕES
+// ============================================
+@mixin fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@mixin pulse {
+  animation: pulse 2s ease-in-out infinite;
+
+  @keyframes pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+}
+
+@mixin shake {
+  animation: shake 0.5s ease-in-out;
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-10px);
+    }
+    75% {
+      transform: translateX(10px);
+    }
+  }
+}
+
+// ============================================
+// UTILITÁRIOS GERAIS
+// ============================================
+@mixin scrollbar-custom {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: clr(secondary);
+    border-radius: 10px;
+
+    &:hover {
+      background: clr(primary);
+    }
+  }
+}
+
+@mixin hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@mixin reset-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@mixin aspect-ratio($width, $height) {
+  aspect-ratio: $width / $height;
+
+  @supports not (aspect-ratio: 1) {
+    &::before {
+      content: "";
+      float: left;
+      padding-top: calc(($height / $width) * 100%);
+    }
+
+    &::after {
+      content: "";
+      display: block;
+      clear: both;
+    }
+  }
+}
+
+// ============================================
+// TRANSIÇÕES REUTILIZÁVEIS
+// ============================================
+@mixin transition($property: all, $duration: 0.3s, $timing: ease) {
+  transition: $property $duration $timing;
+}
+
+@mixin transitions($properties...) {
+  transition: $properties;
+}
+
+// ============================================
+// POSICIONAMENTO
+// ============================================
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin absolute-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@mixin sticky-top($offset: 0) {
+  position: sticky;
+  top: $offset;
+  z-index: 100;
+}
+
+// ============================================
+// PRINT STYLES
+// ============================================
+@mixin print-hidden {
+  @media print {
+    display: none !important;
+  }
+}
+
+@mixin print-only {
+  display: none;
+
+  @media print {
+    display: block;
   }
 }

@@ -32,9 +32,7 @@
 
 .modal-header {
   background-color: rgb(39 63 91);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   gap: 2rem;
   // @include box-shadow-primary;
   color: rgb(255, 255, 255);
@@ -123,9 +121,7 @@
   width: 1.5rem;
   height: 1.5rem;
   padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   background-color: #8a8383;
   color: #ffffff;
   border: none;
@@ -141,9 +137,7 @@
 
 .historico-item-data {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  @include flex-between;
   gap: 2rem;
   font-size: 1.6rem;
 }
@@ -157,10 +151,8 @@
   background-color: hsl(202.86deg 29.58% 86.08%);
   box-shadow: 0.4rem 0.3rem 0.3rem 0 rgba(8, 14, 17, 0.35);
   border-radius: 0.5rem;
-  display: flex;
+  @include flex-between;
   gap: 1rem;
-  align-items: center;
-  justify-content: space-between;
   padding: 1.5rem;
 
   z-index: 1;
@@ -184,10 +176,8 @@
 .edit-botoes {
   height: 100%;
   width: 30%;
-  display: flex;
+  @include flex-between;
   margin: 0 auto;
-  justify-content: space-between;
-  align-items: center;
 
   .btn-success {
     border-top-left-radius: 1rem;
@@ -228,8 +218,7 @@
 }
 
 .form-group {
-  display: flex;
-  flex-flow: column;
+  @include flex-column;
   align-items: center;
   gap: 1rem;
   margin-top: 2rem;
@@ -274,7 +263,7 @@
   margin-bottom: 2rem;
   cursor: pointer;
   box-shadow: 0 0.4rem 1.2rem rgba(218, 131, 18, 0.4);
-  transition: all 0.3s ease;
+  @include transition;
   width: auto;
   display: inline-block;
 
@@ -313,4 +302,58 @@
   border-radius: 0 1rem 0 1rem;
 
   background-color: rgb(39 63 91);
+}
+
+// Melhorias de legibilidade mobile
+@media (max-width: 480px) {
+  .modal-header {
+    .titulo-modal {
+      font-size: 2.8rem;
+    }
+
+    .close-btn i {
+      font-size: 3.5rem;
+    }
+  }
+
+  .mt-4 {
+    font-size: 2.4rem;
+  }
+
+  .mt-5 {
+    font-size: 1.8rem;
+  }
+
+  .btn {
+    width: 2rem;
+    height: 2rem;
+    padding: 1.4rem;
+    font-size: 2rem;
+  }
+
+  .historico-item-data {
+    font-size: 1.8rem;
+  }
+
+  .card-data-valor {
+    font-size: 1.8rem;
+  }
+
+  .btn-modal-solicitar {
+    font-size: 2rem;
+    padding: 1.4rem 2.5rem;
+  }
+
+  .edit-botoes {
+    .btn-success,
+    .btn-cancelar-correcao {
+      font-size: 1.8rem;
+      padding: 1rem 1.5rem;
+    }
+  }
+
+  .historico-item-legend {
+    font-size: 1.6rem;
+    padding: 0.3rem 0.8rem;
+  }
 }

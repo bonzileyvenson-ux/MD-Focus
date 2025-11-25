@@ -10,3 +10,7 @@ package-lock.json
 
 # Se você estiver usando o editor VS Code (opcional)
 .vscode/
+
+# Documentação privada do desenvolvedor (não subir para GitHub)
+DOCS_DEV.md
+docs.html
