@@ -104,10 +104,10 @@ try {
  * Enable automatic app-icon decoration for all notie notifications.
  * It wraps `notie.alert` and `notie.confirm` so the icon appears by default.
  * @param {object} options
- * @param {string} options.iconUrl - URL to the icon to use (defaults to './touch-icon.png')
+ * @param {string} options.iconUrl - URL to the icon to use (defaults to './favicon.png')
  */
 export function enableGlobalNotieIcon(options = {}) {
-  const { iconUrl = "./touch-icon.png" } = options;
+  const { iconUrl = "./favicon.png" } = options;
 
   const waitAndPatch = () => {
     if (typeof window === "undefined" || typeof window.notie === "undefined") {
@@ -192,8 +192,11 @@ export function enableGlobalNotieIcon(options = {}) {
 try {
   if (typeof window !== "undefined") {
     // small delay to avoid race with module loading
+    const baseUrl = window.location.hostname.includes("github.io")
+      ? "https://bonzileyvenson-ux.github.io/MD-Focus"
+      : window.location.origin;
     setTimeout(
-      () => enableGlobalNotieIcon({ iconUrl: "./touch-icon.png" }),
+      () => enableGlobalNotieIcon({ iconUrl: `${baseUrl}/favicon.png` }),
       120
     );
   }
