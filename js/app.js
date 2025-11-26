@@ -1,9 +1,18 @@
-// js/app.js
+// ============================================================================
+// APP.JS - Controlador principal da aplicação (Refatorado)
+// ============================================================================
+// 🎯 Propósito: Orquestrar toda a aplicação, gerenciar eventos e UI
+// 🧹 Refatoração: Código limpo, modular, bem documentado e fácil de manter
+// ============================================================================
 
+// ============================================================================
+// IMPORTS - Módulos da aplicação
+// ============================================================================
+
+// UI e utilitários
 import { destacarElemento, alternarDisplay } from "./ui.js";
 
-const notie = window.notie;
-
+// Gerenciamento de dados
 import {
   salvarDados,
   criarDadosIniciais,
@@ -16,94 +25,150 @@ import {
   getDiasAgendados,
 } from "./data.js";
 
-// CORREÇÃO 1: Renomear a função no import para o nome correto
+// Cálculos e gráficos
 import {
   calcularEAtualizarDashboard,
   atualizarGraficoCircular,
 } from "./calc.js";
+
+// Validações
 import {
   validarNome,
   validarMeta,
   validarPontosRegistro,
 } from "./validation.js";
+
+// Histórico e comandos
 import {
   configurarModalHistorico,
   abrirModalHistorico,
   solicitarBonus,
 } from "./history.js";
 
-// Importar a função de atualização do gráfico
+// Notificações centralizadas
+import {
+  notificarNomeInvalido,
+  notificarPontosRegistrados,
+  confirmarLeituraPolitica,
+  notificarPoliticaRecomendada,
+  notificarSincronizado,
+  notificarInfo,
+} from "./notifications.js";
+
+// Constantes
+import {
+  STORAGE_PREFIX,
+  STORAGE_THEME,
+  TEMAS,
+  ICONES,
+  MOBILE_MEDIA_QUERY,
+} from "./constants.js";
+
+// Dados de demonstração
+import { carregarDadosDemo, limparDadosDemo, infoDadosDemo } from "./demo.js";
+
+// Debug
+import { debugLog } from "./debug.js";
+
+// ============================================================================
+// ESTADO DA APLICAÇÃO
+// ============================================================================
+
+/**
+ * Modo atual do input (registro ou simulação)
+ * @type {string}
+ */
 let modoAtual = "registro";
 
+// ============================================================================
+// INICIALIZAÇÃO DA APLICAÇÃO
+// ============================================================================
+
+/**
+ * Ponto de entrada principal - executa quando DOM estiver pronto
+ */
 document.addEventListener("DOMContentLoaded", () => {
-  carregarTema(); // NOVO: Carrega o tema salvo ao iniciar
+  carregarTema();
+
   const dadosUsuario = carregarDados();
+
   if (dadosUsuario) {
-    // CORREÇÃO 2: Apenas iniciar o dashboard (os cálculos e gráfico serão feitos dentro de iniciarDashboard)
+    // Usuário já logado - iniciar dashboard
     iniciarDashboard(dadosUsuario.nome);
   } else {
+    // Novo usuário - mostrar tela de cadastro
     configurarCadastro();
   }
+
+  // 🛡️ PROTEÇÃO: Sincronizar dados entre múltiplas abas
+  configurarSincronizacaoAbas();
 });
 
+// ============================================================================
+// CONFIGURAÇÃO DE CADASTRO/LOGIN
+// ============================================================================
+
+/**
+ * Configura tela de cadastro para novos usuários
+ */
 function configurarCadastro() {
-  // Apenas configuramos o botão de login rápido (nome único)
   const loginBtn = document.getElementById("login-button");
   const loginInput = document.getElementById("login-username");
 
-  if (loginBtn && loginInput) {
-    loginBtn.addEventListener("click", () => {
-      const nome = loginInput.value ? loginInput.value.trim() : "";
-      if (!validarNome(nome)) {
-        notie.alert({
-          type: "error",
-          text: "Por favor, digite um nome válido (3 a 10 letras).",
-          time: 3,
-        });
-        return;
-      }
+  if (!loginBtn || !loginInput) return;
 
-      // Verifica se é o primeiro acesso (novo usuário)
-      const primeiroAcesso = !localStorage.getItem(`dados_${nome}`);
+  loginBtn.addEventListener("click", () => processarLogin(loginInput));
+}
 
-      // Define o usuário atual
-      setCurrentUser(nome);
+/**
+ * Processa login/cadastro do usuário
+ * @param {HTMLInputElement} loginInput - Input com nome do usuário
+ */
+function processarLogin(loginInput) {
+  const nome = loginInput.value ? loginInput.value.trim() : "";
 
-      // Se for primeiro acesso, cria dados iniciais. Se não, carrega os existentes
-      let dadosUsuario;
-      if (primeiroAcesso) {
-        dadosUsuario = criarDadosIniciais(nome, "300");
-        salvarDados(dadosUsuario);
-      } else {
-        dadosUsuario = carregarDados();
-      }
+  // Validar nome
+  if (!validarNome(nome)) {
+    notificarNomeInvalido();
+    return;
+  }
 
-      // Se for primeiro acesso, mostra aviso sobre política de uso
-      if (primeiroAcesso) {
-        notie.confirm({
-          text: "📋 Bem-vindo(a)! Recomendamos fortemente a leitura da <strong>Política de Uso</strong> para entender todas as funcionalidades do aplicativo. Deseja ler agora?",
-          submitText: "Sim, ler agora",
-          cancelText: "Depois",
-          submitCallback: () => {
-            window.open("uso_privacidade.html", "_blank");
-            iniciarDashboard(nome);
-          },
-          cancelCallback: () => {
-            notie.alert({
-              type: "info",
-              text: "💡 Acesse a Política de Uso a qualquer momento através do menu Relatório.",
-              time: 5,
-            });
-            iniciarDashboard(nome);
-          },
-        });
-      } else {
-        iniciarDashboard(nome);
-      }
-    });
+  // Verificar se é primeiro acesso
+  const primeiroAcesso = !localStorage.getItem(`${STORAGE_PREFIX}${nome}`);
+
+  // Definir usuário atual
+  setCurrentUser(nome);
+
+  // Criar ou carregar dados
+  let dadosUsuario;
+  if (primeiroAcesso) {
+    dadosUsuario = criarDadosIniciais(nome, "300");
+    salvarDados(dadosUsuario);
+    mostrarBemVindoPrimeiroAcesso(nome);
+  } else {
+    dadosUsuario = carregarDados();
+    iniciarDashboard(nome);
   }
 }
-// End of configurarCadastro
+
+/**
+ * Mostra mensagem de boas-vindas para primeiro acesso
+ * @param {string} nome - Nome do usuário
+ */
+function mostrarBemVindoPrimeiroAcesso(nome) {
+  confirmarLeituraPolitica(
+    () => {
+      // Aceita ler política
+      window.open("uso_privacidade.html", "_blank");
+      iniciarDashboard(nome);
+    },
+    () => {
+      // Recusa ler agora
+      notificarPoliticaRecomendada();
+      iniciarDashboard(nome);
+    }
+  );
+}
 
 export function iniciarDashboard(nome) {
   // Se estivermos em um login automático ou se a variável global não estiver pronta,
@@ -231,6 +296,15 @@ export function refreshMetaDropdownLabels() {
 // Ela deve usar os resultados do calc.js e o objeto dadosUsuario
 function atualizarUIDashboard(resultados) {
   const dadosUsuario = getDadosUsuario();
+
+  // 🛡️ PROTEÇÃO: Verificar se dados existem
+  if (!dadosUsuario) {
+    console.error("❌ Erro: getDadosUsuario() retornou null");
+    return;
+  }
+
+  debugLog("✅ Dados carregados:", dadosUsuario);
+
   const PontotalElement = document.getElementById("ponto-total");
   if (PontotalElement) {
     const pontoTotal = dadosUsuario.realizadoTotal;
@@ -261,7 +335,11 @@ function atualizarUIDashboard(resultados) {
 
   // meta mensal
   const metaMensalElement = document.getElementById("meta-mensal");
-  if (metaMensalElement) {
+  if (
+    metaMensalElement &&
+    dadosUsuario &&
+    dadosUsuario.metaMensal !== undefined
+  ) {
     const metaTotal = dadosUsuario.metaMensal;
     const metaTotalFormatado = metaTotal.toLocaleString("pt-BR", {
       style: "decimal",
@@ -638,7 +716,7 @@ function ligarModoSimulacao() {
   notie.alert({
     type: "info",
     text: "Modo Simulação Ativo. Insira um valor para recalcular as metas.",
-    time: 5,
+    time: 8,
   });
 }
 
@@ -749,11 +827,23 @@ function editoresBtnsListerner() {
 
 function solicitarBtnListerner() {
   const btnSolicitar = document.getElementById("btn-solicitar");
+  const textareaObservacoes = document.getElementById("texterarea-obervacoes");
+
   if (btnSolicitar) {
     const newBtn = btnSolicitar.cloneNode(true);
     btnSolicitar.parentNode.replaceChild(newBtn, btnSolicitar);
     newBtn.addEventListener("click", () => {
       solicitarBonus();
+    });
+  }
+
+  // Adiciona evento Enter no textarea
+  if (textareaObservacoes) {
+    textareaObservacoes.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        solicitarBonus();
+      }
     });
   }
 }
@@ -883,6 +973,173 @@ function atualizarIconeTema(tema) {
         ? "bi bi-sun-fill" // Ícone para passar para o modo claro
         : "bi bi-moon-stars-fill"; // Ícone para passar para o modo escuro
   }
+}
+
+// ============================================================================
+// SINCRONIZAÇÃO ENTRE ABAS
+// ============================================================================
+
+/**
+ * 🛡️ PROTEÇÃO: Sincroniza dados entre múltiplas abas
+ * Detecta mudanças no localStorage feitas por outras abas e atualiza a UI
+ */
+function configurarSincronizacaoAbas() {
+  window.addEventListener("storage", (evento) => {
+    const chaveAtual = `${STORAGE_PREFIX}${localStorage.getItem(
+      "currentUser"
+    )}`;
+
+    // Ignora eventos de outras chaves
+    if (evento.key !== chaveAtual) return;
+
+    // Detecta mudança no localStorage de outra aba
+    if (evento.newValue) {
+      sincronizarDadosDeOutraAba(evento.newValue);
+    } else {
+      // Dados foram removidos (logout em outra aba)
+      tratarLogoutEmOutraAba();
+    }
+  });
+
+  debugLog("✅ Sincronização entre abas ativada");
+}
+
+/**
+ * Sincroniza dados quando outra aba faz alterações
+ * @param {string} novosValorJSON - JSON com novos dados
+ */
+function sincronizarDadosDeOutraAba(novosValorJSON) {
+  try {
+    const novosDados = JSON.parse(novosValorJSON);
+    console.log("🔄 Dados atualizados de outra aba");
+
+    // Atualizar cache local
+    atualizarDadosUsuario(novosDados);
+
+    // Recalcular e atualizar UI
+    calcularEAtualizarDashboard();
+
+    // Notificar usuário
+    notificarSincronizado();
+  } catch (error) {
+    console.error("❌ Erro ao sincronizar dados:", error);
+  }
+}
+
+/**
+ * Trata logout realizado em outra aba
+ */
+function tratarLogoutEmOutraAba() {
+  console.log("🚪 Sessão encerrada em outra aba");
+
+  notificarInfo("⚠️ Sessão encerrada. Recarregando...", 2);
+
+  setTimeout(() => location.reload(), 2000);
+}
+
+// ============================================================================
+// FUNÇÕES GLOBAIS PARA DEMONSTRAÇÃO
+// ============================================================================
+// Expõe funções no console para facilitar apresentações
+// Uso rápido: window.carregarDemo()
+
+/**
+ * Carrega dados fictícios completos para apresentação
+ * Usuário: yvenson | Histórico: 3 meses | Observações: 5
+ *
+ * ATENÇÃO: Sobrescreve dados existentes!
+ *
+ * @returns {boolean} true se carregado com sucesso
+ */
+window.carregarDemo = function () {
+  console.clear();
+  console.log(
+    "%c🎬 CARREGANDO DADOS DE DEMONSTRAÇÃO",
+    "color: #007bff; font-size: 20px; font-weight: bold"
+  );
+  console.log(
+    "%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+    "color: #007bff"
+  );
+
+  const sucesso = carregarDadosDemo();
+
+  if (sucesso) {
+    console.log(
+      "%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+      "color: #28a745"
+    );
+    console.log(
+      "%c✅ PRONTO PARA APRESENTAÇÃO!",
+      "color: #28a745; font-size: 18px; font-weight: bold"
+    );
+    console.log(
+      "%cRecarregue a página para ver os dados (F5)",
+      "color: #ffc107; font-size: 14px"
+    );
+  }
+
+  return sucesso;
+};
+
+/**
+ * Remove dados de demonstração e volta ao estado inicial
+ *
+ * @returns {boolean} true se removido com sucesso
+ */
+window.limparDemo = function () {
+  console.clear();
+  console.log(
+    "%c🧹 LIMPANDO DADOS DE DEMONSTRAÇÃO",
+    "color: #dc3545; font-size: 18px; font-weight: bold"
+  );
+
+  const sucesso = limparDadosDemo();
+
+  if (sucesso) {
+    console.log(
+      "%c✅ Dados removidos! Recarregue para começar do zero.",
+      "color: #28a745; font-size: 14px"
+    );
+  }
+
+  return sucesso;
+};
+
+/**
+ * Exibe informações detalhadas sobre os dados demo
+ */
+window.infoDemo = function () {
+  console.clear();
+  infoDadosDemo();
+};
+
+// Mensagem de boas-vindas no console (apenas em desenvolvimento)
+if (
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+) {
+  debugLog(
+    "%c💡 COMANDOS DE DEMONSTRAÇÃO DISPONÍVEIS",
+    "color: #ffc107; font-size: 16px; font-weight: bold"
+  );
+  debugLog("%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "color: #6c757d");
+  debugLog(
+    "%cwindow.carregarDemo()%c → Carregar dados completos (yvenson)",
+    "color: #007bff; font-weight: bold",
+    "color: #6c757d"
+  );
+  debugLog(
+    "%cwindow.limparDemo()%c   → Remover dados demo",
+    "color: #dc3545; font-weight: bold",
+    "color: #6c757d"
+  );
+  debugLog(
+    "%cwindow.infoDemo()%c     → Ver estatísticas dos dados",
+    "color: #28a745; font-weight: bold",
+    "color: #6c757d"
+  );
+  debugLog("%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "color: #6c757d");
 }
 
 // Service worker / PWA offline support removed per user request.

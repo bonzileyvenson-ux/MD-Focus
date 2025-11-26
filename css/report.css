@@ -12,7 +12,11 @@ html {
 body {
   font-size: 1.6rem;
   font-family: "Montserrat", sans-serif;
-  background-image: linear-gradient(41deg, rgb(84, 100, 116), hsl(202, 14%, 36%));
+  background-image: linear-gradient(
+    41deg,
+    rgb(84, 100, 116),
+    hsl(202, 14%, 36%)
+  );
 }
 
 .relatorio-container {
@@ -127,6 +131,21 @@ body {
 .report-table table tbody tr.row-trabalho {
   border-left: 4px solid #28a745;
   background-color: rgba(40, 167, 69, 0.1);
+}
+/* Marcação visual para fim de semana (sexta-feira) */
+.report-table table tbody tr.row-fim-semana {
+  border-bottom: 2px solid #123b6b !important;
+  box-shadow: 0 2px 4px rgba(18, 59, 107, 0.2);
+}
+.report-table table tbody tr.row-fim-semana td.data-fim-semana {
+  font-weight: 700;
+  color: #123b6b;
+  position: relative;
+}
+.report-table table tbody tr.row-fim-semana td.data-fim-semana::after {
+  content: "📅";
+  margin-left: 0.5rem;
+  font-size: 1.2rem;
 }
 .report-table table tfoot tr {
   background-color: hsl(203, 68%, 82%);

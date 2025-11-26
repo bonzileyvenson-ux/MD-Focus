@@ -1,3 +1,5 @@
+import { debugWarn } from "./debug.js";
+
 export function destacarElemento(elementId) {
   const elemento = document.getElementById(elementId);
   if (elemento) {
@@ -49,7 +51,7 @@ export function chamarCorrecao(btn) {
 export function notieWithIcon(opts = {}) {
   const { type = "info", text = "", time = 3, iconUrl = null } = opts;
   if (typeof notie === "undefined") {
-    console.warn("notie is not available");
+    debugWarn("notie is not available");
     return;
   }
   notie.alert({ type, text, time });

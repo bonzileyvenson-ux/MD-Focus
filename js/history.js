@@ -1,5 +1,6 @@
 // js/history.js
 
+import { debugWarn } from "./debug.js";
 import {
   destacarElemento,
   ocultarEdicaoInPlace,
@@ -246,6 +247,7 @@ function processarObservacao(obsText) {
     limparDados: false,
     remocaoAgendamento: null,
     atestado: null,
+    valorPonto: null,
   };
 
   const regrasDeComando = [
@@ -310,6 +312,22 @@ function processarObservacao(obsText) {
       },
     },
     {
+      // Detecta valor do ponto
+      // Formatos aceitos:
+      // - valor do ponto R$ 0,50
+      // - ponto vale R$ 0,35
+      // - valor ponto: 0.50
+      regex:
+        /(?:valor\s*(?:do\s*)?ponto|ponto\s*vale)\s*[:\s]*R?\$?\s*(\d+[.,]\d{2})/gi,
+      processar: (match, res) => {
+        const valorStr = match[1].replace(",", ".");
+        const valor = parseFloat(valorStr);
+        if (!isNaN(valor) && valor > 0) {
+          res.valorPonto = valor;
+        }
+      },
+    },
+    {
       // Detecta atestado médico com duração e/ou período específico
       // Formatos aceitos:
       // - atestado (1 dia)
@@ -370,7 +388,7 @@ export function solicitarBonus() {
     notie.alert({
       type: "info",
       text: "Nenhuma observação inserida.",
-      time: 2,
+      time: 5,
     });
     return;
   }
@@ -384,7 +402,7 @@ export function solicitarBonus() {
       // Abre em nova aba a página de relatório
       window.open("report.html", "_blank");
     } catch (e) {
-      console.warn("Não foi possível abrir a página de relatório:", e);
+      debugWarn("Não foi possível abrir a página de relatório:", e);
     }
     // Não processa outros comandos quando o usuário apenas solicitou o relatório
     return;
@@ -552,7 +570,7 @@ export function solicitarBonus() {
       notie.alert({
         type: "info",
         text: `⚠️ ${erros} erro(s) registrado(s).`,
-        time: 2,
+        time: 5,
       });
     }
 
@@ -565,6 +583,26 @@ export function solicitarBonus() {
     if (!dadosUsuario.observacoesDiarias) {
       dadosUsuario.observacoesDiarias = {};
     }
+
+    // Rastreia histórico de bônus para relatório
+    if (!dadosUsuario.historicoBonus) {
+      dadosUsuario.historicoBonus = [];
+    }
+
+    // Identifica o tipo de bônus
+    let tipoBonus = "Outros";
+    if (/ajudar\s*no\s*recebimento/i.test(observacoes)) {
+      tipoBonus = "Ajudar no recebimento";
+    } else if (/outro\s*sector/i.test(observacoes)) {
+      tipoBonus = "Outro setor";
+    }
+
+    dadosUsuario.historicoBonus.push({
+      data: dataKey,
+      tipo: tipoBonus,
+      valor: valorBonus,
+      descricao: observacoes.substring(0, 100), // Limita a 100 caracteres
+    });
 
     // Adiciona o bônus ao dia atual, se já houver um valor, ou cria o registro
     const valorExistente = dadosUsuario.realizadoDiario[dataKey] || 0;
@@ -588,6 +626,18 @@ export function solicitarBonus() {
 
   if (atestado) {
     dadosUsuario = processarAtestado(atestado, dadosUsuario, observacoes);
+  }
+
+  // Salva o valor do ponto se detectado
+  if (resultadoDosProcessamentos.valorPonto) {
+    dadosUsuario.valorPonto = resultadoDosProcessamentos.valorPonto;
+    notie.alert({
+      type: "success",
+      text: `💰 Valor do ponto configurado: R$ ${resultadoDosProcessamentos.valorPonto
+        .toFixed(2)
+        .replace(".", ",")}`,
+      time: 3,
+    });
   }
 
   salvarDados(dadosUsuario);
@@ -706,7 +756,7 @@ function salvarDiaOffAgendado(dataOff, dadosUsuario) {
     notie.alert({
       type: "info",
       text: `A data de ${dataOff} já está agendada.`,
-      time: 2,
+      time: 5,
     });
     return dadosUsuario;
   }
@@ -796,7 +846,7 @@ function handleHistoricoClick(event) {
       notie.alert({
         type: "warning",
         text: "O valor inserido é o mesmo que o anterior.",
-        time: 2,
+        time: 5,
       });
       ocultarEdicaoInPlace(edicaoDiv); // Cancela a edição
       return;

@@ -1,4 +1,5 @@
 import { getDadosUsuario } from "./data.js";
+import { debugLog, debugWarn } from "./debug.js";
 
 function renderReport() {
   const dados = safeGetDadosUsuario();
@@ -11,7 +12,7 @@ function renderReport() {
   const elErros = document.getElementById("report-erros");
 
   if (!dados) {
-    console.log("Nenhum dado encontrado para o usuário atual");
+    debugLog("Nenhum dado encontrado para o usuário atual");
     if (elUsuario) elUsuario.textContent = "-";
     if (tbody)
       tbody.innerHTML = `<tr><td colspan=\"4\">Nenhum movimento registrado.</td></tr>`;
@@ -42,6 +43,10 @@ function renderReport() {
         : dados.totalErros || "-";
 
   const movimentos = buildMovements(dados);
+  debugLog("📊 Total de movimentos gerados:", movimentos.length);
+  debugLog("🗓️ Primeiro dia:", movimentos[0]?.date);
+  debugLog("🗓️ Último dia:", movimentos[movimentos.length - 1]?.date);
+
   if (!tbody) return;
   tbody.innerHTML = "";
 
@@ -51,6 +56,17 @@ function renderReport() {
 
   movimentos.forEach((movimento) => {
     const tr = document.createElement("tr");
+
+    // Verifica o dia da semana para marcar fim de semana
+    const [ano, mes, dia] = movimento.date.split("-").map(Number);
+    const dataObj = new Date(ano, mes - 1, dia, 12, 0, 0);
+    const diaSemana = dataObj.getDay();
+
+    // Adiciona classe especial para sexta-feira (fim de semana útil)
+    if (diaSemana === 5) {
+      // 5 = Sexta-feira
+      tr.classList.add("row-fim-semana");
+    }
 
     // Adiciona classes para estilização visual e conta dias não trabalhados
     if (movimento.type === "Atestado") {
@@ -71,6 +87,10 @@ function renderReport() {
 
     const tdDate = document.createElement("td");
     tdDate.textContent = formatDateISO(movimento.date);
+    // Adiciona indicador visual na data se for sexta-feira
+    if (diaSemana === 5) {
+      tdDate.classList.add("data-fim-semana");
+    }
 
     const tdType = document.createElement("td");
     tdType.textContent = movimento.type;
@@ -99,6 +119,56 @@ function renderReport() {
   // Adiciona linha de totais no tfoot com resumo completo para o gestor
   const tfoot = document.querySelector(".report-table tfoot");
   if (tfoot) {
+    // Calcula bônus extras do mês atual
+    const historicoBonus = dados.historicoBonus || [];
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+
+    const bonusMesAtual = historicoBonus.filter((b) => {
+      const [ano, mes] = b.data.split("-");
+      return parseInt(ano) === anoAtual && parseInt(mes) - 1 === mesAtual;
+    });
+
+    const totalBonus = bonusMesAtual.reduce((sum, b) => sum + b.valor, 0);
+    const pontosNormais = totalPontos - totalBonus;
+
+    // Agrupa bônus por tipo
+    const bonusPorTipo = {};
+    bonusMesAtual.forEach((b) => {
+      if (!bonusPorTipo[b.tipo]) bonusPorTipo[b.tipo] = 0;
+      bonusPorTipo[b.tipo] += b.valor;
+    });
+
+    const linhaBonus =
+      totalBonus > 0
+        ? `<tr>
+          <td style="text-align: right; font-weight: bold;">Bônus Extras:</td>
+          <td style="font-weight: bold; color: #007bff; text-align: center;">${totalBonus.toLocaleString(
+            "pt-BR"
+          )} pts</td>
+          <td colspan="2" style="text-align: left; font-size: 1.3rem; color: #666;">
+            ${Object.entries(bonusPorTipo)
+              .map(
+                ([tipo, valor]) =>
+                  `${tipo}: ${valor.toLocaleString("pt-BR")} pts`
+              )
+              .join(" | ")}
+          </td>
+        </tr>`
+        : "";
+
+    const linhaNormal =
+      totalBonus > 0
+        ? `<tr>
+          <td style="text-align: right; font-style: italic;">Trabalho Normal:</td>
+          <td style="text-align: center; font-style: italic; color: #666;">${pontosNormais.toLocaleString(
+            "pt-BR"
+          )} pts</td>
+          <td colspan="2"></td>
+        </tr>`
+        : "";
+
     tfoot.innerHTML = `
       <tr>
         <td style="text-align: right; font-weight: bold;">TOTAL:</td>
@@ -108,6 +178,8 @@ function renderReport() {
         <td style="text-align: center; font-style: italic; color: #28a745;">${diasTrabalhados} trabalhado(s)</td>
         <td style="text-align: center; font-style: italic; color: #dc3545;">${diasNaoTrabalhados} não trabalhado(s)</td>
       </tr>
+      ${linhaBonus}
+      ${linhaNormal}
     `;
   }
 
@@ -196,15 +268,27 @@ function renderAnalysis(dados) {
     const percentualAtingido = ((totalPontos / metaMensal) * 100).toFixed(1);
 
     if (!pontosOk && faltaPontos > 0) {
-      // Calcular dias úteis restantes do mês
+      // Calcular dias úteis restantes do mês (excluindo finais de semana)
       const hoje = new Date();
       const ultimoDia = new Date(
         hoje.getFullYear(),
         hoje.getMonth() + 1,
         0
       ).getDate();
-      const diasRestantes = ultimoDia - hoje.getDate();
-      const pontosPorDia = Math.ceil(faltaPontos / Math.max(diasRestantes, 1));
+
+      let diasUteisRestantes = 0;
+      for (let dia = hoje.getDate(); dia <= ultimoDia; dia++) {
+        const data = new Date(hoje.getFullYear(), hoje.getMonth(), dia);
+        const diaSemana = data.getDay();
+        // Conta apenas dias úteis (não é sábado nem domingo)
+        if (diaSemana !== 0 && diaSemana !== 6) {
+          diasUteisRestantes++;
+        }
+      }
+
+      const pontosPorDia = Math.ceil(
+        faltaPontos / Math.max(diasUteisRestantes, 1)
+      );
 
       cards.push({
         type: "warning",
@@ -220,7 +304,7 @@ function renderAnalysis(dados) {
         `,
         recommendation: `
           <i class="bi bi-lightbulb recommendation-icon"></i>
-          <strong>Recomendação:</strong> Com aproximadamente <strong>${diasRestantes} dias restantes</strong> no mês, 
+          <strong>Recomendação:</strong> Com aproximadamente <strong>${diasUteisRestantes} dias úteis restantes</strong> no mês, 
           você precisa fazer em média <strong>${pontosPorDia.toLocaleString(
             "pt-BR"
           )} pontos por dia</strong> para atingir sua meta.
@@ -276,8 +360,8 @@ function renderAnalysis(dados) {
  * Formata data ISO (YYYY-MM-DD) para formato brasileiro (DD/MM/YYYY)
  */
 function formatDateISO(dateStr) {
-  const dataObj = new Date(dateStr);
-  return dataObj.toLocaleDateString("pt-BR");
+  const [ano, mes, dia] = dateStr.split("-");
+  return `${dia}/${mes}/${ano}`;
 }
 
 /**
@@ -315,7 +399,7 @@ function safeGetDadosUsuario() {
   try {
     return getDadosUsuario();
   } catch (erro) {
-    console.warn("Acesso ao localStorage bloqueado ou indisponível:", erro);
+    debugWarn("Acesso ao localStorage bloqueado ou indisponível:", erro);
     return null;
   }
 }
@@ -365,7 +449,9 @@ function buildMovements(dados) {
   hoje.setHours(0, 0, 0, 0);
 
   diasDoMes.forEach((isoDate) => {
-    const dataObj = new Date(isoDate + "T00:00:00");
+    // Parse correto da data ISO sem problemas de timezone
+    const [ano, mes, dia] = isoDate.split("-").map(Number);
+    const dataObj = new Date(ano, mes - 1, dia, 12, 0, 0, 0);
     const diaSemana = dataObj.getDay();
 
     // Ignora finais de semana (0=domingo, 6=sábado)
@@ -377,19 +463,7 @@ function buildMovements(dados) {
     // Verifica se é atestado médico (detecta ícone 🏥 ou palavra "atestado")
     const isAtestado = obs.includes("🏥") || /atestado|afastamento/i.test(obs);
 
-    // Caso 1: Dia agendado (folga, feriado, aniversário)
-    if (offSetISO.has(isoDate)) {
-      const tipo = isAtestado ? "Atestado" : "Agendamento";
-      movimentos.push({
-        date: isoDate,
-        type: tipo,
-        points: "-",
-        notes: obs || "Dia agendado como folga",
-      });
-      return;
-    }
-
-    // Caso 2: Dia com trabalho registrado
+    // Caso 1: Dia com trabalho registrado (PRIORIDADE - mesmo se agendado)
     if (dados?.realizadoDiario?.[isoDate] !== undefined) {
       const pontos = dados.realizadoDiario[isoDate];
       movimentos.push({
@@ -397,6 +471,18 @@ function buildMovements(dados) {
         type: "Trabalho",
         points: typeof pontos === "number" ? pontos : pontos || 0,
         notes: obs || "-",
+      });
+      return;
+    }
+
+    // Caso 2: Dia agendado (folga, feriado, aniversário) SEM trabalho
+    if (offSetISO.has(isoDate)) {
+      const tipo = isAtestado ? "Atestado" : "Agendamento";
+      movimentos.push({
+        date: isoDate,
+        type: tipo,
+        points: "-",
+        notes: obs || "Dia agendado como folga",
       });
       return;
     }
@@ -452,7 +538,7 @@ function renderObservations(dados) {
     });
   }
 
-  // Adiciona agendamentos (dia off, feriado, aniversário) como observações
+  // Adiciona agendamentos apenas se NÃO houver observação específica
   if (
     dados &&
     Array.isArray(dados.diasOffAgendados) &&
@@ -463,8 +549,11 @@ function renderObservations(dados) {
       const partes = String(dataBR).split("/");
       if (partes.length === 3) {
         const dataISO = `${partes[2]}-${partes[1]}-${partes[0]}`;
-        if (!byDate[dataISO]) byDate[dataISO] = [];
-        byDate[dataISO].push("📅 Agendamento: Dia off / Feriado / Aniversário");
+        // Só adiciona a mensagem genérica se não houver observação específica
+        if (!byDate[dataISO] || byDate[dataISO].length === 0) {
+          if (!byDate[dataISO]) byDate[dataISO] = [];
+          byDate[dataISO].push("📅 Dia off agendado");
+        }
       }
     });
   }
@@ -738,10 +827,9 @@ function generateInsights(dados) {
   const insightsContainer = document.getElementById("insights-grid");
   if (!insightsContainer) return;
 
-  const historico = dados.historico || [];
   const realizadoDiario = dados.realizadoDiario || {};
 
-  if (historico.length === 0) {
+  if (Object.keys(realizadoDiario).length === 0) {
     insightsContainer.innerHTML =
       '<p style="text-align: center; color: #666;">Sem dados suficientes para gerar insights.</p>';
     return;
@@ -962,6 +1050,14 @@ function generateComparison(dados) {
   const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
   const anoAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
 
+  debugLog("📊 Comparativo Mensal - Debug:");
+  debugLog("Mês atual:", mesAtual, "(índice 0-based)");
+  debugLog("Mês anterior:", mesAnterior);
+  debugLog(
+    "Total de datas em realizadoDiario:",
+    Object.keys(realizadoDiario).length
+  );
+
   let pontosAtual = 0,
     diasAtual = 0,
     errosAtual = 0;
@@ -984,25 +1080,38 @@ function generateComparison(dados) {
     }
   });
 
-  // Conta erros
-  historico.forEach((item) => {
-    if (!item.date) return;
-    const [dia, mes, ano] = item.date.split("/");
-    if (parseInt(ano) === anoAtual && parseInt(mes) - 1 === mesAtual) {
-      if (item.obs && item.obs.match(/erros?\s*\((\d+)\)/i)) {
-        const match = item.obs.match(/erros?\s*\((\d+)\)/i);
-        errosAtual += parseInt(match[1]);
-      }
-    } else if (
-      parseInt(ano) === anoAnterior &&
-      parseInt(mes) - 1 === mesAnterior
-    ) {
-      if (item.obs && item.obs.match(/erros?\s*\((\d+)\)/i)) {
-        const match = item.obs.match(/erros?\s*\((\d+)\)/i);
-        errosAnterior += parseInt(match[1]);
+  debugLog("Outubro:", diasAnterior, "dias,", pontosAnterior, "pontos");
+  debugLog("Novembro:", diasAtual, "dias,", pontosAtual, "pontos");
+
+  // Se não houver dados do mês anterior, não mostra o comparativo
+  if (diasAnterior === 0) {
+    comparisonContainer.innerHTML =
+      '<p style="text-align: center; color: #666;">Comparação disponível após completar 2 meses de dados.</p>';
+    return;
+  }
+
+  // Conta erros das observações diárias
+  const observacoesDiarias = dados.observacoesDiarias || {};
+  Object.entries(observacoesDiarias).forEach(([dataKey, obs]) => {
+    const [ano, mes] = dataKey.split("-");
+    const match = obs.match(/erros?\s*\((\d+)\)/i);
+    if (match) {
+      const erros = parseInt(match[1]);
+      if (parseInt(ano) === anoAtual && parseInt(mes) - 1 === mesAtual) {
+        errosAtual += erros;
+      } else if (
+        parseInt(ano) === anoAnterior &&
+        parseInt(mes) - 1 === mesAnterior
+      ) {
+        errosAnterior += erros;
       }
     }
   });
+
+  // Fallback: se não houver erros nas observações, usa totalErros do mês atual
+  if (errosAtual === 0 && dados.totalErros) {
+    errosAtual = dados.totalErros;
+  }
 
   const mediaAtual = diasAtual > 0 ? pontosAtual / diasAtual : 0;
   const mediaAnterior = diasAnterior > 0 ? pontosAnterior / diasAnterior : 0;
@@ -1220,7 +1329,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let dados;
   if (modoDemo) {
     dados = gerarDadosFicticios();
-    console.log("📊 Modo demonstração ativado com dados fictícios");
+    debugLog("📊 Modo demonstração ativado com dados fictícios");
   } else {
     dados = safeGetDadosUsuario();
   }

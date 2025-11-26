@@ -1,7 +1,96 @@
-// js/data.js (Versão Final para Consistência)
+// ============================================================================
+// DATA.JS - Gerenciamento de dados do usuário (Refatorado)
+// ============================================================================
+// 📋 Propósito: Gerenciar dados do usuário, metas e estado da aplicação
+// 🎯 Benefícios:
+//    - Código limpo sem try-catch (delegado ao storage.js)
+//    - Responsabilidade única (apenas lógica de negócio)
+//    - Fácil manutenção e teste
+//    - Documentação completa com JSDoc
+// ============================================================================
 
+import {
+  STORAGE_PREFIX,
+  STORAGE_CURRENT_USER,
+  MAPA_METAS,
+  META_PADRAO,
+} from "./constants.js";
+
+import {
+  obterItem,
+  salvarItem,
+  removerItem,
+  obterString,
+  salvarString,
+} from "./storage.js";
+
+// ============================================================================
+// ESTADO DA APLICAÇÃO
+// ============================================================================
+
+/**
+ * Cache em memória dos dados do usuário atual
+ * @type {Object|null}
+ * @private
+ */
 let dadosUsuario = null;
 
+// ============================================================================
+// RE-EXPORTAR CONSTANTES (para compatibilidade)
+// ============================================================================
+
+/**
+ * Mapeamento de metas diárias para valores mensais
+ * @constant
+ */
+export { MAPA_METAS };
+
+// ============================================================================
+// GERENCIAMENTO DE USUÁRIO ATUAL
+// ============================================================================
+
+/**
+ * Define o usuário atual da sessão
+ * @param {string} nome - Nome do usuário
+ */
+export function setCurrentUser(nome) {
+  salvarString(STORAGE_CURRENT_USER, nome);
+}
+
+/**
+ * Obtém o nome do usuário atual
+ * @returns {string|null} Nome do usuário ou null
+ */
+export function getCurrentUser() {
+  return obterString(STORAGE_CURRENT_USER);
+}
+
+/**
+ * Limpa o usuário atual (logout)
+ */
+export function clearCurrentUser() {
+  removerItem(STORAGE_CURRENT_USER);
+  dadosUsuario = null;
+}
+
+/**
+ * Retorna a chave de armazenamento do usuário atual
+ * @returns {string|null} Chave formatada (ex: "dados_João") ou null
+ */
+export function getChaveDadosUsuario() {
+  const nome = getCurrentUser();
+  if (!nome) return null;
+  return `${STORAGE_PREFIX}${nome}`;
+}
+
+// ============================================================================
+// GERENCIAMENTO DE DADOS DO USUÁRIO
+// ============================================================================
+
+/**
+ * Obtém os dados do usuário atual (usa cache em memória)
+ * @returns {Object|null} Dados do usuário ou null
+ */
 export function getDadosUsuario() {
   if (!dadosUsuario) {
     dadosUsuario = carregarDados();
@@ -9,142 +98,165 @@ export function getDadosUsuario() {
   return dadosUsuario;
 }
 
-export function setCurrentUser(nome) {
-  localStorage.setItem("currentUser", nome);
-}
-
-export function getCurrentUser() {
-  return localStorage.getItem("currentUser");
-}
-
-export function clearCurrentUser() {
-  localStorage.removeItem("currentUser");
-  dadosUsuario = null;
-}
-
+/**
+ * Atualiza os dados do usuário e salva automaticamente
+ * @param {Object} novosDados - Novos dados a serem salvos
+ */
 export function atualizarDadosUsuario(novosDados) {
   dadosUsuario = novosDados;
   salvarDados(dadosUsuario);
 }
 
-/**
- * Mapeamento das Metas por nome de chave.
- * Nota: Os valores do SELECT (300, 400, etc.) devem ser usados como chaves,
- * mas para este exemplo, manteremos as chaves em string por enquanto.
- */
-export const MAPA_METAS = {
-  600: 90000,
-  500: 65000,
-  400: 55000,
-  300: 45000,
-};
+// ============================================================================
+// CARREGAMENTO DE DADOS
+// ============================================================================
 
 /**
- * Retorna a chave de armazenamento dinâmico para o usuário.
- * @returns {string} Chave formatada para localStorage.
- */
-export function getChaveDadosUsuario() {
-  const nome = localStorage.getItem("currentUser");
-  if (!nome) return null;
-  return `dados_${nome}`;
-}
-
-/**
- * Carrega o objeto de dados do usuário do localStorage.
- * @returns {object | null} O objeto de dados do usuário ou null.
+ * Carrega os dados do usuário do localStorage
+ * 🛡️ Proteções delegadas ao storage.js (try-catch, backup, etc)
+ * @returns {Object|null} Dados do usuário ou null
  */
 export function carregarDados() {
   const chave = getChaveDadosUsuario();
-  if (!chave) {
-    return null;
-  }
-  const dadosJSON = localStorage.getItem(chave);
-  if (!dadosJSON) {
-    return null;
-  }
+  if (!chave) return null;
 
-  const dados = JSON.parse(dadosJSON);
+  // 🛡️ obterItem() já trata JSON corrompido e backup
+  let dados = obterItem(chave);
+  if (!dados) return null;
 
-  const hoje = new Date();
-  const dataUltimoCalculo = new Date(dados.dataUltimoCalculo);
+  // Verificar reset mensal automático
+  dados = verificarResetMensal(dados);
 
-  if (hoje.getMonth() !== dataUltimoCalculo.getMonth()) {
-    dados.realizadoDiario = {};
-    dados.realizadoTotal = 0;
-    dados.dataUltimoCalculo = hoje.toISOString().slice(0, 10);
-    salvarDados(dados); // Salva os dados zerados
-  }
-
+  // Atualizar cache
   dadosUsuario = dados;
   return dados;
 }
 
 /**
- * Salva o objeto de dados atual do usuário no localStorage.
- * @param {object} dados O objeto de dados a ser salvo.
+ * Verifica se precisa resetar dados para novo mês
+ * @param {Object} dados - Dados atuais
+ * @returns {Object} Dados (zerados se novo mês)
+ * @private
+ */
+function verificarResetMensal(dados) {
+  const hoje = new Date();
+  const dataUltimoCalculo = new Date(dados.dataUltimoCalculo);
+
+  // Se mudou de mês, zerar dados diários
+  if (hoje.getMonth() !== dataUltimoCalculo.getMonth()) {
+    dados.realizadoDiario = {};
+    dados.realizadoTotal = 0;
+    dados.dataUltimoCalculo = hoje.toISOString().slice(0, 10);
+    salvarDados(dados);
+  }
+
+  return dados;
+}
+
+// ============================================================================
+// SALVAMENTO DE DADOS
+// ============================================================================
+
+/**
+ * Salva os dados do usuário no localStorage
+ * 🛡️ Proteções delegadas ao storage.js (try-catch, QuotaExceeded, backup, etc)
+ * @param {Object} dados - Dados a serem salvos
  */
 export function salvarDados(dados) {
   const chave = getChaveDadosUsuario();
-  localStorage.setItem(chave, JSON.stringify(dados));
-  dadosUsuario = dados;
+  if (!chave) return;
+
+  // 🛡️ salvarItem() já trata QuotaExceededError, sanitização e backup
+  const sucesso = salvarItem(chave, dados, true);
+
+  // Atualizar cache apenas se salvou com sucesso
+  if (sucesso) {
+    dadosUsuario = dados;
+  }
 }
 
+// ============================================================================
+// CRIAÇÃO DE DADOS INICIAIS
+// ============================================================================
+
 /**
- * Cria a estrutura inicial de dados para um novo usuário.
- * @param {string} funcionario Nome do funcionário.
- * @param {string} metaDiariaBase Meta diária selecionada (chave do MAPA_METAS).
- * @returns {object} O objeto de dados inicial.
+ * Cria estrutura inicial de dados para novo usuário
+ * @param {string} funcionario - Nome do funcionário
+ * @param {string} metaDiariaBase - Meta selecionada (300/400/500/600)
+ * @returns {Object} Dados iniciais estruturados
  */
-export function criarDadosIniciais(funcionario, metaDiariaBase) {
-  const metaMensal = MAPA_METAS[metaDiariaBase] || 0;
+export function criarDadosIniciais(funcionario, metaDiariaBase = META_PADRAO) {
+  const metaMensal = MAPA_METAS[metaDiariaBase] || MAPA_METAS[META_PADRAO];
 
   const dados = {
     nome: funcionario,
     metaMensal: metaMensal,
-    // mapa de metas personalizável por usuário (chaves em R$ como strings -> valor mensal)
-    mapaMetas: Object.assign({}, MAPA_METAS),
-    // chave selecionada do dropdown (300/400/500/600)
-    selectedMetaKey: metaDiariaBase || "300",
+    mapaMetas: { ...MAPA_METAS }, // Cópia personalizável por usuário
+    selectedMetaKey: metaDiariaBase,
     realizadoDiario: {},
     realizadoTotal: 0,
     dataUltimoCalculo: new Date().toISOString().slice(0, 10),
-    observacoes: [], // [{ date: 'YYYY-MM-DD', text: '...' }]
+    observacoes: [], // Array de { date: 'YYYY-MM-DD', text: '...' }
+    diasOffAgendados: [], // Array de datas em formato DD/MM/YYYY
   };
 
   dadosUsuario = dados;
   return dados;
 }
 
-/** Observações helpers **/
+// ============================================================================
+// GERENCIAMENTO DE OBSERVAÇÕES
+// ============================================================================
+
+/**
+ * Obtém todas as observações do usuário
+ * @returns {Array<{date: string, text: string}>} Array de observações
+ */
 export function getObservacoesUsuario() {
   const dados = getDadosUsuario();
   if (!dados) return [];
   return dados.observacoes || [];
 }
 
+/**
+ * Adiciona nova observação
+ * @param {string} dateISO - Data no formato YYYY-MM-DD
+ * @param {string} text - Texto da observação
+ * @returns {Array|null} Array atualizado de observações ou null
+ */
 export function adicionarObservacao(dateISO, text) {
-  const chave = getChaveDadosUsuario();
-  if (!chave) return null;
-  const dados =
-    getDadosUsuario() ||
-    criarDadosIniciais(localStorage.getItem("currentUser") || "Usuário", "300");
-  if (!dados.observacoes) dados.observacoes = [];
+  const dados = getDadosUsuario();
+  if (!dados) return null;
+
+  if (!dados.observacoes) {
+    dados.observacoes = [];
+  }
+
   dados.observacoes.push({ date: dateISO, text: text });
   salvarDados(dados);
+
   return dados.observacoes;
 }
 
+/**
+ * Remove todas as observações
+ */
 export function limparObservacoes() {
   const dados = getDadosUsuario();
   if (!dados) return;
+
   dados.observacoes = [];
   salvarDados(dados);
 }
 
+// ============================================================================
+// GERENCIAMENTO DE DIAS OFF AGENDADOS
+// ============================================================================
+
 /**
- * Verifica se uma data específica está agendada como dia off
+ * Verifica se uma data está agendada como dia off
  * @param {string} dataBR - Data no formato DD/MM/YYYY
- * @returns {boolean} true se a data está agendada, false caso contrário
+ * @returns {boolean} true se agendado, false caso contrário
  */
 export function isDiaAgendado(dataBR) {
   const dados = getDadosUsuario();
@@ -153,7 +265,7 @@ export function isDiaAgendado(dataBR) {
 }
 
 /**
- * Retorna lista de todos os dias agendados
+ * Obtém lista de todos os dias off agendados
  * @returns {string[]} Array de datas no formato DD/MM/YYYY
  */
 export function getDiasAgendados() {
