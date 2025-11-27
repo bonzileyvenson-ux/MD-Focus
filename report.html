@@ -8,7 +8,53 @@
     <link rel="stylesheet" href="css/report.css">
 
   </head>
-  <body>
+  <body class="report-body">
+    <!-- Navegação Fixa -->
+    <nav class="report-nav no-print" id="report-nav">
+      <div class="nav-container">
+        <a href="index.html" class="nav-logo" title="Voltar ao Dashboard">
+          <i class="bi bi-arrow-left-circle"></i>
+          <span class="nav-logo-text"><span>MD</span>-Focus</span>
+        </a>
+        
+        <div class="nav-links">
+          <a href="#report-summary" class="nav-link" data-section="summary">
+            <i class="bi bi-file-text"></i>
+            <span>Resumo</span>
+          </a>
+          <a href="#report-table" class="nav-link" data-section="table">
+            <i class="bi bi-table"></i>
+            <span>Movimentos</span>
+          </a>
+          <a href="#report-insights" class="nav-link" data-section="insights">
+            <i class="bi bi-lightbulb"></i>
+            <span>Insights</span>
+          </a>
+          <a href="#report-ranking" class="nav-link" data-section="ranking">
+            <i class="bi bi-trophy"></i>
+            <span>Ranking</span>
+          </a>
+          <a href="#report-comparison" class="nav-link" data-section="comparison">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Comparativo</span>
+          </a>
+          <a href="#report-analysis" class="nav-link" data-section="analysis">
+            <i class="bi bi-clipboard-data"></i>
+            <span>Análise</span>
+          </a>
+        </div>
+
+        <div class="nav-actions">
+          <button id="btn-print-nav" class="nav-btn" title="Imprimir">
+            <i class="bi bi-printer"></i>
+          </button>
+          <button id="btn-download-nav" class="nav-btn" title="Baixar PDF">
+            <i class="bi bi-download"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+
     <main id="report-root" class="relatorio-container">
       <header class="report-header">
         <div class="report-logo"><span>MD</span>-Focus</div>
@@ -19,8 +65,8 @@
         </div>
       </header>
 
-      <section class="report-summary">
-        <h2>Resumo</h2>
+      <section class="report-summary" id="report-summary">
+        <h2>📋 Resumo</h2>
         <div class="summary-grid">
           <p class="summary-item">
             <strong class="item-title">Meta Mensal:</strong> <span id="report-meta-mensal">—</span>
@@ -39,9 +85,9 @@
         </p>
       </section>
 
-      <section class="report-table">
-        <h2>Movimentos</h2>
-        <table class="table table-striped" id="report-table">
+      <section class="report-table" id="report-table">
+        <h2>📊 Movimentos</h2>
+        <table class="table table-striped" id="report-movements-table">
           <thead>
             <tr>
               <th>Data</th>

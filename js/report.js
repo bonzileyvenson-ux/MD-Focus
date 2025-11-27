@@ -559,21 +559,24 @@ function renderObservations(dados) {
   }
 
   if (Object.keys(byDate).length === 0) {
-    container.innerHTML = `<div class="no-observations">Nenhuma observacao registrada.</div>`;
+    container.innerHTML = `<div class="no-observations">Nenhuma observação registrada.</div>`;
     return;
   }
 
   const keys = Object.keys(byDate).sort((aKey, bKey) => (aKey < bKey ? 1 : -1));
-  const html = keys
-    .map((date) => {
-      const items = byDate[date]
-        .map((texto) => `<li class="obs-item">${texto}</li>`)
-        .join("");
-      return `<div class="obs-day"><div class="obs-date">${formatDateISO(
-        date
-      )}</div><ul>${items}</ul></div>`;
-    })
-    .join("");
+  const html = `
+    <h3>Observações Detalhadas</h3>
+    ${keys
+      .map((date) => {
+        const items = byDate[date]
+          .map((texto) => `<div class="obs-item">${texto}</div>`)
+          .join("");
+        return `<div class="obs-day"><div class="obs-date">${formatDateISO(
+          date
+        )}</div>${items}</div>`;
+      })
+      .join("")}
+  `;
 
   container.innerHTML = html;
 }
@@ -1319,6 +1322,73 @@ function gerarDadosFicticios() {
 }
 
 // ========================================
+// NAVEGAÇÃO
+// ========================================
+function setupNavigation() {
+  const navLinks = document.querySelectorAll(".nav-link");
+  const sections = document.querySelectorAll("section[id]");
+
+  // Scroll suave para seções
+  navLinks.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute("href");
+      const targetSection = document.querySelector(targetId);
+
+      if (targetSection) {
+        const navHeight = document.querySelector(".report-nav").offsetHeight;
+        const targetPosition = targetSection.offsetTop - navHeight - 20;
+
+        window.scrollTo({
+          top: targetPosition,
+          behavior: "smooth",
+        });
+      }
+    });
+  });
+
+  // Destaca link ativo ao rolar
+  const observerOptions = {
+    root: null,
+    rootMargin: "-100px 0px -66%",
+    threshold: 0,
+  };
+
+  const observerCallback = (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        navLinks.forEach((link) => link.classList.remove("active"));
+        const activeLink = document.querySelector(
+          `.nav-link[href="#${entry.target.id}"]`
+        );
+        if (activeLink) {
+          activeLink.classList.add("active");
+        }
+      }
+    });
+  };
+
+  const observer = new IntersectionObserver(observerCallback, observerOptions);
+  sections.forEach((section) => observer.observe(section));
+
+  // Botões de ação na navegação
+  const btnPrintNav = document.getElementById("btn-print-nav");
+  const btnDownloadNav = document.getElementById("btn-download-nav");
+
+  if (btnPrintNav) {
+    btnPrintNav.addEventListener("click", () => {
+      window.print();
+    });
+  }
+
+  if (btnDownloadNav) {
+    btnDownloadNav.addEventListener("click", () => {
+      gerarPDF();
+    });
+  }
+}
+
+// ========================================
 // INICIALIZAÇÃO
 // ========================================
 document.addEventListener("DOMContentLoaded", () => {
@@ -1343,4 +1413,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupActions();
   setupSignatures();
   setupEmailFallback();
+  setupNavigation(); // Configura navegação
 });

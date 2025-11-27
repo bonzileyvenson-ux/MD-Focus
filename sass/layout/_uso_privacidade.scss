@@ -1,17 +1,13 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-html {
-  font-size: 62.5%;
-}
-
+// Estilos específicos para a página de privacidade
 .body-privacidade {
   font-size: 1.6rem;
   font-family: "Montserrat", sans-serif;
-  background-color: darken(clr(primary), 18%);
+  background-image: linear-gradient(41deg, rgb(84, 100, 116), hsl(202, 14%, 36%));
   overflow-x: hidden;
+
+  // Scroll suave apenas na página de privacidade
+  scroll-behavior: smooth;
+  scroll-padding-top: 10rem;
 }
 
 .manual-header {
@@ -45,6 +41,136 @@ html {
     padding: 2rem 1.3rem;
   }
 }
+
+// ============================================
+// NAVEGAÇÃO DE SEÇÕES
+// ============================================
+.manual-nav {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(
+    135deg,
+    clr("dark-blue"),
+    lighten(clr(primary), 10%)
+  );
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+}
+
+.manual-nav-container {
+  max-width: 120rem;
+  margin: 0 auto;
+  padding: 0 2rem;
+  @include flex-center;
+  gap: 2rem;
+}
+
+.nav-back-btn {
+  @include flex-center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-3px);
+  }
+
+  i {
+    font-size: 1.6rem;
+  }
+}
+
+.manual-nav-links {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  flex: 1;
+  padding: 0.5rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+
+  &::-webkit-scrollbar {
+    height: 0.4rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0.2rem;
+  }
+}
+
+.manual-nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+  }
+
+  &.active {
+    background: clr(tercery);
+    color: white;
+    font-weight: 600;
+  }
+}
+
+// Mobile: Stack navigation
+@media (max-width: 768px) {
+  .manual-nav {
+    padding: 0.8rem 0;
+  }
+
+  .manual-nav-container {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .nav-back-btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 1.3rem;
+    padding: 0.7rem 1.2rem;
+  }
+
+  .manual-nav-links {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .manual-nav-link {
+    font-size: 1.2rem;
+    padding: 0.7rem 1rem;
+  }
+}
+
+// Adiciona scroll-margin nas seções
+.manual-section {
+  scroll-margin-top: 10rem;
+}
+
 .manual-container {
   max-width: 90rem;
   width: 95%; // Responsivo: ocupa 95% da largura disponível

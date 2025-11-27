@@ -19,6 +19,52 @@
     <meta name="theme-color" content="#1c0a5f" />
   </head>
   <body class="body-privacidade">
+    <script>
+      // Script de navegação inteligente
+      document.addEventListener("DOMContentLoaded", () => {
+        const navLinks = document.querySelectorAll(".manual-nav-link");
+        const sections = document.querySelectorAll(".manual-section");
+
+        // Smooth scroll ao clicar nos links
+        navLinks.forEach((link) => {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute("href");
+            const targetSection = document.querySelector(targetId);
+
+            if (targetSection) {
+              targetSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }
+          });
+        });
+
+        // Intersection Observer para destacar seção ativa
+        const observerOptions = {
+          root: null,
+          rootMargin: "-20% 0px -70% 0px",
+          threshold: 0,
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const activeId = entry.target.getAttribute("id");
+              navLinks.forEach((link) => {
+                link.classList.remove("active");
+                if (link.getAttribute("href") === `#${activeId}`) {
+                  link.classList.add("active");
+                }
+              });
+            }
+          });
+        }, observerOptions);
+
+        sections.forEach((section) => observer.observe(section));
+      });
+    </script>
     <header class="manual-header">
       <h1 class="manual-title">
         <span class="md">MD</span> <span class="focus">Focus:</span> Guia Rápido
@@ -26,14 +72,48 @@
       </h1>
     </header>
 
+    <!-- Navegação de Seções -->
+    <nav class="manual-nav">
+      <div class="manual-nav-container">
+        <a href="index.html" class="nav-back-btn" title="Voltar ao Dashboard">
+          <i class="bi bi-arrow-left"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="manual-nav-links">
+          <a href="#secao-1" class="manual-nav-link active">O que é</a>
+          <a href="#secao-2" class="manual-nav-link">Registro</a>
+          <a href="#secao-3" class="manual-nav-link">Inteligência</a>
+          <a href="#secao-4" class="manual-nav-link">Comandos</a>
+          <a href="#secao-5" class="manual-nav-link">Dashboard</a>
+          <a href="#secao-6" class="manual-nav-link">Histórico</a>
+          <a href="#secao-7" class="manual-nav-link">Simulação</a>
+          <a href="#secao-8" class="manual-nav-link">Relatório</a>
+          <a href="#secao-9" class="manual-nav-link">Notificações</a>
+          <a href="#secao-10" class="manual-nav-link">Temas</a>
+          <a href="#secao-11" class="manual-nav-link">Privacidade</a>
+          <a href="#secao-12" class="manual-nav-link">Dicas</a>
+          <a href="#secao-13" class="manual-nav-link">FAQ</a>
+          <a href="#secao-14" class="manual-nav-link">Atualizações</a>
+        </div>
+      </div>
+    </nav>
+
     <main class="manual-container">
-      <section class="manual-section">
+      <section class="manual-section" id="secao-1">
         <h2 class="section-title">1. O que é o MD Focus?</h2>
 
+        <p
+          class="destacado"
+          style="text-align: center; font-size: 1.8rem; margin-bottom: 1.5rem"
+        >
+          <strong>MD Focus</strong> = <strong>Meta Diária Focada</strong>
+        </p>
+
         <p class="section-subtitle">
-          <strong>MD Focus</strong> é uma ferramenta inteligente de gestão de
-          produtividade que vai além do simples registro de pontos. Com
-          <strong>análise em tempo real</strong>,
+          <strong>MD Focus (Meta Diária Focada)</strong> é uma ferramenta
+          inteligente de gestão de produtividade que vai além do simples
+          registro de pontos. Com <strong>análise em tempo real</strong>,
           <strong>recomendações automáticas</strong> e
           <strong>insights inteligentes</strong>, o aplicativo te ajuda a
           atingir suas metas com eficiência máxima.
@@ -104,7 +184,7 @@
         </p>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-2">
         <h2 class="section-title">2. Registro Diário (O Botão Lápis)</h2>
         <h3>A ação mais importante é registrar seus pontos.</h3>
         <ul>
@@ -148,7 +228,7 @@
         </ul>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-3">
         <h2 class="section-title">
           3. Entendendo a Inteligência (Recálculo em Tempo Real)
         </h2>
@@ -214,7 +294,7 @@
         </dl>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-4">
         <h2 class="section-title">4. Sistema de Comandos por Observações</h2>
 
         <p>
@@ -354,7 +434,7 @@
         </div>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-5">
         <h2 class="section-title">5. Dashboard e Indicadores em Tempo Real</h2>
 
         <div class="manual-subsection">
@@ -419,15 +499,33 @@
         </div>
       </section>
 
-      <section class="manual-section">
-        <h2 class="section-title">6. Modal de Histórico e Correções</h2>
+      <section class="manual-section" id="secao-6">
+        <h2 class="section-title">6. Modal de Histórico e Atalhos Rápidos</h2>
 
         <div class="manual-subsection">
           <h3 class="subsection-title">📜 Funcionalidades do Histórico</h3>
 
           <p>
-            <strong>Acesso:</strong> Clique no seu nome de usuário no topo do
-            dashboard
+            <strong>Acesso Simples:</strong> Clique no seu nome de usuário no
+            topo do dashboard
+          </p>
+
+          <p>
+            <strong>🚀 Atalho Rápido (Novo!):</strong> Clique no ícone do
+            calendário <i class="bi bi-calendar-check"></i> ao lado dos dias
+            restantes:
+          </p>
+          <ul>
+            <li><strong>1 clique:</strong> Abre o modal de histórico</li>
+            <li>
+              <strong>2 cliques rápidos:</strong> Abre o relatório completo em
+              nova aba
+            </li>
+          </ul>
+          <p class="destacado">
+            💡 <strong>Dica Mobile:</strong> O duplo clique é especialmente útil
+            no celular para acessar rapidamente o relatório sem navegar pelo
+            menu!
           </p>
 
           <dl>
@@ -492,7 +590,7 @@
         </div>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-7">
         <h2 class="section-title">7. Modo Simulação vs Modo Registro</h2>
 
         <div class="manual-subsection">
@@ -554,12 +652,56 @@
         </div>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-8">
         <h2 class="section-title">
           8. Relatório Mensal Completo e Análises Avançadas
         </h2>
 
-        <p><strong>Acesso:</strong> Botão "Relatório" no menu superior</p>
+        <p>
+          <strong>Acesso Principal:</strong> Botão "Relatório" no menu superior
+        </p>
+        <p>
+          <strong>Atalho Rápido:</strong> Duplo clique no ícone do calendário
+          <i class="bi bi-calendar-check"></i>
+        </p>
+
+        <div class="manual-subsection">
+          <h3 class="subsection-title">🧭 Navegação por Seções (Novo!)</h3>
+
+          <p>
+            O relatório agora possui uma
+            <strong>barra de navegação fixa</strong> no topo que facilita o
+            acesso a cada seção:
+          </p>
+
+          <ul>
+            <li>📊 <strong>Resumo:</strong> Visão geral dos dados do mês</li>
+            <li>
+              📋 <strong>Movimentos:</strong> Tabela completa de registros
+              diários
+            </li>
+            <li>
+              💡 <strong>Insights:</strong> Análises inteligentes de desempenho
+            </li>
+            <li>🏆 <strong>Ranking:</strong> Melhores dias da semana</li>
+            <li>
+              📈 <strong>Comparativo:</strong> Comparação com mês anterior
+            </li>
+            <li>📝 <strong>Análise:</strong> Recomendações personalizadas</li>
+          </ul>
+
+          <p class="destacado">
+            💡 <strong>Scroll Inteligente:</strong> Clique em qualquer item da
+            navegação para rolar suavemente até a seção. A seção ativa é
+            destacada automaticamente!
+          </p>
+
+          <p>
+            <strong>🖨️ Ações Rápidas:</strong> Os botões de Imprimir e Download
+            PDF também estão disponíveis na barra de navegação para acesso
+            rápido.
+          </p>
+        </div>
 
         <div class="manual-subsection">
           <h3 class="subsection-title">📊 Seções do Relatório</h3>
@@ -650,14 +792,6 @@
         </div>
 
         <div class="manual-subsection">
-          <h3 class="subsection-title">🎯 Modo Demo</h3>
-          <p class="destacado">
-            💡 <strong>Quer testar as análises?</strong> Acesse o relatório com
-            <code>?demo=true</code> na URL para visualizar com dados fictícios!
-          </p>
-        </div>
-
-        <div class="manual-subsection">
           <h3 class="subsection-title">🖨️ Ações do Relatório</h3>
 
           <ul>
@@ -681,7 +815,7 @@
         </div>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-9">
         <h2 class="section-title">9. Notificações e Feedback Visual</h2>
 
         <div class="manual-subsection">
@@ -790,7 +924,7 @@
         </div>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-10">
         <h2 class="section-title">10. Temas e Personalização</h2>
 
         <div class="manual-subsection">
@@ -840,7 +974,7 @@
         </div>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-11">
         <h2 class="section-title">11. Privacidade e Segurança de Dados</h2>
 
         <div class="manual-subsection">
@@ -918,7 +1052,7 @@
         </div>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-12">
         <h2 class="section-title">12. Dicas e Melhores Práticas</h2>
 
         <div class="manual-subsection">
@@ -984,7 +1118,7 @@
         </div>
       </section>
 
-      <section class="manual-section">
+      <section class="manual-section" id="secao-13">
         <h2 class="section-title">13. Perguntas Frequentes (FAQ)</h2>
 
         <div class="manual-subsection">
@@ -1051,46 +1185,41 @@
         </div>
       </section>
 
-      <section class="manual-section">
-        <h2 class="section-title">14. Suporte e Atualizações</h2>
+      <section class="manual-section" id="secao-14">
+        <h2 class="section-title">14. Sobre o Aplicativo</h2>
 
         <p>
-          Este aplicativo é desenvolvido e mantido para facilitar o controle de
-          metas de produtividade.
+          O MD Focus é uma ferramenta desenvolvida para facilitar o controle de
+          metas de produtividade e ajudar você a alcançar seus objetivos com
+          mais eficiência.
         </p>
 
         <div class="manual-subsection">
-          <h3 class="subsection-title">🆕 Última Atualização (Nov 2025)</h3>
+          <h3 class="subsection-title">🆕 Recursos Principais</h3>
           <ul>
             <li>
+              ✨ <strong>Navegação por Seções:</strong> Barra de navegação fixa
+              no relatório com scroll suave e destaque automático da seção ativa
+            </li>
+            <li>
+              ✨ <strong>Atalho de Duplo Clique:</strong> Duplo clique no ícone
+              do calendário abre o relatório diretamente (ideal para mobile)
+            </li>
+            <li>
               ✨ <strong>Insights Automáticos:</strong> Análise inteligente de
-              desempenho
+              desempenho com recomendações personalizadas
             </li>
             <li>
               ✨ <strong>Ranking de Dias:</strong> Descubra seus dias mais
-              produtivos
+              produtivos da semana
             </li>
             <li>
-              ✨ <strong>Comparação Mensal:</strong> Compare performance mês a
-              mês
+              ✨ <strong>Comparação Mensal:</strong> Compare sua performance mês
+              a mês
             </li>
             <li>
-              ✨ <strong>Recomendações Personalizadas:</strong> Sugestões para
-              melhorar
-            </li>
-            <li>
-              ✨ <strong>Modo Demo:</strong> Teste recursos com dados fictícios
-            </li>
-            <li>
-              ✨ <strong>SCSS Refatorado:</strong> 50+ mixins para código mais
-              limpo
-            </li>
-            <li>
-              ✨ <strong>Legibilidade Mobile:</strong> Botões e fontes maiores
-            </li>
-            <li>
-              ✨ <strong>Bug de Datas Corrigido:</strong> Timezone do
-              agendamento resolvido
+              ✨ <strong>Interface Responsiva:</strong> Design otimizado para
+              mobile, tablet e desktop
             </li>
           </ul>
         </div>

@@ -11,6 +11,7 @@ $raio: 45;
   width: 100%;
   min-height: 0;
   padding: 1rem 0; // Padding reduzido para não ocupar muito espaço
+  position: relative; // Para posicionar o reflexo
 
   @include any-landscape {
     padding: 0.5rem 0;
@@ -18,6 +19,51 @@ $raio: 45;
 
   @include landscape-desktop {
     padding: 1.5rem 0;
+  }
+
+  // Efeito de brilho inferior moderno
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    height: 3rem;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 123, 255, 0.63),
+      rgba(0, 123, 255, 0.438),
+      transparent
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(15px);
+    z-index: -1;
+    opacity: 0.8;
+  }
+
+  // Segundo efeito: linha de luz na base
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%;
+    height: 0.3rem;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(0, 200, 255, 0.6),
+      rgba(0, 123, 255, 0.8),
+      rgba(0, 200, 255, 0.6),
+      transparent
+    );
+    border-radius: 50%;
+    filter: blur(2px);
+    z-index: -1;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
   }
 }
 
@@ -29,6 +75,11 @@ $raio: 45;
   height: min(50vw, 28vh, 18rem);
   margin: 0 auto;
   flex-shrink: 0;
+
+  // Sombra múltipla para destaque intenso
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4))
+    drop-shadow(0 12px 24px rgba(0, 123, 255, 0.25))
+    drop-shadow(0 0 20px rgba(0, 123, 255, 0.15));
 
   @include any-landscape {
     width: min(28vw, 22vh, 13rem);

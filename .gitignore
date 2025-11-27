@@ -14,3 +14,8 @@ package-lock.json
 # Documentação privada do desenvolvedor (não subir para GitHub)
 DOCS_DEV.md
 docs.html
+
+# Arquivos de teste local (não devem estar no repositório)
+test-*.js
+test-*.html
+test-*.md

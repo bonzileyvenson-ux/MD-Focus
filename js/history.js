@@ -189,7 +189,31 @@ export function configurarModalHistorico() {
     listaHistorico.addEventListener("click", handleHistoricoClick);
 
   if (btnAbrir) {
-    btnAbrir.addEventListener("click", abrirModalHistorico);
+    let lastClickTime = 0;
+
+    btnAbrir.addEventListener("click", (e) => {
+      e.preventDefault(); // Prevenir comportamento padrão
+      const now = Date.now();
+      const timeSinceLastClick = now - lastClickTime;
+
+      console.log("Click detectado:", {
+        now,
+        lastClickTime,
+        timeSinceLastClick,
+      });
+
+      // Duplo clique: abrir relatório (dentro de 300ms)
+      if (timeSinceLastClick < 300 && timeSinceLastClick > 0) {
+        console.log("Duplo clique detectado! Abrindo relatório...");
+        window.open("report.html", "_blank");
+        lastClickTime = 0; // Reset
+      } else {
+        // Clique simples: abrir modal
+        console.log("Clique simples detectado! Abrindo modal...");
+        abrirModalHistorico();
+        lastClickTime = now;
+      }
+    });
   }
 
   if (btnFechar) {
@@ -267,13 +291,15 @@ function processarObservacao(obsText) {
       },
     },
     {
-      regex: /ajudar\s*no\s*recebimento/g,
+      // Aceita: ajudar no recebimento, ajudar recebimento, ajuda recebimento, recebimento
+      regex: /(?:ajud[ao]r?(?:\s*no)?\s*recebimento|recebimento)/g,
       processar: (match, res) => {
         res.totalBonus += 100;
       },
     },
     {
-      regex: /outro\s*sector\s*#?(\d+)/g,
+      // Aceita: outro setor, outro sector, outra atividade, outras atividades
+      regex: /(?:outr[oa]s?\s*(?:sector|setor|atividades?))\s*#?(\d+)/g,
       processar: (match, res) => {
         res.totalBonus += Number(match[1]) || 0;
       },
@@ -382,7 +408,8 @@ export function solicitarBonus() {
   }
 
   const observacoesElement = document.getElementById("texterarea-obervacoes");
-  const observacoes = observacoesElement.value.trim();
+  // Converte para minúsculas para evitar erros de capitalização
+  const observacoes = observacoesElement.value.trim().toLowerCase();
 
   if (!observacoes) {
     notie.alert({
@@ -591,9 +618,13 @@ export function solicitarBonus() {
 
     // Identifica o tipo de bônus
     let tipoBonus = "Outros";
-    if (/ajudar\s*no\s*recebimento/i.test(observacoes)) {
+    if (
+      /(?:ajud[ao]r?(?:\s*no)?\s*recebimento|recebimento)/.test(observacoes)
+    ) {
       tipoBonus = "Ajudar no recebimento";
-    } else if (/outro\s*sector/i.test(observacoes)) {
+    } else if (
+      /(?:outr[oa]s?\s*(?:sector|setor|atividades?))/.test(observacoes)
+    ) {
       tipoBonus = "Outro setor";
     }
 
