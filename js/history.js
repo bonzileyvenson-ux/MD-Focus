@@ -215,8 +215,8 @@ export function configurarModalHistorico() {
             navigator.vibrate(50);
           }
 
-          console.log("Long press detectado! Abrindo relatório...");
-          window.open("report.html", "_blank");
+          // Navega dentro do PWA (não abre nova aba)
+          window.location.href = "report.html";
 
           // Restaura visual
           btnAbrir.style.opacity = "1";
@@ -262,7 +262,7 @@ export function configurarModalHistorico() {
         // Duplo clique: abrir relatório (dentro de 300ms)
         if (timeSinceLastClick < 300 && timeSinceLastClick > 0) {
           console.log("Duplo clique detectado! Abrindo relatório...");
-          window.open("report.html", "_blank");
+          window.location.href = "report.html";
           lastClickTime = 0; // Reset
         } else {
           // Clique simples: abrir modal

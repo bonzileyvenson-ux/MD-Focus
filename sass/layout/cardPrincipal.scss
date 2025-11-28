@@ -201,6 +201,35 @@
       transform: scale(0.95);
     }
   }
+
+  .btn-notifications {
+    margin-left: 1.5rem;
+    background: rgba(0, 123, 255, 0.15);
+    border: 2px solid rgba(0, 123, 255, 0.4);
+    color: clr(blanco);
+    font-size: 2rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: rgba(0, 123, 255, 0.3);
+      border-color: rgba(0, 123, 255, 0.7);
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    i {
+      pointer-events: none;
+    }
+  }
 }
 
 .meta-data-hidden {

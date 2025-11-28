@@ -25,6 +25,9 @@ import {
   getDiasAgendados,
 } from "./data.js";
 
+// Notificações Push
+import pushManager from "./notifications-push.js";
+
 // Cálculos e gráficos
 import {
   calcularEAtualizarDashboard,
@@ -914,6 +917,35 @@ function configurarToggleTema() {
       localStorage.setItem("tema", novoTema);
       atualizarIconeTema(novoTema);
     });
+  }
+
+  // Botão de ativar notificações push
+  const btnNotifications = document.getElementById("btn-notifications");
+  if (btnNotifications) {
+    btnNotifications.addEventListener("click", async () => {
+      const success = await pushManager.requestPermission();
+      if (success) {
+        notie.alert({
+          type: "success",
+          text: "✅ Notificações ativadas! Você receberá lembretes e parabenizações.",
+          time: 3,
+        });
+        btnNotifications.style.opacity = "0.5";
+        btnNotifications.title = "Notificações já ativadas";
+      } else {
+        notie.alert({
+          type: "error",
+          text: "❌ Permissão negada. Ative nas configurações do navegador.",
+          time: 4,
+        });
+      }
+    });
+
+    // Se já tiver permissão, deixa o botão em estado "ativado"
+    if (pushManager.permission === "granted") {
+      btnNotifications.style.opacity = "0.5";
+      btnNotifications.title = "Notificações já ativadas";
+    }
   }
 }
 

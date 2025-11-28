@@ -1,5 +1,6 @@
 import { getDadosUsuario } from "./data.js";
 import { debugLog, debugWarn } from "./debug.js";
+import chartManager from "./charts.js";
 
 function renderReport() {
   const dados = safeGetDadosUsuario();
@@ -876,21 +877,46 @@ function generateInsights(dados) {
   const mediaGeral =
     diasTrabalhados > 0 ? dados.realizadoTotal / diasTrabalhados : 0;
 
-  // Calcula sequência atual
+  // Calcula sequência atual (dias consecutivos trabalhados)
   const datasOrdenadas = Object.keys(realizadoDiario).sort();
   let sequenciaAtual = 0;
   const hoje = new Date();
-  hoje.setHours(12, 0, 0, 0);
+  hoje.setHours(0, 0, 0, 0);
 
+  // Começa do dia mais recente e volta contando consecutivos
   for (let i = datasOrdenadas.length - 1; i >= 0; i--) {
     const [ano, mes, dia] = datasOrdenadas[i].split("-");
-    const data = new Date(ano, mes - 1, dia, 12, 0, 0);
-    const diffDias = Math.floor((hoje - data) / (1000 * 60 * 60 * 24));
+    const dataRegistro = new Date(ano, mes - 1, dia);
+    dataRegistro.setHours(0, 0, 0, 0);
 
-    if (diffDias === sequenciaAtual) {
-      sequenciaAtual++;
+    // Calcula quantos dias atrás foi esse registro
+    const diffDias = Math.floor((hoje - dataRegistro) / (1000 * 60 * 60 * 24));
+
+    // Se é o primeiro dia ou é consecutivo ao anterior
+    if (sequenciaAtual === 0) {
+      // Primeiro dia: aceita se for hoje ou ontem (tolerância de 1 dia)
+      if (diffDias <= 1) {
+        sequenciaAtual = 1;
+      } else {
+        break; // Não começou sequência
+      }
     } else {
-      break;
+      // Próximos dias: verifica se é exatamente 1 dia antes do último contado
+      if (i < datasOrdenadas.length - 1) {
+        const [anoAnt, mesAnt, diaAnt] = datasOrdenadas[i + 1].split("-");
+        const dataAnterior = new Date(anoAnt, mesAnt - 1, diaAnt);
+        dataAnterior.setHours(0, 0, 0, 0);
+
+        const diffEntreRegistros = Math.floor(
+          (dataAnterior - dataRegistro) / (1000 * 60 * 60 * 24)
+        );
+
+        if (diffEntreRegistros === 1) {
+          sequenciaAtual++;
+        } else {
+          break; // Quebrou a sequência
+        }
+      }
     }
   }
 
@@ -1409,6 +1435,12 @@ document.addEventListener("DOMContentLoaded", () => {
     generateInsights(dados);
     generateRanking(dados);
     generateComparison(dados);
+
+    // Renderiza gráfico de progresso
+    const chartCanvas = document.getElementById("progress-chart");
+    if (chartCanvas) {
+      chartManager.createProgressLineChart("progress-chart");
+    }
   }
   setupActions();
   setupSignatures();

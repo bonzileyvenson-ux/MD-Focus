@@ -6,6 +6,7 @@
     <title>Relatório de Movimentos — MD-Focus</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="touch-icon.png">
     <link rel="manifest" href="manifest.json">
@@ -110,6 +111,24 @@
         <h2>📊 Análise e Recomendações</h2>
         <div class="analysis-content" id="analysis-content">
           <!-- Será preenchido dinamicamente pelo JavaScript -->
+        </div>
+      </section>
+
+      <!-- Seção de Gráfico de Progresso - NÃO aparece no print -->
+      <section class="report-chart no-print" id="report-chart">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <h2>📈 Gráfico de Progresso</h2>
+            <p>Últimos 14 dias • Pontos coloridos por desempenho</p>
+          </div>
+          <div class="chart-legend">
+            <span title="Meta batida">🟢 ≥100%</span>
+            <span title="Próximo da meta">🟡 ≥80%</span>
+            <span title="Abaixo da meta">🔴 <80%</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="progress-chart"></canvas>
         </div>
       </section>
 

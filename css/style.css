@@ -953,6 +953,31 @@ svg {
 .emojis-meta #btn-abrir-historico:active {
   transform: scale(0.95);
 }
+.emojis-meta .btn-notifications {
+  margin-left: 1.5rem;
+  background: rgba(0, 123, 255, 0.15);
+  border: 2px solid rgba(0, 123, 255, 0.4);
+  color: hsl(0, 0%, 100%);
+  font-size: 2rem;
+  padding: 0.8rem 1.2rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.emojis-meta .btn-notifications:hover {
+  background: rgba(0, 123, 255, 0.3);
+  border-color: rgba(0, 123, 255, 0.7);
+  transform: scale(1.1);
+}
+.emojis-meta .btn-notifications:active {
+  transform: scale(0.95);
+}
+.emojis-meta .btn-notifications i {
+  pointer-events: none;
+}
 
 .meta-data-hidden {
   display: none;
