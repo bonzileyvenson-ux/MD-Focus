@@ -1074,11 +1074,11 @@ svg {
   inset: 0 0 0 0;
   z-index: 10000;
   backdrop-filter: blur(5rem);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 @media screen and (orientation: landscape) and (min-width: 768px) {
   .modal-backdrop {
-    overflow-y: auto;
-    overflow-x: hidden;
     position: relative;
     backdrop-filter: none;
     background-color: transparent;
@@ -1099,11 +1099,11 @@ svg {
   justify-content: center;
   gap: 2rem;
   color: rgb(255, 255, 255);
-  max-height: 10vh;
-  min-height: 6.8rem;
+  max-height: 8vh;
+  min-height: 5.5rem;
   width: 100%;
   margin: 0 auto;
-  padding: 0 3rem;
+  padding: 0 1.5rem;
 }
 .modal-header .titulo-modal {
   font-size: 2.5rem;
@@ -1372,42 +1372,110 @@ svg {
 }
 
 @media (max-width: 480px) {
+  .modal-header {
+    max-height: 7vh;
+    min-height: 5rem;
+    padding: 0 1rem;
+    gap: 1rem;
+  }
   .modal-header .titulo-modal {
-    font-size: 2.8rem;
+    font-size: 2rem;
+  }
+  .modal-header .close-btn {
+    width: 4rem;
   }
   .modal-header .close-btn i {
-    font-size: 3.5rem;
+    font-size: 2.5rem;
+  }
+  .modal-body {
+    padding-bottom: 2rem;
   }
   .mt-4 {
-    font-size: 2.4rem;
+    font-size: 1.8rem;
+    padding-top: 1rem;
   }
   .mt-5 {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
+  }
+  .list-group {
+    width: 95%;
+    padding: 0.8rem;
   }
   .btn {
-    width: 2rem;
-    height: 2rem;
-    padding: 1.4rem;
-    font-size: 2rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    padding: 1.2rem;
+    font-size: 1.6rem;
+  }
+  .historico-item-card {
+    padding: 0.8rem;
   }
   .historico-item-data {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
+    gap: 1rem;
   }
   .card-data-valor {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
   }
   .btn-modal-solicitar {
-    font-size: 2rem;
-    padding: 1.4rem 2.5rem;
+    font-size: 1.6rem;
+    padding: 1rem 2rem;
   }
   .edit-botoes .btn-success,
   .edit-botoes .btn-cancelar-correcao {
-    font-size: 1.8rem;
-    padding: 1rem 1.5rem;
+    font-size: 1.4rem;
+    padding: 0.8rem 1rem;
   }
   .historico-item-legend {
+    font-size: 1.3rem;
+    padding: 0.2rem 0.6rem;
+  }
+  .form-group {
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+  .form-group .observacao-text {
+    width: 95%;
+    min-height: 2.5rem;
+    padding: 0.8rem;
+  }
+  .h3-media-semanal {
     font-size: 1.6rem;
-    padding: 0.3rem 0.8rem;
+    margin-top: 1rem;
+  }
+}
+@media (max-width: 360px) {
+  .modal-header {
+    max-height: 6vh;
+    min-height: 4.5rem;
+    padding: 0 0.5rem;
+  }
+  .modal-header .titulo-modal {
+    font-size: 1.6rem;
+  }
+  .modal-header .close-btn {
+    width: 3.5rem;
+  }
+  .modal-header .close-btn i {
+    font-size: 2rem;
+  }
+  .mt-4 {
+    font-size: 1.6rem;
+  }
+  .historico-item-data {
+    font-size: 1.2rem;
+  }
+  .card-data-valor {
+    font-size: 1.2rem;
+  }
+  .btn {
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 1rem;
+    font-size: 1.4rem;
+  }
+  .historico-item-legend {
+    font-size: 1.1rem;
   }
 }
 

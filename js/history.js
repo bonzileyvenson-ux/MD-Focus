@@ -190,30 +190,88 @@ export function configurarModalHistorico() {
 
   if (btnAbrir) {
     let lastClickTime = 0;
+    let longPressTimer = null;
+    let longPressTriggered = false;
 
-    btnAbrir.addEventListener("click", (e) => {
-      e.preventDefault(); // Prevenir comportamento padrão
-      const now = Date.now();
-      const timeSinceLastClick = now - lastClickTime;
+    // Detectar se é mobile
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
-      console.log("Click detectado:", {
-        now,
-        lastClickTime,
-        timeSinceLastClick,
+    if (isMobile) {
+      // MOBILE: Long press para relatório, tap para modal
+      btnAbrir.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        longPressTriggered = false;
+
+        // Feedback visual: reduz opacidade
+        btnAbrir.style.opacity = "0.6";
+        btnAbrir.style.transform = "scale(0.95)";
+
+        // Inicia timer de 500ms para long press
+        longPressTimer = setTimeout(() => {
+          longPressTriggered = true;
+
+          // Vibração de feedback (se suportado)
+          if (navigator.vibrate) {
+            navigator.vibrate(50);
+          }
+
+          console.log("Long press detectado! Abrindo relatório...");
+          window.open("report.html", "_blank");
+
+          // Restaura visual
+          btnAbrir.style.opacity = "1";
+          btnAbrir.style.transform = "scale(1)";
+        }, 500);
       });
 
-      // Duplo clique: abrir relatório (dentro de 300ms)
-      if (timeSinceLastClick < 300 && timeSinceLastClick > 0) {
-        console.log("Duplo clique detectado! Abrindo relatório...");
-        window.open("report.html", "_blank");
-        lastClickTime = 0; // Reset
-      } else {
-        // Clique simples: abrir modal
-        console.log("Clique simples detectado! Abrindo modal...");
-        abrirModalHistorico();
-        lastClickTime = now;
-      }
-    });
+      btnAbrir.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        clearTimeout(longPressTimer);
+
+        // Restaura visual
+        btnAbrir.style.opacity = "1";
+        btnAbrir.style.transform = "scale(1)";
+
+        // Se não foi long press, abre modal
+        if (!longPressTriggered) {
+          console.log("Tap simples detectado! Abrindo modal...");
+          abrirModalHistorico();
+        }
+      });
+
+      btnAbrir.addEventListener("touchcancel", () => {
+        clearTimeout(longPressTimer);
+
+        // Restaura visual
+        btnAbrir.style.opacity = "1";
+        btnAbrir.style.transform = "scale(1)";
+      });
+    } else {
+      // DESKTOP: Duplo clique para relatório, clique simples para modal
+      btnAbrir.addEventListener("click", (e) => {
+        e.preventDefault();
+        const now = Date.now();
+        const timeSinceLastClick = now - lastClickTime;
+
+        console.log("Click detectado:", {
+          now,
+          lastClickTime,
+          timeSinceLastClick,
+        });
+
+        // Duplo clique: abrir relatório (dentro de 300ms)
+        if (timeSinceLastClick < 300 && timeSinceLastClick > 0) {
+          console.log("Duplo clique detectado! Abrindo relatório...");
+          window.open("report.html", "_blank");
+          lastClickTime = 0; // Reset
+        } else {
+          // Clique simples: abrir modal
+          console.log("Clique simples detectado! Abrindo modal...");
+          abrirModalHistorico();
+          lastClickTime = now;
+        }
+      });
+    }
   }
 
   if (btnFechar) {
