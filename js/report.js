@@ -60,7 +60,7 @@ function renderReport() {
 
     // Verifica o dia da semana para marcar fim de semana
     const [ano, mes, dia] = movimento.date.split("-").map(Number);
-    const dataObj = new Date(ano, mes - 1, dia, 12, 0, 0);
+    const dataObj = new Date(ano, mes - 1, dia);
     const diaSemana = dataObj.getDay();
 
     // Adiciona classe especial para sexta-feira (fim de semana útil)
@@ -291,10 +291,34 @@ function renderAnalysis(dados) {
         faltaPontos / Math.max(diasUteisRestantes, 1)
       );
 
+      // Mensagens diferentes se dias acabaram ou não
+      let recommendationText = "";
+      if (diasUteisRestantes === 0) {
+        recommendationText = `
+          <i class="bi bi-exclamation-circle recommendation-icon"></i>
+          <strong>Atenção:</strong> O mês acabou e ainda faltam <strong>${faltaPontos.toLocaleString(
+            "pt-BR"
+          )} pontos</strong> para bater a meta.
+          <br><br>
+          <strong>Meta do próximo mês:</strong> Planeje melhor sua produtividade para não deixar acumular no final!
+        `;
+      } else {
+        recommendationText = `
+          <i class="bi bi-lightbulb recommendation-icon"></i>
+          <strong>Recomendação:</strong> Com aproximadamente <strong>${diasUteisRestantes} dia(s) útil(eis) restante(s)</strong> no mês, 
+          você precisa fazer em média <strong>${pontosPorDia.toLocaleString(
+            "pt-BR"
+          )} pontos por dia</strong> para atingir sua meta.
+        `;
+      }
+
       cards.push({
-        type: "warning",
-        icon: "bi-graph-up-arrow",
-        title: "Meta Mensal em Andamento",
+        type: diasUteisRestantes === 0 ? "danger" : "warning",
+        icon: diasUteisRestantes === 0 ? "bi-calendar-x" : "bi-graph-up-arrow",
+        title:
+          diasUteisRestantes === 0
+            ? "Meta Não Atingida"
+            : "Meta Mensal em Andamento",
         body: `
           Você atingiu <strong class="highlight">${percentualAtingido}%</strong> da meta mensal.
           <br><br>
@@ -303,13 +327,7 @@ function renderAnalysis(dados) {
             "pt-BR"
           )} pontos</strong> da meta.
         `,
-        recommendation: `
-          <i class="bi bi-lightbulb recommendation-icon"></i>
-          <strong>Recomendação:</strong> Com aproximadamente <strong>${diasUteisRestantes} dias úteis restantes</strong> no mês, 
-          você precisa fazer em média <strong>${pontosPorDia.toLocaleString(
-            "pt-BR"
-          )} pontos por dia</strong> para atingir sua meta.
-        `,
+        recommendation: recommendationText,
       });
     } else if (pontosOk) {
       const excedente = totalPontos - metaMensal;
@@ -452,7 +470,7 @@ function buildMovements(dados) {
   diasDoMes.forEach((isoDate) => {
     // Parse correto da data ISO sem problemas de timezone
     const [ano, mes, dia] = isoDate.split("-").map(Number);
-    const dataObj = new Date(ano, mes - 1, dia, 12, 0, 0, 0);
+    const dataObj = new Date(ano, mes - 1, dia);
     const diaSemana = dataObj.getDay();
 
     // Ignora finais de semana (0=domingo, 6=sábado)
@@ -852,8 +870,8 @@ function generateInsights(dados) {
   ];
 
   Object.entries(realizadoDiario).forEach(([dataKey, pontos]) => {
-    const [ano, mes, dia] = dataKey.split("-");
-    const data = new Date(ano, mes - 1, dia, 12, 0, 0);
+    const [ano, mes, dia] = dataKey.split("-").map(Number);
+    const data = new Date(ano, mes - 1, dia);
     const diaSemana = data.getDay();
 
     if (!porDiaSemana[diaSemana]) {
@@ -1009,8 +1027,8 @@ function generateRanking(dados) {
   // Converte para array e ordena
   const diasOrdenados = Object.entries(realizadoDiario)
     .map(([dataKey, pontos]) => {
-      const [ano, mes, dia] = dataKey.split("-");
-      const data = new Date(ano, mes - 1, dia, 12, 0, 0);
+      const [ano, mes, dia] = dataKey.split("-").map(Number);
+      const data = new Date(ano, mes - 1, dia);
       return {
         dataKey,
         dataFormatada: `${dia}/${mes}/${ano}`,

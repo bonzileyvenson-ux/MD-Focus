@@ -167,7 +167,7 @@ main {
 
 .notie-container {
   position: fixed;
-  top: 6rem !important;
+  top: 4.5rem !important;
   left: 50%;
   transform: translateX(-50%);
   z-index: 11001;
@@ -177,11 +177,14 @@ main {
   max-width: min(96%, 64rem);
   padding: 0.6rem 1rem;
   border-radius: 0.9rem;
-  font-size: 1.45rem;
+  font-size: 1.2rem;
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
   font-weight: 600;
   box-shadow: 0 0.8rem 1.6rem rgba(8, 14, 17, 0.08);
   background-image: linear-gradient(135deg, rgb(18, 51, 88), rgb(52, 118, 194));
+  word-break: break-word; // Quebra palavras longas
+  overflow-wrap: break-word; // Fallback para navegadores antigos
+  hyphens: auto; // Adiciona hifenização automática
 }
 
 .notie-container.with-icon {
@@ -214,19 +217,25 @@ main {
   .notie-container {
     font-size: 1.6rem;
     padding: 0.8rem 1.2rem;
+    padding-top: 2.2rem; // Espaço reduzido para metade do ícone
     max-width: 98%;
     line-height: 1.5;
   }
 
   .notie-container.with-icon {
-    padding-left: 4.5rem;
+    padding-left: 1.2rem; // Remove padding esquerdo
+    justify-content: center; // Centraliza conteúdo
   }
 
   .notie-container.with-icon::before {
-    left: 0.5rem;
+    left: 50%; // Centraliza horizontalmente
+    top: -1.5rem; // 50% fora do topo (metade da altura de 3rem)
+    transform: translateX(-50%); 
     width: 3rem;
     height: 3rem;
     background-size: cover;
+    border-right: none; // Remove borda lateral
+    border-bottom: 2px solid rgba(13, 185, 207, 0.7); // Borda na base
   }
 
   .notie-button {
@@ -240,6 +249,9 @@ main {
 .notie-container.with-icon .notie-text {
   margin-left: 0.6rem;
   text-align: left;
+  word-break: break-word; // Evita texto sair do container
+  overflow-wrap: break-word;
+  max-width: 100%; // Garante que não ultrapasse o container
 }
 
 .notie-background-success {
@@ -297,6 +309,9 @@ main {
     padding: 0.2rem 0.4rem;
     text-align: center;
     color: clr(blanco);
+    word-break: break-word; // Quebra palavras longas em confirmações
+    overflow-wrap: break-word;
+    max-width: 100%;
   }
 
   .notie-buttons,
@@ -304,15 +319,20 @@ main {
     @include flex-center;
     gap: 0.8rem;
     margin-top: 0.4rem;
+    flex-wrap: wrap; // Permite botões quebrarem linha se necessário
   }
 
   .notie-button {
-    flex: 0 0 auto;
+    flex: 0 1 auto; // Permite encolher se necessário
     width: auto !important;
     min-width: 5.2rem;
+    max-width: 25%; // Evita que um botão ocupe toda a linha
     padding: 0.5rem 0.85rem;
     border-radius: 0.6rem;
     font-size: 1.25rem;
+    white-space: nowrap; // Mantém texto do botão em uma linha
+    overflow: hidden;
+    text-overflow: ellipsis; // Adiciona ... se texto muito longo
   }
 }
 

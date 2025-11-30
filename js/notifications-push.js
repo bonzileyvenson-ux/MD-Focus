@@ -71,7 +71,13 @@ class PushNotificationManager {
    * Envia uma notificação
    */
   sendNotification(title, body, icon = "/favicon.png", tag = null) {
-    if (this.permission !== "granted") return;
+    // Sempre salva a notificação, mesmo se não tiver permissão
+    this.saveUnreadNotification(title, body, icon, tag);
+
+    if (this.permission !== "granted") {
+      this.updateBadge();
+      return;
+    }
 
     const options = {
       body,
@@ -87,12 +93,114 @@ class PushNotificationManager {
     notification.onclick = () => {
       window.focus();
       notification.close();
+      // Marca como lida quando clicada
+      this.markNotificationAsRead(tag || `notif-${Date.now()}`);
     };
 
     // Auto-fecha após 5 segundos
     setTimeout(() => notification.close(), 5000);
 
     return notification;
+  }
+
+  /**
+   * Salva notificação não lida no localStorage
+   */
+  saveUnreadNotification(title, body, icon, tag) {
+    const notifications = this.getUnreadNotifications();
+    const newNotification = {
+      id: tag || `notif-${Date.now()}`,
+      title,
+      body,
+      icon,
+      timestamp: Date.now(),
+      read: false,
+    };
+
+    notifications.push(newNotification);
+
+    // Mantém apenas últimas 50 notificações
+    if (notifications.length > 50) {
+      notifications.shift();
+    }
+
+    localStorage.setItem(
+      "md-focus-notifications",
+      JSON.stringify(notifications)
+    );
+    this.updateBadge();
+  }
+
+  /**
+   * Obtém notificações não lidas
+   */
+  getUnreadNotifications() {
+    try {
+      const stored = localStorage.getItem("md-focus-notifications");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Conta notificações não lidas
+   */
+  getUnreadCount() {
+    const notifications = this.getUnreadNotifications();
+    return notifications.filter((n) => !n.read).length;
+  }
+
+  /**
+   * Marca notificação como lida
+   */
+  markNotificationAsRead(id) {
+    const notifications = this.getUnreadNotifications();
+    const notification = notifications.find((n) => n.id === id);
+    if (notification) {
+      notification.read = true;
+      localStorage.setItem(
+        "md-focus-notifications",
+        JSON.stringify(notifications)
+      );
+      this.updateBadge();
+    }
+  }
+
+  /**
+   * Marca todas como lidas
+   */
+  markAllAsRead() {
+    const notifications = this.getUnreadNotifications();
+    notifications.forEach((n) => (n.read = true));
+    localStorage.setItem(
+      "md-focus-notifications",
+      JSON.stringify(notifications)
+    );
+    this.updateBadge();
+  }
+
+  /**
+   * Atualiza badge visual do botão
+   */
+  updateBadge() {
+    const count = this.getUnreadCount();
+    const btn = document.getElementById("btn-notifications");
+    if (!btn) return;
+
+    // Remove badge existente
+    const existingBadge = btn.querySelector(".notification-badge");
+    if (existingBadge) {
+      existingBadge.remove();
+    }
+
+    // Adiciona badge se houver notificações não lidas
+    if (count > 0) {
+      const badge = document.createElement("span");
+      badge.className = "notification-badge";
+      badge.textContent = count > 99 ? "99+" : count;
+      btn.appendChild(badge);
+    }
   }
 
   /**
@@ -356,6 +464,51 @@ class PushNotificationManager {
     this.cancelAll();
     localStorage.removeItem("notification-permission");
     console.log("✅ Notificações desativadas");
+  }
+
+  /**
+   * Método de teste - adiciona notificações de exemplo
+   */
+  addTestNotifications() {
+    console.log("🧪 Adicionando notificações de teste...");
+
+    this.sendNotification(
+      "✅ Meta atingida!",
+      "Você bateu 100% da meta!",
+      "/favicon.png",
+      "test-1"
+    );
+    this.sendNotification(
+      "⚠️ Atenção",
+      "Faltam 2 dias para o fim do mês",
+      "/favicon.png",
+      "test-2"
+    );
+    this.sendNotification(
+      "💪 Motivação",
+      "Continue assim, você está indo bem!",
+      "/favicon.png",
+      "test-3"
+    );
+
+    // Aguarda 500ms e força atualização do badge
+    setTimeout(() => {
+      this.updateBadge();
+      const count = this.getUnreadCount();
+      console.log(`✅ ${count} notificações adicionadas!`);
+      console.log("🔔 O badge deve aparecer no botão agora.");
+
+      // Tenta localizar o botão novamente
+      const btn = document.getElementById("btn-notifications");
+      if (btn) {
+        console.log("✓ Botão encontrado:", btn);
+        console.log("✓ Badge filho:", btn.querySelector(".notification-badge"));
+      } else {
+        console.warn("⚠️ Botão ainda não encontrado. Você já fez login?");
+      }
+    }, 500);
+
+    return this.getUnreadCount();
   }
 }
 

@@ -201,35 +201,6 @@
       transform: scale(0.95);
     }
   }
-
-  .btn-notifications {
-    margin-left: 1.5rem;
-    background: rgba(0, 123, 255, 0.15);
-    border: 2px solid rgba(0, 123, 255, 0.4);
-    color: clr(blanco);
-    font-size: 2rem;
-    padding: 0.8rem 1.2rem;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    &:hover {
-      background: rgba(0, 123, 255, 0.3);
-      border-color: rgba(0, 123, 255, 0.7);
-      transform: scale(1.1);
-    }
-
-    &:active {
-      transform: scale(0.95);
-    }
-
-    i {
-      pointer-events: none;
-    }
-  }
 }
 
 .meta-data-hidden {
@@ -286,8 +257,15 @@
   text-transform: capitalize;
   border-bottom: 2px solid hsl(209, 100%, 50%);
   border-right: 2px solid hsl(209, 100%, 50%);
+  @include flex-center;
+  gap: 0.6rem;
+  
+  // Necessário para o posicionamento absoluto do btn-notifications
+  &-hidden {
+    position: relative;
+  }
 
-  .bi {
+  .bi-person-badge-fill {
     margin-right: 0.5rem;
   }
 
@@ -295,7 +273,6 @@
     background: transparent;
     border: none;
     color: clr(tercery);
-    margin-left: 0.6rem;
     cursor: pointer;
     font-size: 1.6rem;
     @include flex-center;
@@ -303,10 +280,88 @@
     padding: 0.3rem 0.5rem;
     border-radius: 0.6rem;
     @include transitions(background 0.15s ease, transform 0.12s ease);
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.04);
+      transform: translateY(-2px);
+    }
   }
-  .logout-btn:hover {
-    background: rgba(0, 0, 0, 0.04);
-    transform: translateY(-2px);
+}
+
+// Botão de notificações posicionado à esquerda do usuario-name
+.btn-notifications {
+  position: absolute;
+  right: 100%; // Posiciona à esquerda do usuario-name
+  top: 50%; // Centraliza verticalmente
+  transform: translateY(-50%); // Ajuste fino da centralização
+  margin-right: 1rem; // Espaçamento do usuario-name
+  
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(0, 123, 255, 0.3);
+  color: rgba(0, 123, 255, 1);
+  cursor: pointer;
+  font-size: 1.8rem;
+  @include flex-center;
+  display: inline-flex;
+  padding: 0.6rem;
+  border-radius: 50%;
+  width: 3.6rem;
+  height: 3.6rem;
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.15);
+  @include transitions(all 0.15s ease);
+
+  &.active {
+    color: rgba(40, 200, 100, 1);
+    border-color: rgba(40, 200, 100, 0.5);
+    animation: pulse 2s infinite;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 0.4rem 1.2rem rgba(0, 123, 255, 0.3);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+// Badge de notificações não lidas
+.notification-badge {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  background: linear-gradient(135deg, #ff4757, #ff6348);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  min-width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  box-shadow: 0 0.2rem 0.6rem rgba(255, 71, 87, 0.5),
+    0 0 0 0.2rem rgba(255, 255, 255, 0.3);
+  animation: badgePulse 2s infinite;
+  z-index: 10;
+}
+
+@keyframes badgePulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
   }
 }
 

@@ -166,6 +166,7 @@ html {
 .relatorio-container {
   width: 90%;
   margin: 2rem auto;
+  margin-top: 3rem;
   padding: 2rem;
   background-color: hsl(0, 0%, 100%);
   border-radius: 2rem;
@@ -177,6 +178,7 @@ html {
   margin-bottom: 2rem;
   border-bottom: solid 2px hsl(29, 85%, 37%);
   padding-bottom: 3rem;
+  padding-top: 1rem;
 }
 .report-header .report-logo {
   font-size: 3rem;

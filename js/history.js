@@ -234,7 +234,7 @@ export function configurarModalHistorico() {
 
         // Se não foi long press, abre modal
         if (!longPressTriggered) {
-          console.log("Tap simples detectado! Abrindo modal...");
+    
           abrirModalHistorico();
         }
       });

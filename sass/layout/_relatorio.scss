@@ -191,6 +191,7 @@ html {
 .relatorio-container {
   width: 90%;
   margin: 2rem auto;
+  margin-top: 3rem; // Espaço extra para não ser coberto pela navegação
   padding: 2rem;
   background-color: clr(blanco);
   border-radius: 2rem;
@@ -202,6 +203,7 @@ html {
   margin-bottom: 2rem;
   border-bottom: solid 2px clr(tercery);
   padding-bottom: 3rem;
+  padding-top: 1rem; // Respiro superior no cabeçalho
 
   .report-logo {
     font-size: 3rem;

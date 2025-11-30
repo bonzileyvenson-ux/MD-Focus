@@ -219,15 +219,20 @@ export function iniciarDashboard(nome) {
   // Mostra o nome e a meta
   userName.classList.replace("usuario-name-hidden", "usuario-name");
 
-  // CORREÇÃO DE SEGURANÇA: Evitar XSS usando textContent em vez de innerHTML
-  // Limpa o conteúdo anterior
-  userName.innerHTML = "";
-  // Cria o ícone de forma segura
-  const icon = document.createElement("i");
-  icon.className = "bi bi-person-badge-fill";
-  // Adiciona o ícone e o texto do nome de forma segura
-  userName.appendChild(icon);
-  userName.appendChild(document.createTextNode(nomeFinal));
+  // CORREÇÃO DE SEGURANÇA: Atualiza apenas o texto do nome sem apagar os botões
+  // Procura o span do nome ou cria se não existir
+  let displayUsername = userName.querySelector("#display-username");
+  if (!displayUsername) {
+    displayUsername = document.createElement("span");
+    displayUsername.id = "display-username";
+    // Insere depois do ícone (primeiro elemento)
+    if (userName.children.length > 0) {
+      userName.insertBefore(displayUsername, userName.children[1]);
+    } else {
+      userName.appendChild(displayUsername);
+    }
+  }
+  displayUsername.textContent = nomeFinal;
 
   metaData.classList.replace("meta-data-hidden", "meta-data");
 
@@ -267,6 +272,13 @@ export function iniciarDashboard(nome) {
       time: 3,
     });
   }
+
+  // 7. ATUALIZA BADGE DE NOTIFICAÇÕES (se o botão existir)
+  setTimeout(() => {
+    if (pushManager) {
+      pushManager.updateBadge();
+    }
+  }, 500);
 }
 
 // Atualiza os textos das opções do dropdown para mostrar o valor mensal atual do mapaMetas
@@ -332,7 +344,14 @@ function atualizarUIDashboard(resultados) {
       maximumFractionDigits: 0,
     });
 
-    diariaElement.textContent = valorFormatado;
+    // Texto claro explicando a meta diária
+    if (resultados.diasUteisRestantes > 0) {
+      diariaElement.textContent = `${valorFormatado} pts/dia para bater a meta`;
+    } else if (resultados.isMetaBatida) {
+      diariaElement.textContent = `Meta batida! 🎉`;
+    } else {
+      diariaElement.textContent = `Faltam ${valorFormatado} pts`;
+    }
     destacarElemento("meta-value");
   }
 
@@ -357,6 +376,32 @@ function atualizarUIDashboard(resultados) {
   if (diasRestantesElement) {
     diasRestantesElement.textContent = resultados.diasUteisRestantes;
     destacarElemento("dias-restante");
+
+    // Mensagem especial quando dias restantes = 0
+    if (resultados.diasUteisRestantes === 0) {
+      setTimeout(() => {
+        if (resultados.isMetaBatida) {
+          notie.alert({
+            type: "success",
+            text: `🎉 Parabéns! Você bateu a meta com ${resultados.percentualProgresso.toFixed(
+              1
+            )}% de conclusão!`,
+            time: 5,
+            position: "top",
+          });
+        } else {
+          const faltante = resultados.faltante;
+          notie.alert({
+            type: "warning",
+            text: `⏰ Último dia do mês! Ainda faltam ${faltante.toLocaleString(
+              "pt-BR"
+            )} pontos para bater a meta. Dê o máximo hoje! 💪`,
+            time: 6,
+            position: "top",
+          });
+        }
+      }, 800);
+    }
   }
 
   atualizarGraficoCircular(
@@ -508,9 +553,7 @@ function ativarListenerMeta() {
       // Persistir a opção selecionada para manter entre sessões
       dadosUsuario.selectedMetaKey = metaAlterada;
       atualizarDadosUsuario(dadosUsuario);
-      console.log(
-        `[MD-Focus] Meta selecionada alterada por usuário: key=${metaAlterada}, mensal=${novaMetaMensal} (antes=${anterior})`
-      );
+
       // Atualiza labels caso o mapa de metas tenha valores customizados
       refreshMetaDropdownLabels();
       iniciarDashboard(dadosUsuario.nome);
@@ -859,17 +902,34 @@ function configurarLogout() {
   if (btnLogout) {
     btnLogout.addEventListener("click", () => {
       notie.confirm({
-        text: "Deseja encerrar a sessão e voltar para a tela inicial?",
-        submitText: "Sair",
-        cancelText: "Cancelar",
+        text: "Trocar de usuário? (Seus dados NÃO serão perdidos)",
+        submitText: `<i class="bi bi-check2-circle"></i>`,
+        cancelText: `<i class="bi bi-ban"></i>`,
         submitCallback: () => {
           clearCurrentUser();
+
           // Exibir a tela de login e esconder o conteúdo principal
           const loginScreen = document.getElementById("login-screen");
           const mainContent = document.getElementById("main-content");
+          const loginInput = document.getElementById("login-username");
+
           if (loginScreen) loginScreen.classList.remove("hidden");
           if (mainContent) mainContent.classList.add("hidden");
-          notie.alert({ type: "success", text: "Sessão encerrada.", time: 2 });
+
+          // Limpa o input para novo nome
+          if (loginInput) {
+            loginInput.value = "";
+            loginInput.focus();
+          }
+
+          // Reconfigura o botão de login
+          configurarCadastro();
+
+          notie.alert({
+            type: "success",
+            text: "✓ Sessão encerrada. Seus dados estão salvos.",
+            time: 2,
+          });
         },
         cancelCallback: () => {
           // nada a fazer
@@ -880,16 +940,28 @@ function configurarLogout() {
     // fallback: clicar no nome também abre confirmação
     userNameEl.addEventListener("click", () => {
       notie.confirm({
-        text: "Deseja encerrar a sessão e voltar para a tela inicial?",
-        submitText: "Sair",
-        cancelText: "Cancelar",
+        text: "Trocar de usuário? (Seus dados NÃO serão perdidos)",
+        submitText: `<i class="bi bi-check2-circle"></i>`,
+        cancelText: `<i class="bi bi-ban"></i>`,
         submitCallback: () => {
           clearCurrentUser();
           const loginScreen = document.getElementById("login-screen");
           const mainContent = document.getElementById("main-content");
+          const loginInput = document.getElementById("login-username");
+
           if (loginScreen) loginScreen.classList.remove("hidden");
           if (mainContent) mainContent.classList.add("hidden");
-          notie.alert({ type: "success", text: "Sessão encerrada.", time: 2 });
+
+          if (loginInput) {
+            loginInput.value = "";
+            loginInput.focus();
+          }
+
+          notie.alert({
+            type: "success",
+            text: "✓ Sessão encerrada. Seus dados estão salvos.",
+            time: 2,
+          });
         },
       });
     });
@@ -903,12 +975,23 @@ function configurarLogout() {
 function carregarTema() {
   const temaSalvo = localStorage.getItem("tema") || "light";
   document.documentElement.setAttribute("data-theme", temaSalvo);
-  atualizarIconeTema(temaSalvo);
+  // Atualiza ícone quando DOM estiver pronto
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () =>
+      atualizarIconeTema(temaSalvo)
+    );
+  } else {
+    atualizarIconeTema(temaSalvo);
+  }
 }
 
 function configurarToggleTema() {
   const toggleButton = document.getElementById("theme-toggle");
   if (toggleButton) {
+    // Atualiza ícone inicial
+    const temaAtual = document.documentElement.getAttribute("data-theme");
+    atualizarIconeTema(temaAtual);
+
     toggleButton.addEventListener("click", () => {
       let temaAtual = document.documentElement.getAttribute("data-theme");
       const novoTema = temaAtual === "dark" ? "light" : "dark";
@@ -922,31 +1005,127 @@ function configurarToggleTema() {
   // Botão de ativar notificações push
   const btnNotifications = document.getElementById("btn-notifications");
   if (btnNotifications) {
+    // Clique: mostra notificações ou pede permissão
     btnNotifications.addEventListener("click", async () => {
-      const success = await pushManager.requestPermission();
-      if (success) {
-        notie.alert({
-          type: "success",
-          text: "✅ Notificações ativadas! Você receberá lembretes e parabenizações.",
-          time: 3,
-        });
-        btnNotifications.style.opacity = "0.5";
-        btnNotifications.title = "Notificações já ativadas";
+      const unreadCount = pushManager.getUnreadCount();
+
+      // Se tiver notificações não lidas, mostra a lista
+      if (unreadCount > 0) {
+        showNotificationsList();
+        return;
+      }
+
+      // Se não tiver permissão, solicita
+      if (pushManager.permission !== "granted") {
+        const success = await pushManager.requestPermission();
+        if (success) {
+          notie.alert({
+            type: "success",
+            text: "✅ Notificações ativadas! Você receberá lembretes e parabenizações.",
+            time: 3,
+          });
+          btnNotifications.classList.add("active");
+          btnNotifications.title = "Notificações ativadas ✓";
+        } else {
+          notie.alert({
+            type: "error",
+            text: "❌ Permissão negada. Ative nas configurações do navegador.",
+            time: 4,
+          });
+        }
       } else {
         notie.alert({
-          type: "error",
-          text: "❌ Permissão negada. Ative nas configurações do navegador.",
-          time: 4,
+          type: "info",
+          text: `<i class="bi bi-chat-square"></i> Você não tem notificações não lidas.`,
+          time: 2,
         });
       }
     });
 
+    // Atualiza badge na inicialização
+    pushManager.updateBadge();
+
     // Se já tiver permissão, deixa o botão em estado "ativado"
     if (pushManager.permission === "granted") {
-      btnNotifications.style.opacity = "0.5";
-      btnNotifications.title = "Notificações já ativadas";
+      btnNotifications.classList.add("active");
+      btnNotifications.title = "Notificações ativadas ✓";
     }
   }
+}
+
+/**
+ * Mostra lista de notificações não lidas
+ */
+function showNotificationsList() {
+  const notifications = pushManager
+    .getUnreadNotifications()
+    .filter((n) => !n.read);
+
+  if (notifications.length === 0) {
+    notie.alert({
+      type: "info",
+      text: `<i class="bi bi-chat-square"></i> Você não tem notificações não lidas.`,
+      time: 2,
+    });
+    return;
+  }
+
+  // Ordena por mais recente
+  notifications.sort((a, b) => b.timestamp - a.timestamp);
+
+  // Monta HTML da lista
+  let html = `
+    <div style="max-height: 400px; overflow-y: auto; padding: 1rem;">
+      <h3 style="margin: 0 0 1rem 0; color: #fff; font-size: 1.2rem;">
+        <i class="bi bi-chat-text"></i> Notificações (${notifications.length})
+      </h3>
+  `;
+
+  notifications.slice(0, 10).forEach((notif) => {
+    const date = new Date(notif.timestamp);
+    const timeStr = date.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    html += `
+      <div style="
+        background: rgba(255,255,255,0.15); 
+        padding: 1rem; 
+        margin-bottom: 0.8rem; 
+        border-radius: 0.5rem;
+        border-left: 3px solid #ffa726;
+      ">
+        <div style="font-weight: bold; margin-bottom: 0.3rem; color: #ffa726;">
+          ${notif.title}
+        </div>
+        <div style="font-size: 1.3rem; margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);">
+          ${notif.body}
+        </div>
+        <div style="font-size: 1.1rem; color: rgba(255,255,255,0.6);">
+          ${timeStr}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  notie.confirm({
+    text: html,
+    submitText: `<i class="bi bi-check2-circle"></i>`,
+    cancelText: `<i class="bi bi-ban"></i>`,
+    submitCallback: () => {
+      pushManager.markAllAsRead();
+      notie.alert({
+        type: "success",
+        text: "✓ Todas as notificações foram marcadas como lidas",
+        time: 2,
+      });
+    },
+  });
 }
 
 // Responsive mode: toggles visibility/behavior between mobile and desktop widths
@@ -990,11 +1169,7 @@ function setupResponsiveMode() {
   applyMode(mq);
 
   // Listen for changes
-  if (typeof mq.addEventListener === "function") {
-    mq.addEventListener("change", (e) => applyMode(e));
-  } else if (typeof mq.addListener === "function") {
-    mq.addListener((e) => applyMode(e));
-  }
+  mq.addEventListener("change", (e) => applyMode(e));
 }
 
 function atualizarIconeTema(tema) {
@@ -1044,6 +1219,13 @@ function sincronizarDadosDeOutraAba(novosValorJSON) {
   try {
     const novosDados = JSON.parse(novosValorJSON);
     console.log("🔄 Dados atualizados de outra aba");
+
+    // Verifica se há usuário logado nesta aba
+    const mainContent = document.getElementById("main-content");
+    if (!mainContent || mainContent.classList.contains("hidden")) {
+      console.log("⏭️ Aba está na tela de login, ignorando sincronização");
+      return;
+    }
 
     // Atualizar cache local
     atualizarDadosUsuario(novosDados);

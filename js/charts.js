@@ -267,7 +267,7 @@ class ChartManager {
                 weight: "500",
               },
               padding: 8,
-              stepSize: 25, // Incrementos menores para melhor precisão
+              maxTicksLimit: 8, // Limita a 8 marcações no eixo Y
               callback: (value) => `${value}`,
             },
             title: {
@@ -487,7 +487,12 @@ class ChartManager {
 
     if (comDiaSemana) {
       const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-      const diaSemana = diasSemana[date.getDay()];
+      const dataSemanal = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
+      const diaSemana = diasSemana[dataSemanal.getDay()];
       return `${diaSemana} ${dia}/${mes}`;
     }
 
