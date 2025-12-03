@@ -2,6 +2,19 @@ import { getDadosUsuario } from "./data.js";
 import { debugLog, debugWarn } from "./debug.js";
 import chartManager from "./charts.js";
 
+// Funções helper de pluralização
+function pluralDia(qtd) {
+  return qtd === 1 ? "dia" : "dias";
+}
+
+function pluralUtil(qtd) {
+  return qtd === 1 ? "útil" : "úteis";
+}
+
+function pluralTrabalhado(qtd) {
+  return qtd === 1 ? "trabalhado" : "trabalhados";
+}
+
 function renderReport() {
   const dados = safeGetDadosUsuario();
   const tbody = document.querySelector("#report-table tbody");
@@ -176,8 +189,12 @@ function renderReport() {
         <td style="font-weight: bold; color: #155724; text-align: center;">${totalPontos.toLocaleString(
           "pt-BR"
         )} pts</td>
-        <td style="text-align: center; font-style: italic; color: #28a745;">${diasTrabalhados} trabalhado(s)</td>
-        <td style="text-align: center; font-style: italic; color: #dc3545;">${diasNaoTrabalhados} não trabalhado(s)</td>
+        <td style="text-align: center; font-style: italic; color: #28a745;">${diasTrabalhados} ${pluralTrabalhado(
+      diasTrabalhados
+    )}</td>
+        <td style="text-align: center; font-style: italic; color: #dc3545;">${diasNaoTrabalhados} não ${pluralTrabalhado(
+      diasNaoTrabalhados
+    )}</td>
       </tr>
       ${linhaBonus}
       ${linhaNormal}
@@ -305,7 +322,11 @@ function renderAnalysis(dados) {
       } else {
         recommendationText = `
           <i class="bi bi-lightbulb recommendation-icon"></i>
-          <strong>Recomendação:</strong> Com aproximadamente <strong>${diasUteisRestantes} dia(s) útil(eis) restante(s)</strong> no mês, 
+          <strong>Recomendação:</strong> Com <strong>${diasUteisRestantes} ${pluralDia(
+          diasUteisRestantes
+        )} ${pluralUtil(diasUteisRestantes)} restante${
+          diasUteisRestantes === 1 ? "" : "s"
+        }</strong> no mês, 
           você precisa fazer em média <strong>${pontosPorDia.toLocaleString(
             "pt-BR"
           )} pontos por dia</strong> para atingir sua meta.
@@ -1007,6 +1028,777 @@ function generateInsights(dados) {
   `
     )
     .join("");
+
+  // Adicionar heatmap visual e insights avançados
+  gerarHeatmapSemanal(porDiaSemana, mediaGeral);
+  gerarInsightsAvancados(dados, porDiaSemana, mediaGeral, sequenciaAtual);
+  gerarAlertasPreventivos(dados, porDiaSemana, sequenciaAtual);
+  gerarComparacoesTemporais(dados);
+}
+
+/**
+ * Gera heatmap visual de produtividade por dia da semana
+ */
+function gerarHeatmapSemanal(porDiaSemana, mediaGeral) {
+  const heatmapContainer = document.getElementById("heatmap-semanal");
+  if (!heatmapContainer) return;
+
+  // Apenas dias úteis (1=Segunda até 5=Sexta)
+  const diasUteis = [
+    { nome: "SEG", index: 1 },
+    { nome: "TER", index: 2 },
+    { nome: "QUA", index: 3 },
+    { nome: "QUI", index: 4 },
+    { nome: "SEX", index: 5 },
+  ];
+
+  const heatmapHTML = diasUteis
+    .map(({ nome, index }) => {
+      const dados = porDiaSemana[index];
+      if (!dados || dados.count === 0) {
+        return `
+        <div class="heatmap-dia sem-dados">
+          <div class="dia-nome">${nome}</div>
+          <div class="dia-barra" style="height: 0%; background: #e0e0e0;"></div>
+          <div class="dia-valor">-</div>
+        </div>
+      `;
+      }
+
+      const media = dados.total / dados.count;
+      const percentual = mediaGeral > 0 ? (media / mediaGeral) * 100 : 0;
+      const altura = Math.min(percentual, 150); // Máximo 150%
+
+      // Cores baseadas na performance
+      let cor = "#e0e0e0";
+      let classe = "baixo";
+      if (percentual >= 110) {
+        cor = "#10b981"; // Verde forte - excelente
+        classe = "excelente";
+      } else if (percentual >= 90) {
+        cor = "#3b82f6"; // Azul - bom
+        classe = "bom";
+      } else if (percentual >= 70) {
+        cor = "#f59e0b"; // Amarelo - médio
+        classe = "medio";
+      } else {
+        cor = "#ef4444"; // Vermelho - baixo
+        classe = "baixo";
+      }
+
+      return `
+      <div class="heatmap-dia ${classe}">
+        <div class="dia-nome">${nome}</div>
+        <div class="dia-barra" style="height: ${altura}%; background: ${cor};">
+          <span class="percentual">${percentual.toFixed(0)}%</span>
+        </div>
+        <div class="dia-valor">${media.toFixed(0)}</div>
+        <div class="dia-dias">${dados.count} ${
+        dados.count === 1 ? "dia" : "dias"
+      }</div>
+      </div>
+    `;
+    })
+    .join("");
+
+  heatmapContainer.innerHTML = `
+    <div class="heatmap-header">
+      <h3>📊 Produtividade por Dia da Semana</h3>
+      <p class="heatmap-subtitle">Média de pontos em dias úteis (Seg-Sex) comparada com sua média geral (100%)</p>
+    </div>
+    <div class="heatmap-container">
+      ${heatmapHTML}
+    </div>
+    <div class="heatmap-legenda">
+      <div class="legenda-item"><span class="cor excelente"></span> Excelente (110%+)</div>
+      <div class="legenda-item"><span class="cor bom"></span> Bom (90-110%)</div>
+      <div class="legenda-item"><span class="cor medio"></span> Médio (70-90%)</div>
+      <div class="legenda-item"><span class="cor baixo"></span> Baixo (&lt;70%)</div>
+    </div>
+  `;
+}
+
+/**
+ * Gera insights avançados e inteligentes
+ */
+function gerarInsightsAvancados(
+  dados,
+  porDiaSemana,
+  mediaGeral,
+  sequenciaAtual
+) {
+  const container = document.getElementById("insights-avancados");
+  if (!container) return;
+
+  const realizadoDiario = dados.realizadoDiario || {};
+  const datasOrdenadas = Object.keys(realizadoDiario).sort();
+
+  const insights = [];
+
+  // 1. Análise de consistência
+  const totalDias = datasOrdenadas.length;
+  const hoje = new Date();
+  const diasNoMes = new Date(
+    hoje.getFullYear(),
+    hoje.getMonth() + 1,
+    0
+  ).getDate();
+  const taxaConsistencia = (totalDias / diasNoMes) * 100;
+
+  if (taxaConsistencia >= 90) {
+    insights.push({
+      tipo: "sucesso",
+      icone: "🏆",
+      titulo: "Consistência Excepcional",
+      mensagem: `Você trabalhou ${taxaConsistencia.toFixed(
+        0
+      )}% dos dias do mês! Disciplina invejável!`,
+    });
+  } else if (taxaConsistencia < 50) {
+    insights.push({
+      tipo: "alerta",
+      icone: "⚠️",
+      titulo: "Atenção: Baixa Consistência",
+      mensagem: `Você trabalhou apenas ${taxaConsistencia.toFixed(
+        0
+      )}% dos dias. Tente aumentar a frequência!`,
+    });
+  }
+
+  // 2. Padrão de dia da semana
+  const diasSemana = [
+    "Domingo",
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado",
+  ];
+  let melhorDia = { nome: "", media: 0, percentual: 0 };
+  let piorDia = { nome: "", media: Infinity, percentual: 0 };
+
+  Object.entries(porDiaSemana).forEach(([dia, dados]) => {
+    if (dados.count > 0) {
+      const media = dados.total / dados.count;
+      const percentual = (media / mediaGeral) * 100 - 100;
+
+      if (media > melhorDia.media) {
+        melhorDia = { nome: diasSemana[dia], media, percentual };
+      }
+      if (media < piorDia.media) {
+        piorDia = { nome: diasSemana[dia], media, percentual };
+      }
+    }
+  });
+
+  if (melhorDia.nome && Math.abs(melhorDia.percentual) > 15) {
+    insights.push({
+      tipo: "info",
+      icone: "🎯",
+      titulo: `${melhorDia.nome} é Seu Melhor Dia`,
+      mensagem: `Você rende ${Math.abs(melhorDia.percentual).toFixed(0)}% ${
+        melhorDia.percentual > 0 ? "acima" : "abaixo"
+      } da média! Programe tarefas importantes para esse dia.`,
+    });
+  }
+
+  if (
+    piorDia.nome &&
+    piorDia.nome !== melhorDia.nome &&
+    Math.abs(piorDia.percentual) > 15
+  ) {
+    insights.push({
+      tipo: "dica",
+      icone: "💡",
+      titulo: `${piorDia.nome} Precisa de Atenção`,
+      mensagem: `Você rende ${Math.abs(piorDia.percentual).toFixed(
+        0
+      )}% abaixo da média nesse dia. Tente metas mais leves ou planeje melhor.`,
+    });
+  }
+
+  // 3. Análise de sequência
+  if (sequenciaAtual >= 7) {
+    insights.push({
+      tipo: "sucesso",
+      icone: "🔥",
+      titulo: "Streak Impressionante!",
+      mensagem: `${sequenciaAtual} dias consecutivos! Continue assim para manter o momentum!`,
+    });
+  } else if (sequenciaAtual === 0 && totalDias > 5) {
+    insights.push({
+      tipo: "alerta",
+      icone: "⏰",
+      titulo: "Sequência Quebrada",
+      mensagem:
+        "Você não tem dias consecutivos ativos. Tente trabalhar pelo menos 1 dia para começar uma nova streak!",
+    });
+  }
+
+  // 4. Análise de tendência nos últimos dias
+  if (datasOrdenadas.length >= 14) {
+    const ultimos7 =
+      datasOrdenadas
+        .slice(-7)
+        .reduce((sum, key) => sum + realizadoDiario[key], 0) / 7;
+    const anteriores7 =
+      datasOrdenadas
+        .slice(-14, -7)
+        .reduce((sum, key) => sum + realizadoDiario[key], 0) / 7;
+    const mudanca = ((ultimos7 - anteriores7) / anteriores7) * 100;
+
+    if (mudanca > 20) {
+      insights.push({
+        tipo: "sucesso",
+        icone: "📈",
+        titulo: "Acelerando!",
+        mensagem: `Seus últimos 7 dias estão ${mudanca.toFixed(
+          0
+        )}% melhores! Você está no caminho certo!`,
+      });
+    } else if (mudanca < -20) {
+      insights.push({
+        tipo: "alerta",
+        icone: "📉",
+        titulo: "Ritmo Caindo",
+        mensagem: `Seus últimos 7 dias estão ${Math.abs(mudanca).toFixed(
+          0
+        )}% abaixo dos anteriores. O que mudou?`,
+      });
+    }
+  }
+
+  // 5. Score de produtividade
+  const score = calcularScoreProdutividade(
+    dados,
+    taxaConsistencia,
+    sequenciaAtual,
+    mediaGeral
+  );
+
+  // Renderizar insights
+  container.innerHTML = `
+    <div class="insights-avancados-header">
+      <h3>🧠 Análise Inteligente</h3>
+      <div class="score-produtividade ${score.classe}">
+        <div class="score-numero">${score.valor}</div>
+        <div class="score-label">${score.descricao}</div>
+      </div>
+    </div>
+    <div class="insights-lista">
+      ${insights
+        .map(
+          (insight) => `
+        <div class="insight-avancado ${insight.tipo}">
+          <div class="insight-icone">${insight.icone}</div>
+          <div class="insight-conteudo">
+            <h4>${insight.titulo}</h4>
+            <p>${insight.mensagem}</p>
+          </div>
+        </div>
+      `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+/**
+ * Calcula score de produtividade (0-100)
+ */
+function calcularScoreProdutividade(
+  dados,
+  taxaConsistencia,
+  sequenciaAtual,
+  mediaGeral
+) {
+  let score = 0;
+
+  // Consistência (40 pontos)
+  score += (taxaConsistencia / 100) * 40;
+
+  // Sequência ativa (20 pontos)
+  score += Math.min(sequenciaAtual * 2, 20);
+
+  // Média comparada com meta (30 pontos)
+  const metaDiaria = dados.metaMensal / 30;
+  if (mediaGeral >= metaDiaria) {
+    score += 30;
+  } else {
+    score += (mediaGeral / metaDiaria) * 30;
+  }
+
+  // Tendência positiva (10 pontos)
+  const realizadoDiario = dados.realizadoDiario || {};
+  const datasOrdenadas = Object.keys(realizadoDiario).sort();
+  if (datasOrdenadas.length >= 14) {
+    const ultimos7 =
+      datasOrdenadas
+        .slice(-7)
+        .reduce((sum, key) => sum + realizadoDiario[key], 0) / 7;
+    const anteriores7 =
+      datasOrdenadas
+        .slice(-14, -7)
+        .reduce((sum, key) => sum + realizadoDiario[key], 0) / 7;
+    if (ultimos7 > anteriores7) {
+      score += 10;
+    }
+  }
+
+  score = Math.round(Math.min(score, 100));
+
+  let descricao = "";
+  let classe = "";
+
+  if (score >= 90) {
+    descricao = "Excepcional";
+    classe = "excelente";
+  } else if (score >= 75) {
+    descricao = "Muito Bom";
+    classe = "muito-bom";
+  } else if (score >= 60) {
+    descricao = "Bom";
+    classe = "bom";
+  } else if (score >= 40) {
+    descricao = "Regular";
+    classe = "regular";
+  } else {
+    descricao = "Precisa Melhorar";
+    classe = "baixo";
+  }
+
+  return { valor: score, descricao, classe };
+}
+
+/**
+ * Gera alertas preventivos baseados em padrões históricos
+ */
+function gerarAlertasPreventivos(dados, porDiaSemana, sequenciaAtual) {
+  const container = document.getElementById("alertas-preventivos");
+  if (!container) return;
+
+  const realizadoDiario = dados.realizadoDiario || {};
+  const datasOrdenadas = Object.keys(realizadoDiario).sort();
+  const alertas = [];
+
+  // 1. Padrão de queda após folgas
+  const quedaAposFolga = detectarQuedaAposFolga(
+    realizadoDiario,
+    datasOrdenadas
+  );
+  if (quedaAposFolga.detectado) {
+    alertas.push({
+      tipo: "padrao",
+      icone: "⚠️",
+      titulo: "Padrão Detectado: Queda Após Folgas",
+      mensagem: `Você tende a render ${quedaAposFolga.percentual.toFixed(
+        0
+      )}% menos nos dias após folgas. Planeje retomar gradualmente!`,
+      severidade: quedaAposFolga.percentual > 30 ? "alto" : "medio",
+    });
+  }
+
+  // 2. Risco de quebra de sequência
+  if (sequenciaAtual >= 5) {
+    const hoje = new Date();
+    const ontem = new Date(hoje);
+    ontem.setDate(ontem.getDate() - 1);
+    const chaveOntem = ontem.toISOString().split("T")[0];
+
+    if (!realizadoDiario[chaveOntem] || realizadoDiario[chaveOntem] === 0) {
+      alertas.push({
+        tipo: "urgente",
+        icone: "🚨",
+        titulo: "Risco de Quebrar Sequência!",
+        mensagem: `Você tem ${sequenciaAtual} dias consecutivos. Não deixe para amanhã o que pode fazer hoje!`,
+        severidade: "alto",
+      });
+    }
+  }
+
+  // 3. Baixa performance em dias específicos
+  const diasSemana = [
+    "Domingo",
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado",
+  ];
+  const hoje = new Date().getDay();
+  const dadosHoje = porDiaSemana[hoje];
+
+  if (dadosHoje && dadosHoje.count >= 3) {
+    const mediaHoje = dadosHoje.total / dadosHoje.count;
+    const mediaGeral =
+      datasOrdenadas.reduce((sum, key) => sum + realizadoDiario[key], 0) /
+      datasOrdenadas.length;
+
+    if (mediaHoje < mediaGeral * 0.7) {
+      alertas.push({
+        tipo: "atencao",
+        icone: "📍",
+        titulo: `${diasSemana[hoje]}: Dia Historicamente Fraco`,
+        mensagem: `Sua média em ${diasSemana[hoje].toLowerCase()}s é ${(
+          (1 - mediaHoje / mediaGeral) *
+          100
+        ).toFixed(0)}% abaixo da média. Planeje melhor este dia!`,
+        severidade: "medio",
+      });
+    }
+  }
+
+  // 4. Inconsistência crescente
+  if (datasOrdenadas.length >= 21) {
+    const ultimas3Semanas = analisarConsistencia(
+      realizadoDiario,
+      datasOrdenadas,
+      21
+    );
+    if (
+      ultimas3Semanas.tendencia === "decrescente" &&
+      ultimas3Semanas.variacao > 20
+    ) {
+      alertas.push({
+        tipo: "tendencia",
+        icone: "📉",
+        titulo: "Inconsistência Crescente",
+        mensagem: `Sua consistência caiu ${ultimas3Semanas.variacao.toFixed(
+          0
+        )}% nas últimas 3 semanas. Retome o ritmo!`,
+        severidade: "alto",
+      });
+    }
+  }
+
+  // 5. Meta em risco
+  const metaDiaria = dados.metaMensal / 30;
+  const mediaGeral =
+    datasOrdenadas.reduce((sum, key) => sum + realizadoDiario[key], 0) /
+    datasOrdenadas.length;
+  const hoje3Dias = datasOrdenadas.slice(-3);
+  const media3Dias =
+    hoje3Dias.reduce((sum, key) => sum + realizadoDiario[key], 0) / 3;
+
+  if (media3Dias < metaDiaria * 0.8 && mediaGeral >= metaDiaria * 0.9) {
+    alertas.push({
+      tipo: "meta",
+      icone: "🎯",
+      titulo: "Ritmo Abaixo da Meta",
+      mensagem: `Seus últimos 3 dias estão 20% abaixo da meta. Você costuma render melhor, recupere o ritmo!`,
+      severidade: "alto",
+    });
+  }
+
+  // Renderizar alertas
+  if (alertas.length === 0) {
+    container.innerHTML = `
+      <div class="alertas-header">
+        <h3>🛡️ Alertas Preventivos</h3>
+      </div>
+      <div class="sem-alertas">
+        <div class="sem-alertas-icone">✅</div>
+        <p>Nenhum padrão de risco detectado! Continue assim!</p>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="alertas-header">
+        <h3>🛡️ Alertas Preventivos</h3>
+        <span class="alertas-count">${alertas.length} ${
+      alertas.length === 1 ? "alerta" : "alertas"
+    }</span>
+      </div>
+      <div class="alertas-lista">
+        ${alertas
+          .map(
+            (alerta) => `
+          <div class="alerta-card ${alerta.tipo} severidade-${
+              alerta.severidade
+            }">
+            <div class="alerta-icone">${alerta.icone}</div>
+            <div class="alerta-conteudo">
+              <h4>${alerta.titulo}</h4>
+              <p>${alerta.mensagem}</p>
+            </div>
+            <div class="alerta-badge">${
+              alerta.severidade === "alto" ? "ALTO" : "MÉDIO"
+            }</div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    `;
+  }
+}
+
+/**
+ * Detecta padrão de queda após folgas
+ */
+function detectarQuedaAposFolga(realizadoDiario, datasOrdenadas) {
+  let diasAposFolga = [];
+  let diasNormais = [];
+
+  for (let i = 1; i < datasOrdenadas.length; i++) {
+    const dataAnterior = datasOrdenadas[i - 1];
+    const dataAtual = datasOrdenadas[i];
+
+    // Verificar se houve folga (diferença > 1 dia)
+    const date1 = new Date(dataAnterior);
+    const date2 = new Date(dataAtual);
+    const diffDias = Math.floor((date2 - date1) / (1000 * 60 * 60 * 24));
+
+    if (diffDias > 1 && realizadoDiario[dataAtual] > 0) {
+      diasAposFolga.push(realizadoDiario[dataAtual]);
+    } else if (diffDias === 1 && realizadoDiario[dataAtual] > 0) {
+      diasNormais.push(realizadoDiario[dataAtual]);
+    }
+  }
+
+  if (diasAposFolga.length >= 3 && diasNormais.length >= 5) {
+    const mediaAposFolga =
+      diasAposFolga.reduce((a, b) => a + b, 0) / diasAposFolga.length;
+    const mediaNormal =
+      diasNormais.reduce((a, b) => a + b, 0) / diasNormais.length;
+    const percentual = ((mediaNormal - mediaAposFolga) / mediaNormal) * 100;
+
+    return {
+      detectado: percentual > 15,
+      percentual: percentual,
+      mediaAposFolga,
+      mediaNormal,
+    };
+  }
+
+  return { detectado: false, percentual: 0 };
+}
+
+/**
+ * Analisa consistência em um período
+ */
+function analisarConsistencia(realizadoDiario, datasOrdenadas, dias) {
+  const periodo = datasOrdenadas.slice(-dias);
+  const primeira = periodo.slice(0, Math.floor(dias / 3));
+  const ultima = periodo.slice(-Math.floor(dias / 3));
+
+  const mediaPrimeira =
+    primeira.reduce((sum, key) => sum + realizadoDiario[key], 0) /
+    primeira.length;
+  const mediaUltima =
+    ultima.reduce((sum, key) => sum + realizadoDiario[key], 0) / ultima.length;
+
+  const variacao = ((mediaPrimeira - mediaUltima) / mediaPrimeira) * 100;
+
+  return {
+    tendencia:
+      variacao > 10 ? "decrescente" : variacao < -10 ? "crescente" : "estavel",
+    variacao: Math.abs(variacao),
+    mediaPrimeira,
+    mediaUltima,
+  };
+}
+
+/**
+ * Gera comparações temporais detalhadas
+ */
+function gerarComparacoesTemporais(dados) {
+  const container = document.getElementById("comparacoes-temporais");
+  if (!container) return;
+
+  const realizadoDiario = dados.realizadoDiario || {};
+  const datasOrdenadas = Object.keys(realizadoDiario).sort();
+
+  if (datasOrdenadas.length < 7) {
+    container.innerHTML = `
+      <div class="comparacoes-header">
+        <h3>📊 Comparações Temporais</h3>
+      </div>
+      <div class="sem-dados-comparacao">
+        <p>Dados insuficientes. Continue registrando para ver comparações!</p>
+      </div>
+    `;
+    return;
+  }
+
+  const comparacoes = [];
+
+  // 1. Semana atual vs semana anterior
+  if (datasOrdenadas.length >= 14) {
+    const semanaAtual = datasOrdenadas.slice(-7);
+    const semanaAnterior = datasOrdenadas.slice(-14, -7);
+
+    const totalAtual = semanaAtual.reduce(
+      (sum, key) => sum + realizadoDiario[key],
+      0
+    );
+    const totalAnterior = semanaAnterior.reduce(
+      (sum, key) => sum + realizadoDiario[key],
+      0
+    );
+    const mediaAtual = totalAtual / 7;
+    const mediaAnterior = totalAnterior / 7;
+    const evolucao = ((totalAtual - totalAnterior) / totalAnterior) * 100;
+
+    comparacoes.push({
+      titulo: "Últimos 7 Dias vs 7 Anteriores",
+      atual: { label: "Esta semana", valor: totalAtual, media: mediaAtual },
+      anterior: {
+        label: "Semana anterior",
+        valor: totalAnterior,
+        media: mediaAnterior,
+      },
+      evolucao: evolucao,
+      tipo: evolucao > 0 ? "positivo" : evolucao < 0 ? "negativo" : "neutro",
+    });
+  }
+
+  // 2. Primeiros 7 dias vs últimos 7 dias do mês
+  if (datasOrdenadas.length >= 14) {
+    const primeiros7 = datasOrdenadas.slice(0, 7);
+    const ultimos7 = datasOrdenadas.slice(-7);
+
+    const totalPrimeiros = primeiros7.reduce(
+      (sum, key) => sum + realizadoDiario[key],
+      0
+    );
+    const totalUltimos = ultimos7.reduce(
+      (sum, key) => sum + realizadoDiario[key],
+      0
+    );
+    const mediaPrimeiros = totalPrimeiros / 7;
+    const mediaUltimos = totalUltimos / 7;
+    const evolucao = ((totalUltimos - totalPrimeiros) / totalPrimeiros) * 100;
+
+    comparacoes.push({
+      titulo: "Início do Mês vs Atual",
+      atual: {
+        label: "Últimos 7 dias",
+        valor: totalUltimos,
+        media: mediaUltimos,
+      },
+      anterior: {
+        label: "Primeiros 7 dias",
+        valor: totalPrimeiros,
+        media: mediaPrimeiros,
+      },
+      evolucao: evolucao,
+      tipo: evolucao > 0 ? "positivo" : evolucao < 0 ? "negativo" : "neutro",
+    });
+  }
+
+  // 3. Melhor semana vs pior semana
+  if (datasOrdenadas.length >= 14) {
+    const semanas = [];
+    for (let i = 0; i <= datasOrdenadas.length - 7; i += 7) {
+      const semana = datasOrdenadas.slice(i, i + 7);
+      const total = semana.reduce((sum, key) => sum + realizadoDiario[key], 0);
+      semanas.push({ inicio: i, total });
+    }
+
+    const melhorSemana = semanas.reduce((max, s) =>
+      s.total > max.total ? s : max
+    );
+    const piorSemana = semanas.reduce((min, s) =>
+      s.total < min.total ? s : min
+    );
+    const diferenca =
+      ((melhorSemana.total - piorSemana.total) / piorSemana.total) * 100;
+
+    comparacoes.push({
+      titulo: "Melhor Semana vs Pior Semana",
+      atual: {
+        label: "Melhor",
+        valor: melhorSemana.total,
+        media: melhorSemana.total / 7,
+      },
+      anterior: {
+        label: "Pior",
+        valor: piorSemana.total,
+        media: piorSemana.total / 7,
+      },
+      evolucao: diferenca,
+      tipo: "neutro",
+    });
+  }
+
+  // Renderizar comparações
+  container.innerHTML = `
+    <div class="comparacoes-header">
+      <h3>📊 Comparações Temporais</h3>
+      <p class="comparacoes-subtitle">Evolução e desempenho ao longo do tempo</p>
+    </div>
+    <div class="comparacoes-grid">
+      ${comparacoes
+        .map(
+          (comp) => `
+        <div class="comparacao-card">
+          <h4>${comp.titulo}</h4>
+          <div class="comparacao-barras">
+            <div class="barra-item">
+              <div class="barra-label">${comp.anterior.label}</div>
+              <div class="barra-visual">
+                <div class="barra-fill" style="width: ${
+                  (comp.anterior.valor /
+                    Math.max(comp.atual.valor, comp.anterior.valor)) *
+                  100
+                }%;"></div>
+              </div>
+              <div class="barra-valores">
+                <span class="valor-total">${comp.anterior.valor.toLocaleString(
+                  "pt-BR"
+                )}</span>
+                <span class="valor-media">${comp.anterior.media.toFixed(
+                  0
+                )}/dia</span>
+              </div>
+            </div>
+            <div class="barra-item">
+              <div class="barra-label">${comp.atual.label}</div>
+              <div class="barra-visual">
+                <div class="barra-fill" style="width: ${
+                  (comp.atual.valor /
+                    Math.max(comp.atual.valor, comp.anterior.valor)) *
+                  100
+                }%;"></div>
+              </div>
+              <div class="barra-valores">
+                <span class="valor-total">${comp.atual.valor.toLocaleString(
+                  "pt-BR"
+                )}</span>
+                <span class="valor-media">${comp.atual.media.toFixed(
+                  0
+                )}/dia</span>
+              </div>
+            </div>
+          </div>
+          <div class="comparacao-evolucao ${comp.tipo}">
+            <span class="evolucao-icone">${
+              comp.tipo === "positivo"
+                ? "📈"
+                : comp.tipo === "negativo"
+                ? "📉"
+                : "➡️"
+            }</span>
+            <span class="evolucao-valor">${
+              comp.evolucao > 0 ? "+" : ""
+            }${comp.evolucao.toFixed(1)}%</span>
+            <span class="evolucao-texto">${
+              comp.tipo === "positivo"
+                ? "de evolução"
+                : comp.tipo === "negativo"
+                ? "de queda"
+                : "estável"
+            }</span>
+          </div>
+        </div>
+      `
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 /**

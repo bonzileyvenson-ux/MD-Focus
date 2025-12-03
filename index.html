@@ -54,25 +54,24 @@
             <div class="view-meta">
                 <div class="meta-data-hidden" id="meta-data">
                     <div class="data-card">
+                        <!-- Botão Mirror de Previsões -->
+                        <button id="btn-abrir-predictions" class="btn-mirror-predictions" title="Ver Análises e Previsões">
+                            <i class="bi bi-arrow-left-right mirror-icon"></i>
+                        </button>
+
                         <p>Realizado: <span id="ponto-total"> 0</span></p>
                         <p>Meta: <span id="meta-mensal"></span></p>
                         <p>Diária: <span id="meta-value"></span></p>
                     </div>
                     <p class="top-5" id="top-5-status-container">Top 5: <span id="top-5-status">--</span></p>
                     <p class="emojis-meta">
-                        <i id="btn-abrir-historico" class="bi bi-calendar-check"></i>
+                        <i id="btn-abrir-historico" class="bi bi-calendar-check" title="Histórico"></i>
                         <span class="dias-restante" id="dias-restante"></span>
                     </p>
                 </div>
                 <p class="usuario-name-hidden" id="usuario-nome">
                     <i class="bi bi-person-badge-fill"></i>
                     <span id="display-username"></span>
-                    <button id="btn-notifications" class="btn-notifications" title="Ativar Notificações Push">
-                        <i class="bi bi-bell"></i>
-                    </button>
-                    <button id="btn-logout" class="logout-btn" title="Sair" aria-label="Sair">
-                        <i class="bi bi-arrow-left-right"></i>
-                    </button>
                 </p>
                
                 <!-- old signup removed: using quick login above -->
@@ -92,6 +91,97 @@
                     <i class="bi bi-check-circle"></i>
                 </button>
             </div>
+
+            <!-- ============================================================ -->
+            <!-- PAINEL DESKTOP - 3 Botões + Configurações -->
+            <!-- ============================================================ -->
+            <div class="desktop-panel-wrapper">
+                <!-- Botões de Ação Fixos -->
+                <div class="desktop-action-buttons">
+                    <a href="uso_privacidade.html" class="desktop-btn" title="Privacidade" target="_blank">
+                        <i class="bi bi-shield-fill-check"></i>
+                    </a>
+                    <button class="desktop-btn" id="desktop-config-btn" title="Configurações">
+                        <i class="bi bi-gear-fill"></i>
+                    </button>
+                    <button class="desktop-btn" id="desktop-logout-btn" title="Trocar Usuário">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </button>
+                </div>
+
+                <!-- Backdrop do Painel -->
+                <div class="desktop-panel-backdrop"></div>
+
+                <!-- Painel Lateral de Configurações -->
+                <aside class="desktop-config-panel">
+                    <div class="panel-header">
+                        <h3><i class="bi bi-gear-fill"></i> Configurações</h3>
+                        <button class="panel-close-btn">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="panel-body">
+                        <!-- Sons e Vibração -->
+                        <div class="panel-section">
+                            <h4><i class="bi bi-volume-up-fill"></i> Feedback Sensorial</h4>
+                            <div class="panel-option">
+                                <div class="option-info">
+                                    <span class="option-label">Sons de Notificação</span>
+                                    <span class="option-desc">Toca sons ao salvar e conquistas</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="desktop-toggle-som" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="panel-option">
+                                <div class="option-info">
+                                    <span class="option-label">Vibração Háptica</span>
+                                    <span class="option-desc">Vibra em ações importantes</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="desktop-toggle-vibracao" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <button class="btn-test-feedback">
+                                <i class="bi bi-bell-fill"></i> Testar Feedback
+                            </button>
+                        </div>
+
+                        <!-- Notificações Push -->
+                        <div class="panel-section">
+                            <h4><i class="bi bi-bell-fill"></i> Notificações Push</h4>
+                            <div class="panel-option">
+                                <div class="option-info">
+                                    <span class="option-label">Notificações do Navegador</span>
+                                    <span class="option-desc">Receba lembretes e parabenizações</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="desktop-toggle-push">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Tema (futuro) -->
+                        <div class="panel-section">
+                            <h4><i class="bi bi-palette-fill"></i> Aparência</h4>
+                            <div class="panel-option">
+                                <div class="option-info">
+                                    <span class="option-label">Modo Escuro</span>
+                                    <span class="option-desc">Em breve disponível</span>
+                                </div>
+                                <label class="toggle-switch disabled">
+                                    <input type="checkbox" id="desktop-toggle-dark" disabled>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
         </section>
         <section class="section2">
 
@@ -108,25 +198,43 @@
 
 
             <div class="btns-submit">
-                <button class="lapis-edita hidden" id="btn-edit"><i class="bi bi-pencil-fill"></i></button>
-                <button class="btn-submitcalculator hidden" id="calculo-rapido">
-                    <i class="bi bi-calculator"></i>
-                </button>
                 <div class="edit-icon" id="btn-principal">
                     <i class="bi bi-microsoft"></i>
                 </div>
             </div>
-
-
-
-            <div>
-                <a href="uso_privacidade.html" class="footer-link" target="_blank">
-                    <p><i class="bi bi-shield-check icon-desktop"></i><span class="footer-text">  Política de privacidade | Modo de uso </span><i class="bi bi-shield-fill-check icon-mobile"></i></p>
-                </a>
-            </div>
         </section>
 
     </main>
+
+    <!-- ============================================================ -->
+    <!-- FOOTER DE NAVEGAÇÃO MOBILE -->
+    <!-- ============================================================ -->
+    <div class="footer-backdrop" id="footer-backdrop"></div>
+    <nav class="footer-nav" id="footer-nav">
+        <div class="footer-nav-container">
+            <button class="footer-nav-item" id="btn-edit">
+                <i class="bi bi-pencil-fill"></i>
+                <span>Editar</span>
+            </button>
+            <button class="footer-nav-item" id="calculo-rapido">
+                <i class="bi bi-calculator"></i>
+                <span>Calcular</span>
+            </button>
+            <a href="uso_privacidade.html" class="footer-nav-item" target="_blank">
+                <i class="bi bi-shield-fill-check"></i>
+                <span>Privacidade</span>
+            </a>
+            <button class="footer-nav-item" id="footer-config-btn">
+                <i class="bi bi-gear-fill"></i>
+                <span>Config</span>
+            </button>
+            <button class="footer-nav-item" id="btn-logout">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Trocar</span>
+            </button>
+        </div>
+    </nav>
+
     <!-- Modal de Histórico -->
     <div id="historico-modal" class="modal-backdrop-hidden">
         <div class="modal-content-custom">
@@ -157,6 +265,104 @@
         </div>
     </div>
     </div>
+    
+    <!-- Botão para scroll até observações -->
+    <button id="scroll-to-obs-btn" class="scroll-to-obs-btn" title="Ir para observações">
+      <i class="bi bi-arrow-down-circle-fill"></i>
+    </button>
+
+
+
+    <!-- ============================================================ -->
+    <!-- MODAL DE CONFIGURAÇÕES -->
+    <!-- ============================================================ -->
+    <div id="config-modal" class="config-modal hidden">
+      <div class="config-modal-content">
+        <div class="config-header">
+          <h3>⚙️ Configurações</h3>
+          <button id="btn-close-config" class="btn-close-config">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        
+        <div class="config-body">
+          <!-- Sons e Vibração -->
+          <div class="config-section">
+            <h4>🔊 Feedback Sensorial</h4>
+            <div class="config-option">
+              <div class="option-info">
+                <span class="option-label">Sons de Notificação</span>
+                <span class="option-desc">Toca sons ao salvar, erros e conquistas</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle-som" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="config-option">
+              <div class="option-info">
+                <span class="option-label">Vibração Háptica</span>
+                <span class="option-desc">Vibra o dispositivo em ações importantes</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle-vibracao" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <button class="btn-test-feedback">
+              🧪 Testar Feedback
+            </button>
+          </div>
+
+          <!-- Notificações Push -->
+          <div class="config-section">
+            <h4>🔔 Notificações Push</h4>
+            <div class="config-option">
+              <div class="option-info">
+                <span class="option-label">Notificações do Navegador</span>
+                <span class="option-desc">Receba lembretes e parabenizações</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle-push">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tema (futuro) -->
+          <div class="config-section">
+            <h4>🎨 Aparência</h4>
+            <div class="config-option">
+              <div class="option-info">
+                <span class="option-label">Modo Escuro</span>
+                <span class="option-desc">Em breve disponível</span>
+              </div>
+              <label class="toggle-switch disabled">
+                <input type="checkbox" id="toggle-dark" disabled>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SEÇÃO: ANÁLISES E PREVISÕES -->
+    <!-- ============================================================ -->
+    <section id="predictions-section" class="fullscreen-section hidden">
+      <div class="section-header">
+        <button id="btn-voltar-predictions" class="btn-voltar">
+          <i class="bi bi-arrow-left"></i> Voltar
+        </button>
+        <h2 class="section-title">📊 Análises e Previsões</h2>
+      </div>
+
+      <div id="predictions-container" class="predictions-grid">
+        <!-- Os cards serão gerados dinamicamente pelo predictions.js -->
+      </div>
+    </section>
+    
       <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/notie@4.3.1/dist/notie.min.js"></script>
       <script type="module" src="js/app.js"></script>

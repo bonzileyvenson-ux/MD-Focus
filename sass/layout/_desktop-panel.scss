@@ -1,0 +1,416 @@
+// ============================================================================
+// DESKTOP PANEL - Painel Lateral de Configurações (Desktop Only)
+// ============================================================================
+// 3 botões fixos + painel lateral que desliza da direita
+// Apenas visível em desktop > 768px
+// ============================================================================
+
+@import "../variaveis/cores";
+@import "../variaveis/mixin";
+
+// ============================================================================
+// WRAPPER - Oculto no mobile
+// ============================================================================
+
+.desktop-panel-wrapper {
+  display: none; // Escondido no mobile
+
+  @include landscape-desktop {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; // Permite clicks através do wrapper
+    z-index: 10500;
+  }
+}
+
+// ============================================================================
+// BOTÕES DE AÇÃO FIXOS - Lado direito da section1
+// ============================================================================
+
+.desktop-action-buttons {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  display: flex;
+  flex-direction: row; // Horizontal no canto inferior esquerdo
+  gap: 1.2rem;
+  z-index: 10501;
+  pointer-events: all; // Permite clicks nos botões
+}
+
+.desktop-btn {
+  width: 4.8rem;
+  height: 4.8rem;
+  border-radius: 50%;
+  background: clr(primary);
+  border: 2px solid clr(secondary);
+  color: clr(azul-claro);
+  font-size: 2rem;
+  cursor: pointer;
+  @include flex-center;
+  @include transitions(all 0.3s ease);
+  box-shadow: 0 0.4rem 1.2rem rgba(0, 123, 255, 0.2);
+  text-decoration: none;
+
+  i {
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    background: clr(secondary);
+    color: clr(blanco);
+    transform: scale(1.1);
+    box-shadow: 0 0.6rem 2rem rgba(0, 123, 255, 0.4);
+
+    i {
+      transform: rotate(15deg);
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  // Botão Config - Animação especial
+  &#desktop-config-btn {
+    &:hover i {
+      animation: rotate-gear 0.6s ease-in-out;
+    }
+  }
+}
+
+@keyframes rotate-gear {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+}
+
+// ============================================================================
+// BACKDROP - Overlay com blur na section1
+// ============================================================================
+
+.desktop-panel-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(0.4rem);
+  opacity: 0;
+  pointer-events: none;
+  @include transitions(opacity 0.3s ease);
+  z-index: 10502;
+
+  &.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
+
+// ============================================================================
+// PAINEL LATERAL - Desliza da direita
+// ============================================================================
+
+.desktop-config-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 40rem;
+  max-width: 45%;
+  height: 100vh;
+  background: clr(primary);
+  border-left: 2px solid clr(secondary);
+  box-shadow: -0.8rem 0 3rem rgba(0, 0, 0, 0.5);
+  transform: translateX(100%);
+  @include transitions(transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55));
+  z-index: 10503;
+  pointer-events: all;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &.show {
+    transform: translateX(0);
+  }
+
+  // Scroll customizado
+  &::-webkit-scrollbar {
+    width: 0.8rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: clr(secondary);
+    border-radius: 0.4rem;
+
+    &:hover {
+      background: clr(azul-claro);
+    }
+  }
+}
+
+// ============================================================================
+// HEADER DO PAINEL
+// ============================================================================
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 2px solid clr(secondary);
+  background: linear-gradient(
+    135deg,
+    clr(primary) 0%,
+    darken(clr(primary), 5%) 100%
+  );
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  h3 {
+    font-size: 2rem;
+    color: clr(blanco);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+
+    i {
+      color: clr(azul-claro);
+    }
+  }
+}
+
+.panel-close-btn {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid clr(secondary);
+  color: clr(azul-claro);
+  font-size: 1.6rem;
+  cursor: pointer;
+  @include flex-center;
+  @include transitions(all 0.3s ease);
+
+  &:hover {
+    background: clr(secondary);
+    color: clr(blanco);
+    transform: rotate(90deg);
+  }
+
+  &:active {
+    transform: scale(0.9) rotate(90deg);
+  }
+}
+
+// ============================================================================
+// BODY DO PAINEL
+// ============================================================================
+
+.panel-body {
+  padding: 2rem;
+}
+
+.panel-section {
+  margin-bottom: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  h4 {
+    font-size: 1.6rem;
+    color: clr(blanco);
+    margin-bottom: 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+
+    i {
+      color: clr(azul-claro);
+      font-size: 1.8rem;
+    }
+  }
+}
+
+.panel-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1.2rem;
+  margin-bottom: 1.2rem;
+  @include transitions(all 0.3s ease);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(0.4rem);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.option-info {
+  flex: 1;
+  margin-right: 1.6rem;
+
+  .option-label {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: clr(blanco);
+    margin-bottom: 0.4rem;
+  }
+
+  .option-desc {
+    display: block;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+// ============================================================================
+// TOGGLE SWITCH (reutilizando do modal mobile)
+// ============================================================================
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 5.2rem;
+  height: 2.8rem;
+  flex-shrink: 0;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .toggle-slider {
+      background: clr(secondary);
+
+      &::before {
+        transform: translateX(2.4rem);
+      }
+    }
+
+    &:disabled + .toggle-slider {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.2);
+  @include transitions(all 0.3s ease);
+  border-radius: 2.8rem;
+
+  &::before {
+    position: absolute;
+    content: "";
+    height: 2rem;
+    width: 2rem;
+    left: 0.4rem;
+    bottom: 0.4rem;
+    background: clr(blanco);
+    @include transitions(all 0.3s ease);
+    border-radius: 50%;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+// ============================================================================
+// BOTÃO DE TESTE
+// ============================================================================
+
+.btn-test-feedback {
+  width: 100%;
+  padding: 1.2rem;
+  margin-top: 1.6rem;
+  background: clr(secondary);
+  border: 2px solid clr(azul-claro);
+  color: clr(blanco);
+  font-size: 1.4rem;
+  font-weight: 600;
+  border-radius: 1.2rem;
+  cursor: pointer;
+  @include flex-center;
+  gap: 0.8rem;
+  @include transitions(all 0.3s ease);
+
+  i {
+    font-size: 1.6rem;
+  }
+
+  &:hover {
+    background: clr(azul-claro);
+    transform: translateY(-0.2rem);
+    box-shadow: 0 0.6rem 2rem rgba(0, 123, 255, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ============================================================================
+// RESPONSIVIDADE
+// ============================================================================
+
+@media (max-width: 1200px) {
+  .desktop-config-panel {
+    width: 36rem;
+    max-width: 50%;
+  }
+
+  .desktop-action-buttons {
+    right: 1.5rem;
+    top: 1.5rem;
+  }
+
+  .desktop-btn {
+    width: 4.4rem;
+    height: 4.4rem;
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .desktop-config-panel {
+    width: 32rem;
+    max-width: 55%;
+  }
+}

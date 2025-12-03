@@ -1,0 +1,1293 @@
+// ============================================================================
+// PREDICTIONS.SCSS - Estilos para Análises e Previsões
+// ============================================================================
+// 📊 Componentes: Projeção, Velocímetro, Comparação Semanal
+// 🎨 Design: Cards com gradientes, animações suaves, responsivo
+// ============================================================================
+
+@import "../variaveis/cores";
+@import "../variaveis/mixin";
+
+// ============================================================================
+// VARIÁVEIS LOCAIS
+// ============================================================================
+
+$cor-sucesso: #10b981; // Verde vibrante sólido
+$cor-alerta: #fbbf24; // Amarelo vibrante sólido
+$cor-critico: #ef4444; // Vermelho vibrante sólido
+$cor-info: clr(azul-claro);
+$cor-background: clr("background");
+$cor-texto: clr(blanco);
+$cor-texto-sec: rgba(255, 255, 255, 0.85);
+
+$border-radius: 16px;
+$spacing: 2rem;
+$transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// ============================================================================
+// SEÇÃO FULLSCREEN
+// ============================================================================
+
+.fullscreen-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: clr(primary);
+  background-image: radial-gradient(
+      circle at 35% 40%,
+      rgb(18, 59, 107) 0%,
+      transparent 35%
+    ),
+    linear-gradient(41deg, rgb(32 90 145), hsl(203, 68%, 82%));
+  z-index: 10001;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2rem;
+  transition: $transition;
+  opacity: 1;
+  visibility: visible;
+
+  // Prevenir scroll duplo no body
+  @media (max-width: 768px) {
+    padding: 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  &.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  // Scroll customizado (escondido no mobile)
+  &::-webkit-scrollbar {
+    width: 8px;
+
+    @media (max-width: 768px) {
+      width: 0;
+      display: none;
+    }
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  }
+
+  // Firefox
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+
+  @media (max-width: 768px) {
+    scrollbar-width: none;
+  }
+}
+
+// ============================================================================
+// HEADER DA SEÇÃO
+// ============================================================================
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+
+  .btn-voltar {
+    background: clr(secondary);
+    border: 2px solid clr(azul-claro);
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    color: clr(blanco);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: $transition;
+
+    &:hover {
+      background: clr(azul-claro);
+      border-color: clr(blanco);
+      transform: translateX(-5px);
+    }
+
+    i {
+      font-size: 1.2rem;
+    }
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: clr(blanco);
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+// ============================================================================
+// GRID DE CARDS
+// ============================================================================
+
+.predictions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+// ============================================================================
+// CARDS GERAIS
+// ============================================================================
+
+.prediction-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid clr(secondary);
+  border-radius: $border-radius;
+  padding: 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: $transition;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 123, 255, 0.4);
+    border-color: clr(azul-claro);
+  }
+
+  .card-header {
+    background: clr(primary);
+    border-bottom: 2px solid clr(secondary);
+    padding: 1.5rem;
+    color: clr(blanco);
+
+    h3 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+
+  .card-body {
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.03);
+    color: clr(blanco);
+  }
+}
+
+// ============================================================================
+// CARD DE PROJEÇÃO
+// ============================================================================
+
+.card-projecao {
+  &.sucesso .card-header {
+    background: linear-gradient(135deg, $cor-sucesso 0%, #27ae60 100%);
+  }
+
+  &.alerta .card-header {
+    background: linear-gradient(135deg, $cor-alerta 0%, #e67e22 100%);
+  }
+
+  &.critico .card-header {
+    background: linear-gradient(135deg, $cor-critico 0%, #c0392b 100%);
+  }
+
+  .projecao-principal {
+    text-align: center;
+    padding: 2rem 0;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 1.5rem;
+
+    .valor-projecao {
+      font-size: 3rem;
+      font-weight: 700;
+      color: $cor-texto;
+      margin-bottom: 0.5rem;
+      animation: countUp 1s ease-out;
+
+      @media (max-width: 768px) {
+        font-size: 2.5rem;
+      }
+    }
+
+    .label-projecao {
+      font-size: 1rem;
+      color: $cor-texto-sec;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .percentual-meta {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      display: inline-block;
+
+      &.sucesso {
+        background: rgba($cor-sucesso, 0.1);
+        color: $cor-sucesso;
+      }
+
+      &.alerta {
+        background: rgba($cor-alerta, 0.1);
+        color: $cor-alerta;
+      }
+
+      &.critico {
+        background: rgba($cor-critico, 0.1);
+        color: $cor-critico;
+      }
+    }
+  }
+
+  // Nova seção: Meta Real
+  .meta-real-section {
+    background: linear-gradient(
+      135deg,
+      rgba(102, 126, 234, 0.08),
+      rgba(118, 75, 162, 0.08)
+    );
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+
+    &.sucesso {
+      border-color: rgba($cor-sucesso, 0.3);
+      background: linear-gradient(
+        135deg,
+        rgba($cor-sucesso, 0.05),
+        rgba($cor-sucesso, 0.08)
+      );
+    }
+
+    &.alerta {
+      border-color: rgba($cor-alerta, 0.3);
+      background: linear-gradient(
+        135deg,
+        rgba($cor-alerta, 0.05),
+        rgba($cor-alerta, 0.08)
+      );
+    }
+
+    &.critico {
+      border-color: rgba($cor-critico, 0.3);
+      background: linear-gradient(
+        135deg,
+        rgba($cor-critico, 0.05),
+        rgba($cor-critico, 0.08)
+      );
+    }
+
+    .meta-real-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+
+      .badge-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $cor-texto-sec;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .badge-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: clr(primary);
+        background: clr(blanco);
+        padding: 0.4rem 1.2rem;
+        border-radius: 50px;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+      }
+    }
+
+    .diferenca-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+
+      &.positiva {
+        color: $cor-sucesso;
+
+        i {
+          font-size: 1.3rem;
+        }
+      }
+
+      &.negativa {
+        color: $cor-critico;
+
+        i {
+          font-size: 1.3rem;
+        }
+      }
+    }
+
+    .alerta-meta {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: $cor-alerta;
+      padding: 0.5rem;
+    }
+  }
+
+  .projecao-detalhes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .detalhe-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+
+      .detalhe-label {
+        font-size: 0.9rem;
+        color: $cor-texto-sec;
+      }
+
+      .detalhe-valor {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $cor-texto;
+      }
+    }
+  }
+
+  .projecao-mensagem {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1rem;
+
+    &.sucesso {
+      background: rgba($cor-sucesso, 0.1);
+      color: $cor-sucesso;
+    }
+
+    &.alerta {
+      background: rgba($cor-alerta, 0.1);
+      color: $cor-alerta;
+    }
+
+    &.critico {
+      background: rgba($cor-critico, 0.1);
+      color: $cor-critico;
+    }
+  }
+}
+
+// ============================================================================
+// VELOCÍMETRO
+// ============================================================================
+
+.card-velocimetro {
+  .gauge-container {
+    position: relative;
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto 2rem;
+    padding: 0 1rem;
+    transform: rotate(180deg);
+
+    .gauge-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      max-height: 150px;
+      transform: rotate(360deg);
+    }
+
+    .gauge-progress {
+      transition: stroke-dashoffset 1s ease, stroke 0.3s ease;
+    }
+
+    .gauge-needle {
+      transition: transform 1s ease;
+    }
+
+    .gauge-label {
+      position: absolute;
+      bottom: 5px;
+      left: 50%;
+      transform: translate(-50%, -100%) rotate(180deg);
+      text-align: center;
+
+      .gauge-status {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+
+        &.adiantado {
+          color: $cor-sucesso;
+        }
+
+        &.no-ritmo {
+          color: $cor-alerta;
+        }
+
+        &.atrasado {
+          color: $cor-critico;
+        }
+      }
+
+      .gauge-percentual {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: $cor-texto;
+      }
+    }
+  }
+
+  .ritmo-detalhes {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+
+    .ritmo-item {
+      text-align: center;
+
+      .ritmo-titulo {
+        font-size: 0.9rem;
+        color: $cor-texto-sec;
+        margin-bottom: 0.5rem;
+      }
+
+      .ritmo-valor {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $cor-texto;
+      }
+    }
+
+    .ritmo-divisor {
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: $cor-texto-sec;
+    }
+  }
+
+  .ritmo-info {
+    text-align: center;
+    padding: 1rem;
+    background: rgb(113 166 215 / 87%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: $cor-texto;
+
+    p {
+      margin: 0;
+      font-size: 1rem;
+
+      strong {
+        color: #243689;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// GRÁFICO SEMANAL
+// ============================================================================
+
+.card-grafico {
+  .grafico-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 300px;
+    padding: 2rem 1rem;
+    background: linear-gradient(
+      to top,
+      rgba(102, 126, 234, 0.05) 0%,
+      transparent 100%
+    );
+    border-radius: 12px;
+    margin-bottom: 2rem;
+
+    .barra-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      animation: slideUp 0.6s ease-out both;
+
+      &.semana-atual {
+        .barra {
+          background: linear-gradient(
+            to top,
+            rgba(102, 126, 234, 0.2),
+            rgba(102, 126, 234, 0.1)
+          );
+          border: 2px solid #667eea;
+
+          .barra-fill {
+            background: linear-gradient(to top, #667eea, #764ba2);
+          }
+        }
+      }
+
+      .barra-valor {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $cor-texto;
+        margin-bottom: 0.5rem;
+      }
+
+      .barra {
+        width: 60px;
+        max-width: 100%;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px 8px 0 0;
+        position: relative;
+        transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .barra-fill {
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to top, #95a5a6, #7f8c8d);
+          border-radius: 8px 8px 0 0;
+          transition: background 0.3s ease;
+        }
+
+        &:hover .barra-fill {
+          opacity: 0.8;
+        }
+      }
+
+      .barra-label {
+        font-size: 0.85rem;
+        color: $cor-texto-sec;
+        font-weight: 500;
+      }
+
+      .badge-atual {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+    }
+  }
+
+  .grafico-info {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .info-label {
+        font-size: 1rem;
+        color: $cor-texto-sec;
+      }
+
+      .info-valor {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: $cor-texto;
+      }
+    }
+  }
+
+  .grafico-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+
+      .stat-icon {
+        font-size: 1.8rem;
+        color: clr(azul-claro);
+      }
+
+      .stat-content {
+        flex: 1;
+
+        .stat-label {
+          font-size: 0.85rem;
+          color: $cor-texto-sec;
+          margin-bottom: 0.25rem;
+        }
+
+        .stat-valor {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: $cor-texto;
+
+          &.subindo {
+            color: #10b981;
+          }
+
+          &.descendo {
+            color: #ef4444;
+          }
+
+          &.estável {
+            color:  #274175;
+          }
+        }
+      }
+    }
+  }
+
+  .semana-atual-analise {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    border-left: 4px solid clr(secondary);
+    margin: 1rem 0;
+
+    h4 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      color: $cor-texto;
+      margin-bottom: 1rem;
+
+      i {
+        color: clr(azul-claro);
+      }
+    }
+
+    .analise-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+
+      .analise-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        border: 2px solid transparent;
+
+        &.positivo {
+          border-color: #10b981;
+          background: rgba(16, 185, 129, 0.25);
+
+          .analise-valor {
+            color: #10b981;
+            font-weight: 700;
+          }
+        }
+
+        &.negativo {
+          border-color: #fbbf24;
+          background: rgba(251, 191, 36, 0.25);
+
+          .analise-valor {
+            color: #fbbf24;
+            font-weight: 700;
+          }
+        }
+
+        .analise-label {
+          font-size: 0.9rem;
+          color: $cor-texto-sec;
+        }
+
+        .analise-valor {
+          font-size: 1.2rem;
+          font-weight: 700;
+        }
+      }
+    }
+
+    .analise-texto {
+      font-size: 0.95rem;
+      color: $cor-texto;
+      margin: 0;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      text-align: center;
+    }
+  }
+
+  .badge-melhor,
+  .badge-pior {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 1.2rem;
+    animation: bounce 1s infinite;
+  }
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  .grafico-legenda {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+
+    .legenda-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .legenda-cor {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+
+        &.atual {
+          background: linear-gradient(to bottom, #667eea, #764ba2);
+          border: 2px solid #667eea;
+        }
+
+        &.anterior {
+          background: linear-gradient(to bottom, #95a5a6, #7f8c8d);
+        }
+      }
+
+      span {
+        font-size: 0.9rem;
+        color: $cor-texto-sec;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// CARD EXPLICATIVO
+// ============================================================================
+
+.card-explicativo {
+  &.superando {
+    border-top: 4px solid #10b981;
+  }
+
+  &.proximo {
+    border-top: 4px solid #f59e0b;
+  }
+
+  &.abaixo {
+    border-top: 4px solid #ef4444;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    animation: slideUp 0.6s ease;
+
+    i {
+      font-size: 1.5rem;
+    }
+
+    &.superando {
+      background: #10b981;
+      color: clr(blanco);
+      border: 2px solid #059669;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+
+      i {
+        color: clr(blanco);
+      }
+    }
+
+    &.proximo {
+      background: #fbbf24;
+      color: #1f2937;
+      border: 2px solid #f59e0b;
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+
+      i {
+        color: #1f2937;
+      }
+    }
+
+    &.abaixo {
+      background: #ef4444;
+      color: clr(blanco);
+      border: 2px solid #dc2626;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+
+      i {
+        color: clr(blanco);
+      }
+    }
+  }
+
+  .explicacao-principal {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid clr(secondary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: fadeIn 0.8s ease 0.2s both;
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: clr(azul-claro);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .texto-destaque {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: $cor-texto;
+      margin: 0;
+
+      strong {
+        color: clr(azul-claro);
+        font-weight: 700;
+      }
+    }
+  }
+
+  .cenarios-container {
+    display: grid;
+    gap: 1.5rem;
+    animation: slideUp 1s ease 0.4s both;
+  }
+
+  .cenario {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .cenario-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+
+      i {
+        font-size: 1.3rem;
+      }
+
+      h5 {
+        margin: 0;
+        font-size: 1rem;
+      }
+    }
+
+    .cenario-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    &.cenario-atual {
+      .cenario-header {
+        background: clr(secondary);
+        color: clr(blanco);
+      }
+
+      .meta-real {
+        color:  #274175;
+        font-weight: 700;
+      }
+    }
+
+    &.cenario-necessario {
+      .cenario-header {
+        background: #f59e0b;
+        color: clr(blanco);
+      }
+
+      .meta-escolhida {
+        color: #fbbf24;
+        font-weight: 700;
+      }
+
+      .cenario-diferenca {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: rgba(245, 158, 11, 0.2);
+        border-radius: 8px;
+        border-left: 3px solid #f59e0b;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        margin-top: 0.5rem;
+
+        i {
+          color: #f59e0b;
+          font-size: 1.2rem;
+        }
+
+        span {
+          font-size: 0.95rem;
+          color: #92400e;
+
+          strong {
+            color: #d97706;
+            font-weight: 700;
+          }
+        }
+      }
+    }
+
+    &.cenario-parabens {
+      border: 2px solid #10b981;
+
+      .cenario-header {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+      }
+
+      .texto-parabens {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: $cor-texto;
+        margin: 0 0 1rem 0;
+
+        strong {
+          color: #0c523b;
+          font-weight: 700;
+        }
+      }
+
+      .cenario-extra {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #d4f5e9, #a7f3d0);
+        border-radius: 8px;
+
+        i {
+          color: #0e4231;
+          font-size: 1.2rem;
+        }
+
+        span {
+          font-size: 0.95rem;
+          color: #065f46;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  .cenario-meta,
+  .cenario-ritmo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+
+    .cenario-label {
+      font-size: 0.9rem;
+      color: $cor-texto-sec;
+      font-weight: 500;
+    }
+
+    .cenario-valor {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: $cor-texto;
+
+      &.destaque {
+        color: #f59e0b;
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .dica-container {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid #3b82f6;
+    animation: fadeIn 1.2s ease 0.6s both;
+
+    .dica-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+
+      i {
+        color: #3b82f6;
+        font-size: 1.2rem;
+      }
+
+      span {
+        font-weight: 700;
+        color: #1e40af;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    .dica-texto {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #1e3a8a;
+    }
+  }
+}
+
+// ============================================================================
+// ANIMAÇÕES
+// ============================================================================
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ============================================================================
+// RESPONSIVIDADE MOBILE
+// ============================================================================
+
+@media (max-width: 768px) {
+  .fullscreen-section {
+    padding: 1rem;
+  }
+
+  .predictions-grid {
+    gap: 1rem;
+  }
+
+  .prediction-card {
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+
+  .card-grafico {
+    .grafico-container {
+      height: 250px;
+      padding: 1rem 0.5rem;
+
+      .barra-container {
+        .barra {
+          width: 40px;
+        }
+
+        .barra-valor {
+          font-size: 0.85rem;
+        }
+
+        .barra-label {
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+
+  .card-velocimetro {
+    .gauge-container {
+      max-width: 250px;
+    }
+
+    .ritmo-detalhes {
+      flex-direction: column;
+      gap: 1rem;
+
+      .ritmo-divisor {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .card-explicativo {
+    .card-body {
+      gap: 1.5rem;
+    }
+
+    .status-badge {
+      font-size: 1rem;
+      padding: 0.875rem 1.25rem;
+
+      i {
+        font-size: 1.3rem;
+      }
+    }
+
+    .explicacao-principal {
+      padding: 1.25rem;
+
+      .texto-destaque {
+        font-size: 1.05rem;
+      }
+    }
+
+    .cenario {
+      .cenario-header {
+        padding: 0.875rem 1.25rem;
+
+        h5 {
+          font-size: 0.95rem;
+        }
+      }
+
+      .cenario-body {
+        padding: 1.25rem;
+      }
+    }
+
+    .cenario-meta,
+    .cenario-ritmo {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.625rem;
+
+      .cenario-valor {
+        font-size: 1.05rem;
+
+        &.destaque {
+          font-size: 1.15rem;
+        }
+      }
+    }
+
+    .dica-container {
+      padding: 1.25rem;
+
+      .dica-texto {
+        font-size: 0.95rem;
+      }
+    }
+  }
+}

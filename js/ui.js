@@ -1,5 +1,101 @@
 import { debugWarn } from "./debug.js";
 
+/**
+ * Função de debounce para otimizar performance
+ * Atrasa execução de função até que usuário pare de digitar
+ * @param {Function} func - Função a ser executada
+ * @param {number} delay - Delay em milissegundos
+ * @returns {Function} Função com debounce aplicado
+ */
+export function debounce(func, delay = 300) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+/**
+ * Throttle: limita execução de função a uma vez por intervalo
+ * @param {Function} func - Função a ser executada
+ * @param {number} limit - Intervalo mínimo entre execuções (ms)
+ * @returns {Function} Função com throttle aplicado
+ */
+export function throttle(func, limit = 100) {
+  let inThrottle;
+  return function (...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
+
+/**
+ * Mostra spinner de loading em um elemento
+ * @param {string|HTMLElement} target - ID do elemento ou elemento HTML
+ * @param {string} message - Mensagem opcional
+ */
+export function mostrarLoading(target, message = "Carregando...") {
+  const elemento =
+    typeof target === "string" ? document.getElementById(target) : target;
+  if (!elemento) return;
+
+  const loadingHTML = `
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p class="loading-text">${message}</p>
+    </div>
+  `;
+
+  elemento.innerHTML = loadingHTML;
+}
+
+/**
+ * Mostra skeleton placeholder em um elemento
+ * @param {string|HTMLElement} target - ID do elemento ou elemento HTML
+ * @param {number} numCards - Número de cards skeleton
+ */
+export function mostrarSkeleton(target, numCards = 4) {
+  const elemento =
+    typeof target === "string" ? document.getElementById(target) : target;
+  if (!elemento) return;
+
+  let skeletonHTML = "";
+  for (let i = 0; i < numCards; i++) {
+    skeletonHTML += `
+      <div class="skeleton skeleton-card"></div>
+    `;
+  }
+
+  elemento.innerHTML = skeletonHTML;
+}
+
+/**
+ * Adiciona classe is-loading a um elemento
+ * @param {string|HTMLElement} target - ID do elemento ou elemento HTML
+ */
+export function adicionarLoading(target) {
+  const elemento =
+    typeof target === "string" ? document.getElementById(target) : target;
+  if (elemento) {
+    elemento.classList.add("is-loading");
+  }
+}
+
+/**
+ * Remove classe is-loading de um elemento
+ * @param {string|HTMLElement} target - ID do elemento ou elemento HTML
+ */
+export function removerLoading(target) {
+  const elemento =
+    typeof target === "string" ? document.getElementById(target) : target;
+  if (elemento) {
+    elemento.classList.remove("is-loading");
+  }
+}
+
 export function destacarElemento(elementId) {
   const elemento = document.getElementById(elementId);
   if (elemento) {
@@ -17,7 +113,7 @@ export function alternarDisplay(element) {
 export function ocultarEdicaoInPlace(edicaoDiv) {
   edicaoDiv.classList.add("edita-pontos-hidden");
 
-  const liContainer = edicaoDiv.closest(".historico-item-card");
+  const liContainer = edicaoDiv.closest(".timeline-item");
   const displayContainer = liContainer
     ? liContainer.querySelector("[id^=display-container-]")
     : null;

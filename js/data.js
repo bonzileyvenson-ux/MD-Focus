@@ -127,6 +127,10 @@ export function carregarDados() {
   // Verificar reset mensal automático
   dados = verificarResetMensal(dados);
 
+  // Garantir que campos obrigatórios existam (compatibilidade com versões antigas)
+  if (dados.totalCaixas === undefined) dados.totalCaixas = 0;
+  if (dados.totalErros === undefined) dados.totalErros = 0;
+
   // Atualizar cache
   dadosUsuario = dados;
   return dados;
@@ -142,11 +146,59 @@ function verificarResetMensal(dados) {
   const hoje = new Date();
   const dataUltimoCalculo = new Date(dados.dataUltimoCalculo);
 
-  // Se mudou de mês, zerar dados diários
-  if (hoje.getMonth() !== dataUltimoCalculo.getMonth()) {
-    dados.realizadoDiario = {};
-    dados.realizadoTotal = 0;
+  // Se mudou de mês, zerar apenas totais do mês (mantém histórico de dias anteriores)
+  if (
+    hoje.getMonth() !== dataUltimoCalculo.getMonth() ||
+    hoje.getFullYear() !== dataUltimoCalculo.getFullYear()
+  ) {
+    const mesAnterior = dataUltimoCalculo.getMonth() + 1;
+    const mesAtual = hoje.getMonth() + 1;
+    const anoAtual = hoje.getFullYear();
+
+    console.log(`🗓️ RESET MENSAL: ${mesAnterior} → ${mesAtual}`);
+    console.log("📦 Dados PRESERVADOS:", {
+      "realizadoDiario (dias totais)": Object.keys(dados.realizadoDiario || {})
+        .length,
+      "observacoesDiarias (dias totais)": Object.keys(
+        dados.observacoesDiarias || {}
+      ).length,
+      diasOffAgendados: dados.diasOffAgendados?.length || 0,
+    });
+
+    // Calcular total apenas dos dias do MÊS ATUAL
+    let totalMesAtual = 0;
+    let diasMesAtual = 0;
+    let diasMesAnterior = 0;
+
+    if (dados.realizadoDiario) {
+      Object.keys(dados.realizadoDiario).forEach((dataKey) => {
+        const [ano, mes] = dataKey.split("-").map(Number);
+        // Contar dias do mês anterior
+        if (ano === anoAtual && mes === mesAnterior) {
+          diasMesAnterior++;
+        }
+        // Somar apenas valores do mês atual
+        if (ano === anoAtual && mes === mesAtual) {
+          totalMesAtual += dados.realizadoDiario[dataKey] || 0;
+          diasMesAtual++;
+        }
+      });
+    }
+
+    console.log("📊 Histórico:", {
+      [`Mês ${mesAnterior} (preservado)`]: `${diasMesAnterior} dias`,
+      [`Mês ${mesAtual} (atual)`]: `${diasMesAtual} dias, ${totalMesAtual} pts`,
+    });
+
+    // Atualizar apenas os totais do mês atual (NÃO apaga nada)
+    dados.realizadoTotal = totalMesAtual;
+    dados.totalCaixas = 0; // Zera contagem de caixas para o novo mês
+    dados.totalErros = 0; // Zera contagem de erros para o novo mês
     dados.dataUltimoCalculo = hoje.toISOString().slice(0, 10);
+
+    console.log(
+      "✅ Reset concluído. Histórico completo mantido para comparações!"
+    );
     salvarDados(dados);
   }
 
@@ -172,6 +224,11 @@ export function salvarDados(dados) {
   // Atualizar cache apenas se salvou com sucesso
   if (sucesso) {
     dadosUsuario = dados;
+
+    // Limpar cache de cálculos quando dados mudam
+    if (typeof window !== "undefined" && window.limparCachePredictions) {
+      window.limparCachePredictions();
+    }
   }
 }
 
@@ -195,6 +252,8 @@ export function criarDadosIniciais(funcionario, metaDiariaBase = META_PADRAO) {
     selectedMetaKey: metaDiariaBase,
     realizadoDiario: {},
     realizadoTotal: 0,
+    totalCaixas: 0, // Total de caixas processadas no mês
+    totalErros: 0, // Total de erros cometidos no mês
     dataUltimoCalculo: new Date().toISOString().slice(0, 10),
     observacoes: [], // Array de { date: 'YYYY-MM-DD', text: '...' }
     diasOffAgendados: [], // Array de datas em formato DD/MM/YYYY

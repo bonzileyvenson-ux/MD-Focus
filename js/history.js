@@ -6,7 +6,7 @@ import {
   ocultarEdicaoInPlace,
   chamarCorrecao,
 } from "./ui.js";
-import { calcularMediaSemanal } from "./calc.js";
+import { calcularMediaSemanal, calcularEAtualizarDashboard } from "./calc.js";
 import {
   getDadosUsuario,
   atualizarDadosUsuario,
@@ -14,7 +14,7 @@ import {
   MAPA_METAS,
 } from "./data.js";
 import { validarEdicao } from "./validation.js";
-import { iniciarDashboard } from "./app.js";
+import { iniciarDashboard, atualizarUIDashboard } from "./app.js";
 
 function carregarDadosHistorico() {
   const dadosUsuario = getDadosUsuario();
@@ -46,6 +46,8 @@ function gerarHistoricoDetalhado(realizadoDiario) {
   const hoje = new Date();
   const dataKeys = [];
   let diasUteisAdicionados = 0;
+
+  // Coletar últimos 5 dias úteis
   for (let i = 0; diasUteisAdicionados < 5; i++) {
     const data = new Date(hoje);
     data.setDate(hoje.getDate() - i);
@@ -68,10 +70,48 @@ function gerarHistoricoDetalhado(realizadoDiario) {
     const dadosUsuario = getDadosUsuario();
     const diasAgendados = dadosUsuario?.diasOffAgendados || [];
 
+    // Calcular meta diária: metaMensal / 22 dias úteis
+    const metaMensal = dadosUsuario?.metaMensal || 0;
+    const metaDiaria = metaMensal > 0 ? Math.round(metaMensal / 22) : 0;
+
+    // Calcular valores anteriores para tendência
+    const valoresAnteriores = dataKeys.map((key) => realizadoDiario[key] || 0);
+
+    let mesAnterior = null; // Para detectar mudança de mês
+
     dataKeys.forEach((dataKey, index) => {
       const valor = realizadoDiario[dataKey];
       const data = new Date(dataKey + "T00:00:00");
       const diaSemana = data.getDay();
+      const mesAtual = data.getMonth();
+      const anoAtual = data.getFullYear();
+
+      // Adicionar separador visual quando muda de mês
+      if (mesAnterior !== null && mesAtual !== mesAnterior) {
+        const mesesNomes = [
+          "Janeiro",
+          "Fevereiro",
+          "Março",
+          "Abril",
+          "Maio",
+          "Junho",
+          "Julho",
+          "Agosto",
+          "Setembro",
+          "Outubro",
+          "Novembro",
+          "Dezembro",
+        ];
+        htmlContent += `
+          <li class="timeline-separator">
+            <div class="separator-line"></div>
+            <div class="separator-badge">
+              <i class="bi bi-calendar-month"></i> ${mesesNomes[mesAnterior]} ${anoAtual}
+            </div>
+            <div class="separator-line"></div>
+          </li>`;
+      }
+      mesAnterior = mesAtual;
       const diaDoMes = data.getDate();
       const isWeekend = diaSemana === 0 || diaSemana === 6; // Domingo (0) e Sábado (6)
       const diasDaSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
@@ -113,46 +153,152 @@ function gerarHistoricoDetalhado(realizadoDiario) {
         }
       }
 
+      // Determinar status e ícone para o dot
+      let dotClass = "sem-registro";
+      let dotIcone = "○";
+      const isHoje = index === 0;
+
+      // 🔍 Debug
+      if (isHoje) {
+        console.log("🎯 DIA HOJE:", {
+          dataKey,
+          valor,
+          metaDiaria,
+          "tem valor": !!valor,
+          "tem meta": !!metaDiaria,
+        });
+      }
+
+      // Verificar status baseado no valor vs meta
+      if (valor && metaDiaria) {
+        if (valor >= metaDiaria) {
+          dotClass = "sucesso";
+          dotIcone = "✓";
+        } else {
+          dotClass = "alerta";
+          dotIcone = "!";
+        }
+      }
+
+      // Se é hoje, adiciona a classe 'hoje' para animação (mas mantém a cor do sucesso/alerta)
+      if (isHoje && valor) {
+        dotClass += " hoje";
+        dotIcone = "●";
+      } else if (isHoje && !valor) {
+        dotClass = "hoje";
+        dotIcone = "●";
+      }
+
+      // 🔍 Debug final
+      if (isHoje) {
+        console.log("✅ Classe final da bolinha HOJE:", dotClass);
+      }
+
+      // Calcular tendência comparando com dia anterior
+      let tendenciaHTML = "";
+      if (valor && index < dataKeys.length - 1) {
+        const valorAnterior = valoresAnteriores[index + 1];
+        if (valorAnterior) {
+          const diferenca = valor - valorAnterior;
+          if (diferenca > 0) {
+            tendenciaHTML = `
+              <div class="timeline-trend trend-up">
+                <i class="bi bi-arrow-up-right"></i>
+                <span>+${diferenca.toLocaleString(
+                  "pt-BR"
+                )} vs dia anterior</span>
+              </div>`;
+          } else if (diferenca < 0) {
+            tendenciaHTML = `
+              <div class="timeline-trend trend-down">
+                <i class="bi bi-arrow-down-right"></i>
+                <span>${diferenca.toLocaleString(
+                  "pt-BR"
+                )} vs dia anterior</span>
+              </div>`;
+          } else {
+            tendenciaHTML = `
+              <div class="timeline-trend trend-stable">
+                <i class="bi bi-arrow-right"></i>
+                <span>Igual ao dia anterior</span>
+              </div>`;
+          }
+        }
+      }
+
+      // Badge de mês diferente do atual
+      const mesHoje = hoje.getMonth();
+      const mesItemBadge =
+        mesAtual !== mesHoje
+          ? `<span class="timeline-badge badge-mes-anterior">${
+              [
+                "Jan",
+                "Fev",
+                "Mar",
+                "Abr",
+                "Mai",
+                "Jun",
+                "Jul",
+                "Ago",
+                "Set",
+                "Out",
+                "Nov",
+                "Dez",
+              ][mesAtual]
+            }</span>`
+          : "";
+
       htmlContent += `
-                <li class="historico-item-card position-relative" id="${liId}">
-                    <fieldset class="historico-item-fieldset">
-                        <legend class="historico-item-legend">${nomeDiaSemana}</legend>
-                        <div class="historico-item-data" id="display-container-${liId}">
-                            <span class="card-data-valor">
-                                ${
-                                  valor
-                                    ? valor.toLocaleString("pt-BR", {
-                                        style: "decimal",
-                                      }) + " pontos"
-                                    : textoSemValor
-                                }
-                            </span>
+                <li class="timeline-item" id="${liId}">
+                    <div class="timeline-dot ${dotClass}">${dotIcone}</div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <span class="timeline-date">${nomeDiaSemana}</span>
                             ${
-                              isEditable
-                                ? `
-                            <button class="btn-corrigir btn btn-sm btn-light" data-li-id="${liId}" aria-label="Corrigir Registro">
-                                <strong><i class="bi bi-pencil"></i></strong>
-                            </button>
-                            `
-                                : ""
+                              isHoje
+                                ? '<span class="timeline-badge badge-hoje">Hoje</span>'
+                                : mesItemBadge
                             }
                         </div>
-                        <div class="edicao-in-place edita-pontos-hidden" id="edicao-${liId}" data-valor-antigo="${
+                        <div class="timeline-body">
+                            <div class="timeline-points-container">
+                                <div class="timeline-points" id="display-container-${liId}">
+                                    <span class="points-value ${dotClass}">
+                                        ${
+                                          valor
+                                            ? valor.toLocaleString("pt-BR") +
+                                              " pts"
+                                            : textoSemValor
+                                        }
+                                    </span>
+                                    ${
+                                      isEditable
+                                        ? `
+                                    <button class="timeline-btn btn-edit" data-li-id="${liId}" aria-label="Corrigir Registro">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>`
+                                        : ""
+                                    }
+                                </div>
+                                <div class="edicao-in-place edita-pontos-hidden" id="edicao-${liId}" data-valor-antigo="${
         valor || ""
       }" data-date-key="${dataKey}">
-                            <input type="number" value="${
-                              valor || ""
-                            }" class="form-control input-correcao" placeholder="Insira o valor">
-                            <div class="edit-botoes">
-                                <button class="btn btn-success btn-sm btn-salvar-correcao" aria-label="Salvar Correção">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm btn-cancelar-correcao" aria-label="Cancelar Correção">
-                                    <i class="bi bi-x-lg"></i>
-                                </button>
+                                    <input type="number" value="${
+                                      valor || ""
+                                    }" class="form-control input-correcao" placeholder="Insira o valor">
+                                    <div class="edit-botoes">
+                                        <button class="btn btn-success btn-sm btn-salvar-correcao" aria-label="Salvar Correção">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm btn-cancelar-correcao" aria-label="Cancelar Correção">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                            ${tendenciaHTML}
                         </div>
-                    </fieldset>
+                    </div>
                 </li>
             `;
     });
@@ -234,7 +380,6 @@ export function configurarModalHistorico() {
 
         // Se não foi long press, abre modal
         if (!longPressTriggered) {
-    
           abrirModalHistorico();
         }
       });
@@ -287,9 +432,35 @@ export function configurarModalHistorico() {
 function corrigirRegistro(dataKey, novoValor, valorAntigo, liId) {
   const dadosUsuario = getDadosUsuario();
   const diferenca = valorAntigo ? novoValor - valorAntigo : novoValor;
-  dadosUsuario.realizadoTotal += diferenca;
+  
+  // Verificar se a data é do mês atual antes de somar no total
+  const hoje = new Date();
+  const mesAtual = hoje.getMonth() + 1;
+  const anoAtual = hoje.getFullYear();
+  const [ano, mes] = dataKey.split('-').map(Number);
+  
+  // Só soma no realizadoTotal se for do mês/ano atual
+  if (ano === anoAtual && mes === mesAtual) {
+    dadosUsuario.realizadoTotal += diferenca;
+    console.log(`✅ Valor do mês atual - somado no total: ${diferenca}`);
+  } else {
+    console.log(`⚠️ Valor de outro mês (${mes}/${ano}) - NÃO somado no total`);
+  }
+  
   dadosUsuario.realizadoDiario[dataKey] = novoValor;
+
+  // 💾 Salvar no localStorage
   atualizarDadosUsuario(dadosUsuario);
+
+  // 🔍 Debug: Verificar se salvou
+  console.log("✅ Dados salvos:", {
+    dataKey,
+    valor: novoValor,
+    total: dadosUsuario.realizadoTotal,
+    localStorage: localStorage.getItem(
+      Object.keys(localStorage).find((k) => k.includes("MD-Focus"))
+    ),
+  });
 
   const data = new Date(dataKey + "T00:00:00");
   const diasDaSemana = [
@@ -309,10 +480,12 @@ function corrigirRegistro(dataKey, novoValor, valorAntigo, liId) {
     time: 3,
   });
 
-  // MELHORIA DE UX: Atualiza o item específico em vez de recarregar a lista inteira.
+  // 🎨 Atualiza apenas o item visual (sem recarregar toda a página)
   atualizarItemHistoricoUI(liId, novoValor, nomeDiaSemana);
-  // Atualiza o dashboard principal
-  iniciarDashboard(null); // Passa null para não exibir a mensagem de boas-vindas
+
+  // 📊 Atualiza apenas o dashboard principal (sem recarregar histórico)
+  const resultado = calcularEAtualizarDashboard(dadosUsuario);
+  atualizarUIDashboard(resultado);
 }
 
 /**
@@ -697,8 +870,18 @@ export function solicitarBonus() {
     const valorExistente = dadosUsuario.realizadoDiario[dataKey] || 0;
     dadosUsuario.realizadoDiario[dataKey] = valorExistente + valorBonus;
 
-    // Adiciona o bônus ao total geral
-    dadosUsuario.realizadoTotal += valorBonus;
+    // Adiciona o bônus ao total geral (APENAS se for do mês atual)
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth() + 1;
+    const anoAtual = hoje.getFullYear();
+    const [ano, mes] = dataKey.split('-').map(Number);
+    
+    if (ano === anoAtual && mes === mesAtual) {
+      dadosUsuario.realizadoTotal += valorBonus;
+      console.log(`✅ Bônus do mês atual - somado no total: ${valorBonus}`);
+    } else {
+      console.log(`⚠️ Bônus de outro mês (${mes}/${ano}) - NÃO somado no total`);
+    }
 
     // Salva a observação
     dadosUsuario.observacoesDiarias[dataKey] =
@@ -867,17 +1050,122 @@ function salvarDiaOffAgendado(dataOff, dadosUsuario) {
 
 // NOVO: Função para atualizar a UI de um item específico após a edição.
 function atualizarItemHistoricoUI(liId, novoValor, nomeDiaSemana) {
+  console.log("🔄 Atualizando UI:", { liId, novoValor });
+
   const liElement = document.getElementById(liId);
-  if (!liElement) return;
+  if (!liElement) {
+    console.error("❌ Elemento não encontrado:", liId);
+    return;
+  }
 
   const displayContainer = liElement.querySelector("[id^=display-container-]");
   const edicaoDiv = liElement.querySelector(".edicao-in-place");
-  const valorSpan = displayContainer.querySelector(".card-data-valor");
+  const valorSpan = displayContainer?.querySelector(".points-value");
+  const timelineDot = liElement.querySelector(".timeline-dot");
 
-  // Atualiza o texto do display
-  valorSpan.textContent = `${novoValor.toLocaleString("pt-BR", {
-    style: "decimal",
-  })} pontos`;
+  console.log("📦 Elementos encontrados:", {
+    displayContainer: !!displayContainer,
+    edicaoDiv: !!edicaoDiv,
+    valorSpan: !!valorSpan,
+    timelineDot: !!timelineDot,
+  });
+
+  // Obter meta diária para determinar status
+  const dadosUsuario = getDadosUsuario();
+  const metaMensal = dadosUsuario?.metaMensal || 0;
+  const metaDiaria = metaMensal > 0 ? Math.round(metaMensal / 22) : 0;
+
+  // Verificar se é hoje (primeiro item)
+  const isHoje = liId === "historico-item-0";
+
+  // Determinar nova classe do dot baseado no valor
+  let novaDotClass = "sem-registro";
+  let novoDotIcone = "○";
+
+  if (novoValor && metaDiaria) {
+    if (novoValor >= metaDiaria) {
+      novaDotClass = "sucesso";
+      novoDotIcone = "✓";
+    } else {
+      novaDotClass = "alerta";
+      novoDotIcone = "!";
+    }
+  }
+
+  // Se é hoje, adiciona classe hoje e mantém ícone de hoje
+  if (isHoje && novoValor) {
+    novaDotClass += " hoje";
+    novoDotIcone = "●";
+  } else if (isHoje && !novoValor) {
+    novaDotClass = "hoje";
+    novoDotIcone = "●";
+  }
+
+  // Atualiza o texto e classe do valor
+  valorSpan.textContent = `${novoValor.toLocaleString("pt-BR")} pts`;
+  valorSpan.className = `points-value ${novaDotClass.replace(" hoje", "")}`;
+
+  // Atualiza a bolinha (dot)
+  timelineDot.className = `timeline-dot ${novaDotClass}`;
+  timelineDot.textContent = novoDotIcone;
+
+  // Recalcular e atualizar a tendência
+  const dataKey = edicaoDiv.getAttribute("data-date-key");
+  const realizadoDiario = dadosUsuario?.realizadoDiario || {};
+
+  // Pegar o item seguinte (dia anterior na lista)
+  const itemIndex = parseInt(liId.replace("historico-item-", ""));
+  const proximoItemId = `historico-item-${itemIndex + 1}`;
+  const proximoItem = document.getElementById(proximoItemId);
+
+  let tendenciaHTML = "";
+  if (proximoItem) {
+    const proximoEdicaoDiv = proximoItem.querySelector(".edicao-in-place");
+    const proximaDataKey = proximoEdicaoDiv?.getAttribute("data-date-key");
+    const valorAnterior = proximaDataKey
+      ? realizadoDiario[proximaDataKey]
+      : null;
+
+    if (valorAnterior && novoValor) {
+      const diferenca = novoValor - valorAnterior;
+      if (diferenca > 0) {
+        tendenciaHTML = `
+          <div class="timeline-trend trend-up">
+            <i class="bi bi-arrow-up-right"></i>
+            <span>+${diferenca.toLocaleString("pt-BR")} vs dia anterior</span>
+          </div>`;
+      } else if (diferenca < 0) {
+        tendenciaHTML = `
+          <div class="timeline-trend trend-down">
+            <i class="bi bi-arrow-down-right"></i>
+            <span>${diferenca.toLocaleString("pt-BR")} vs dia anterior</span>
+          </div>`;
+      } else {
+        tendenciaHTML = `
+          <div class="timeline-trend trend-stable">
+            <i class="bi bi-arrow-right"></i>
+            <span>Igual ao dia anterior</span>
+          </div>`;
+      }
+    }
+  }
+
+  // Atualizar a div de tendência
+  const timelineBody = liElement.querySelector(".timeline-body");
+  let trendElement = timelineBody.querySelector(".timeline-trend");
+
+  if (tendenciaHTML) {
+    if (trendElement) {
+      // Substituir tendência existente
+      trendElement.outerHTML = tendenciaHTML;
+    } else {
+      // Adicionar nova tendência
+      timelineBody.insertAdjacentHTML("beforeend", tendenciaHTML);
+    }
+  } else if (trendElement) {
+    // Remover tendência se não há mais
+    trendElement.remove();
+  }
 
   // Atualiza os atributos para futuras edições
   edicaoDiv.setAttribute("data-valor-antigo", novoValor);
@@ -893,7 +1181,8 @@ function handleHistoricoClick(event) {
   const target = event.target;
 
   // Encontra o botão que foi realmente clicado, mesmo que o clique tenha sido no ícone dentro dele.
-  const btnCorrigir = target.closest(".btn-corrigir");
+  const btnCorrigir =
+    target.closest(".btn-corrigir") || target.closest(".btn-edit");
   const btnSalvar = target.closest(".btn-salvar-correcao");
   const btnCancelar = target.closest(".btn-cancelar-correcao");
 
@@ -916,7 +1205,7 @@ function handleHistoricoClick(event) {
 
   if (btnSalvar) {
     const edicaoDiv = btnSalvar.closest(".edicao-in-place");
-    const liId = edicaoDiv.closest(".historico-item-card").id;
+    const liId = edicaoDiv.closest(".timeline-item").id;
     const dataKey = edicaoDiv.getAttribute("data-date-key");
     const valorAntigo = Number(edicaoDiv.getAttribute("data-valor-antigo"));
     const inputNovoValor = edicaoDiv.querySelector(".input-correcao");

@@ -18,7 +18,6 @@ html {
     ),
     linear-gradient(41deg, rgb(32 90 145), hsl(203, 68%, 82%));
   width: 100vw;
-  height: 100vh;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -98,6 +97,17 @@ main {
   @include flex-center;
   box-shadow: inset 0 0 0.5rem 0.2rem rgba(0, 0, 0, 0.5);
   cursor: pointer;
+  z-index: 9999; // Sempre acima do footer
+  @include transitions(all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55));
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+
+  // Estado escondido (quando footer está aberto)
+  &.hide {
+    opacity: 0;
+    transform: scale(0) rotate(180deg);
+    pointer-events: none;
+  }
 
   @include landscape-desktop {
     // tornar o botão relativo ao `main` em telas largas
@@ -230,7 +240,7 @@ main {
   .notie-container.with-icon::before {
     left: 50%; // Centraliza horizontalmente
     top: -1.5rem; // 50% fora do topo (metade da altura de 3rem)
-    transform: translateX(-50%); 
+    transform: translateX(-50%);
     width: 3rem;
     height: 3rem;
     background-size: cover;
@@ -405,22 +415,18 @@ main {
 }
 
 .footer-link {
-  position: fixed; // Fixed no mobile para ficar no rodapé da tela
-  left: 2rem;
-  bottom: 2rem;
-  font-size: 2rem;
-  z-index: 90; // Acima do conteúdo mas abaixo dos botões
-
-  .icon-desktop,
-  .footer-text {
-    display: none;
-  }
+  // Escondido no mobile (agora está no footer-nav)
+  display: none;
 
   @include landscape-desktop {
-    position: fixed; // Absolute no desktop (relativo ao main)
+    // Visível apenas no desktop
+    display: block;
+    position: fixed;
     width: 100%;
     font-size: 1.2rem;
     left: 2rem;
+    bottom: 2rem;
+    z-index: 90;
 
     .icon-mobile {
       display: none;
@@ -452,6 +458,7 @@ main {
   flex-direction: column;
   width: 100%;
   overflow: auto;
+  position: relative; // Para o painel desktop funcionar
 
   // Qualquer landscape: ocupa mais espaço verticalmente
   @include any-landscape {
@@ -462,6 +469,7 @@ main {
   @include landscape-desktop {
     width: 100%;
     flex: 0 1 auto;
+    overflow: visible; // Permite painel desktop aparecer
   }
 }
 .section2 {

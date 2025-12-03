@@ -4,13 +4,14 @@
   "description": "Acompanhamento de metas",
   "main": "index.js",
   "scripts": {
-    "watch:sass": "npx sass --watch sass/main.scss:css/style.css sass/privacidade.scss:css/privacidade.css sass/report.scss:css/report.css --load-path node_modules",
-    "compile:privacidade": "npx sass sass/privacidade.scss css/privacidade.css",
-    "compile:relatorio": "npx sass sass/report.scss css/report.css",
+    "watch:sass": "npx sass --watch sass/main.scss:css/style.css sass/privacidade.scss:css/privacidade.css sass/report.scss:css/report.css --load-path node_modules --style compressed",
+    "compile:privacidade": "npx sass sass/privacidade.scss css/privacidade.css --style compressed",
+    "compile:relatorio": "npx sass sass/report.scss css/report.css --style compressed",
     "compile:sass": "npx sass sass/main.scss css/style.comp.css",
-    "prefix:css": "npx  postcss --use autoprefixer -b 'last 10 versions' css/style.comp.css -o css/style.prefix.css",
+    "prefix:css": "npx postcss --use autoprefixer -b 'last 10 versions' css/style.comp.css -o css/style.prefix.css",
     "compress:css": "npx sass css/style.prefix.css css/style.css --style compressed --load-path node_modules",
-    "build:css": "npx run-s compile:sass prefix:css compress:css compile:privacidade compile:relatorio"
+    "build:css": "npx run-s compile:sass prefix:css compress:css compile:privacidade compile:relatorio",
+    "build:prod": "npm run build:css"
   },
   "author": "Bonyve",
   "license": "ISC",

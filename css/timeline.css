@@ -1,0 +1,361 @@
+/* ============================================================================
+   TIMELINE.CSS - Estilos para Timeline Visual do Histórico
+   ============================================================================ */
+
+/* Timeline Item */
+.timeline-item {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+/* Timeline Dot */
+.timeline-dot {
+  width: 4rem;
+  min-width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border: 3px solid #3498db;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.timeline-dot.sucesso {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border-color: #3498db;
+}
+
+.timeline-dot.alerta {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  border-color: #f39c12;
+}
+
+.timeline-dot.hoje {
+  animation: todayPulse 2s infinite;
+}
+
+/* Hoje com sucesso - azul pulsante */
+.timeline-dot.sucesso.hoje {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border-color: #3498db;
+}
+
+/* Hoje com alerta - laranja pulsante */
+.timeline-dot.alerta.hoje {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  border-color: #f39c12;
+}
+
+/* Hoje sem valor - verde pulsante */
+.timeline-dot.hoje:not(.sucesso):not(.alerta) {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  border-color: #2ecc71;
+}
+
+.timeline-dot.sem-registro {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  border-color: #95a5a6;
+  opacity: 0.6;
+}
+
+/* Timeline Content */
+.timeline-content {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(0, 123, 255, 0.2);
+  transition: all 0.3s;
+}
+
+.timeline-content:hover {
+  transform: translateX(5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+/* Timeline Header */
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.timeline-date {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: rgb(18, 59, 107);
+}
+
+.timeline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  background: rgba(46, 204, 113, 0.2);
+  color: #27ae60;
+  border: 1px solid rgba(46, 204, 113, 0.5);
+}
+
+.timeline-badge.badge-mes-anterior {
+  background: rgba(149, 165, 166, 0.15);
+  color: #7f8c8d;
+  border: 1px solid rgba(149, 165, 166, 0.3);
+  font-size: 1.1rem;
+}
+
+/* Timeline Body */
+.timeline-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.timeline-points-container {
+  position: relative;
+  min-height: 3.5rem;
+}
+
+.timeline-points {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.points-value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.points-value.sucesso {
+  color: #2ecc71;
+}
+
+.points-value.alerta {
+  color: #f39c12;
+}
+
+.points-value.sem-registro {
+  color: #95a5a6;
+  font-style: italic;
+  font-size: 1.4rem;
+}
+
+/* Timeline Trend */
+.timeline-trend {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.4rem;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.timeline-trend i {
+  font-size: 2rem;
+}
+
+.timeline-trend.trend-up {
+  color: #2ecc71;
+}
+
+.timeline-trend.trend-down {
+  color: #e74c3c;
+}
+
+.timeline-trend.trend-stable {
+  color: #3498db;
+}
+
+/* Timeline Button */
+.timeline-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timeline-btn.btn-edit {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.timeline-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Edição In-place (apenas sobre timeline-points) */
+.timeline-points-container .edicao-in-place {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(236, 240, 241, 0.98);
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.timeline-points-container .input-correcao {
+  flex: 1;
+  padding: 0.8rem;
+  border: 2px solid #3498db;
+  border-radius: 6px;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.timeline-points-container .edit-botoes {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Lista Container */
+#historico-lista {
+  list-style: none;
+  padding: 2rem 0;
+  position: relative;
+}
+
+/* Linha vertical da timeline */
+#historico-lista::before {
+  content: "";
+  position: absolute;
+  left: 2rem;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 123, 255, 0.6),
+    rgba(0, 123, 255, 0.1)
+  );
+  border-radius: 10px;
+}
+
+/* Animações */
+@keyframes todayPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 0 0 currentColor;
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4),
+      0 0 0 8px rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Responsividade Mobile */
+@media (max-width: 480px) {
+  .timeline-item {
+    gap: 1rem;
+  }
+
+  .timeline-dot {
+    width: 3.5rem;
+    min-width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.6rem;
+  }
+
+  .timeline-content {
+    padding: 1.2rem;
+  }
+
+  .timeline-date {
+    font-size: 1.4rem;
+  }
+
+  .points-value {
+    font-size: 1.8rem;
+  }
+
+  .timeline-trend {
+    font-size: 1.2rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .timeline-trend i {
+    font-size: 1.6rem;
+  }
+
+  #historico-lista::before {
+    left: 1.75rem;
+  }
+}
+
+/* ============================================================================
+   SEPARADOR DE MÊS
+   ============================================================================ */
+
+.timeline-separator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.separator-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(52, 152, 219, 0.3),
+    transparent
+  );
+}
+
+.separator-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+  color: #34495e;
+  border-radius: 20px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+
+.separator-badge i {
+  font-size: 1.5rem;
+  color: #3498db;
+}

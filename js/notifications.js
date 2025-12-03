@@ -19,6 +19,193 @@ import {
 const notie = window.notie;
 
 // ============================================================================
+// FEEDBACK SENSORIAL (Vibração + Sons)
+// ============================================================================
+
+/**
+ * Configurações de feedback (ler do localStorage)
+ */
+const CONFIG_FEEDBACK = {
+  vibracaoAtiva: localStorage.getItem("feedbackVibracao") !== "false",
+  somAtivo: localStorage.getItem("feedbackSom") !== "false",
+};
+
+/**
+ * Ativa/desativa vibração
+ * @param {boolean} ativar
+ */
+export function configurarVibracao(ativar) {
+  CONFIG_FEEDBACK.vibracaoAtiva = ativar;
+  localStorage.setItem("feedbackVibracao", ativar.toString());
+}
+
+/**
+ * Ativa/desativa sons
+ * @param {boolean} ativar
+ */
+export function configurarSom(ativar) {
+  CONFIG_FEEDBACK.somAtivo = ativar;
+  localStorage.setItem("feedbackSom", ativar.toString());
+}
+
+/**
+ * Padrões de vibração para diferentes tipos de feedback
+ */
+const PADROES_VIBRACAO = {
+  SUCESSO: [50, 30, 50], // Vibra-pausa-vibra (sucesso)
+  ERRO: [100, 50, 100, 50, 100], // Três vibrações (erro grave)
+  AVISO: [200], // Vibração única longa (atenção)
+  INFO: [30], // Vibração curta (informação)
+  CONQUISTA: [50, 50, 50, 50, 100, 100, 200], // Padrão especial para conquistas
+};
+
+/**
+ * Verifica se o dispositivo suporta vibração
+ */
+function suportaVibracao() {
+  return "vibrate" in navigator;
+}
+
+/**
+ * Ativa vibração se disponível e habilitada
+ * @param {Array<number>} padrao - Padrão de vibração
+ */
+function vibrar(padrao) {
+  if (CONFIG_FEEDBACK.vibracaoAtiva && suportaVibracao()) {
+    navigator.vibrate(padrao);
+  }
+}
+
+/**
+ * Toca som de notificação usando Audio API
+ * @param {string} tipo - Tipo de som (sucesso, erro, aviso, info)
+ */
+function tocarSom(tipo) {
+  // Verificar se som está habilitado
+  if (!CONFIG_FEEDBACK.somAtivo) return;
+
+  try {
+    // Criar contexto de áudio
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+
+    const ctx = new AudioContext();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+  // Configurar som baseado no tipo
+  switch (tipo) {
+    case "success":
+      // Som agradável ascendente (sucesso)
+      oscillator.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+      oscillator.frequency.exponentialRampToValueAtTime(
+        783.99,
+        ctx.currentTime + 0.1
+      ); // G5
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.2);
+      break;
+
+    case "error":
+      // Som grave descendente (erro)
+      oscillator.frequency.setValueAtTime(329.63, ctx.currentTime); // E4
+      oscillator.frequency.exponentialRampToValueAtTime(
+        196.0,
+        ctx.currentTime + 0.15
+      ); // G3
+      oscillator.type = "sawtooth";
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.3);
+      break;
+
+    case "warning":
+      // Som de atenção (duas notas)
+      oscillator.frequency.setValueAtTime(440.0, ctx.currentTime); // A4
+      oscillator.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1); // C#5
+      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+      gainNode.gain.setValueAtTime(0.2, ctx.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.25);
+      break;
+
+    case "info":
+      // Som suave e curto (informação)
+      oscillator.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+      oscillator.type = "sine";
+      gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.15);
+      break;
+
+    case "achievement":
+      // Som de conquista (melodia especial)
+      oscillator.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+      oscillator.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+      oscillator.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.4);
+      break;
+    }
+  } catch (error) {
+    // Silenciosamente ignorar erros de áudio
+    console.warn("Erro ao tocar som:", error.message);
+  }
+}
+
+/**
+ * Feedback completo: vibração + som + notificação visual
+ * @param {string} tipo - Tipo de feedback
+ * @param {string} mensagem - Mensagem da notificação
+ * @param {number} tempo - Tempo em segundos
+ */
+function feedbackCompleto(tipo, mensagem, tempo) {
+  // Determinar padrão de vibração e som
+  let padraoVibracao;
+  let tipoSom;
+
+  switch (tipo) {
+    case "success":
+      padraoVibracao = PADROES_VIBRACAO.SUCESSO;
+      tipoSom = "success";
+      break;
+    case "error":
+      padraoVibracao = PADROES_VIBRACAO.ERRO;
+      tipoSom = "error";
+      break;
+    case "warning":
+      padraoVibracao = PADROES_VIBRACAO.AVISO;
+      tipoSom = "warning";
+      break;
+    case "info":
+      padraoVibracao = PADROES_VIBRACAO.INFO;
+      tipoSom = "info";
+      break;
+  }
+
+  // Executar feedback
+  vibrar(padraoVibracao);
+  tocarSom(tipoSom);
+
+  // Notificação visual
+  notie.alert({
+    type: tipo,
+    text: mensagem,
+    time: tempo,
+  });
+}
+
+// ============================================================================
 // TIPOS DE NOTIFICAÇÃO
 // ============================================================================
 
@@ -38,16 +225,12 @@ const TIPOS = {
 // ============================================================================
 
 /**
- * Mostra notificação de sucesso genérica
+ * Mostra notificação de sucesso genérica com feedback sensorial
  * @param {string} mensagem - Texto da notificação
  * @param {number} tempo - Tempo em segundos (opcional)
  */
 export function notificarSucesso(mensagem, tempo = NOTIFICACAO_TEMPO_PADRAO) {
-  notie.alert({
-    type: TIPOS.SUCESSO,
-    text: mensagem,
-    time: tempo,
-  });
+  feedbackCompleto(TIPOS.SUCESSO, mensagem, tempo);
 }
 
 /**
@@ -84,16 +267,12 @@ export function notificarLogout() {
 // ============================================================================
 
 /**
- * Mostra notificação de erro genérica
+ * Mostra notificação de erro genérica com feedback sensorial
  * @param {string} mensagem - Texto da notificação
  * @param {number} tempo - Tempo em segundos (opcional)
  */
 export function notificarErro(mensagem, tempo = NOTIFICACAO_TEMPO_PADRAO) {
-  notie.alert({
-    type: TIPOS.ERRO,
-    text: mensagem,
-    time: tempo,
-  });
+  feedbackCompleto(TIPOS.ERRO, mensagem, tempo);
 }
 
 /**
@@ -137,16 +316,12 @@ export function notificarErroSalvar() {
 // ============================================================================
 
 /**
- * Mostra notificação de aviso genérica
+ * Mostra notificação de aviso genérica com feedback sensorial
  * @param {string} mensagem - Texto da notificação
  * @param {number} tempo - Tempo em segundos (opcional)
  */
 export function notificarAviso(mensagem, tempo = NOTIFICACAO_TEMPO_PADRAO) {
-  notie.alert({
-    type: TIPOS.AVISO,
-    text: mensagem,
-    time: tempo,
-  });
+  feedbackCompleto(TIPOS.AVISO, mensagem, tempo);
 }
 
 /**
@@ -174,16 +349,12 @@ export function notificarResetMensal() {
 // ============================================================================
 
 /**
- * Mostra notificação informativa genérica
+ * Mostra notificação informativa genérica com feedback sensorial
  * @param {string} mensagem - Texto da notificação
  * @param {number} tempo - Tempo em segundos (opcional)
  */
 export function notificarInfo(mensagem, tempo = NOTIFICACAO_TEMPO_PADRAO) {
-  notie.alert({
-    type: TIPOS.INFO,
-    text: mensagem,
-    time: tempo,
-  });
+  feedbackCompleto(TIPOS.INFO, mensagem, tempo);
 }
 
 /**
@@ -222,11 +393,30 @@ export function notificarPoliticaRecomendada() {
 // ============================================================================
 
 /**
- * Notifica bônus aplicado
+ * Notifica bônus aplicado com feedback especial
  * @param {number} valor - Valor do bônus
  */
 export function notificarBonusAplicado(valor) {
-  notificarSucesso(`🎉 Bônus de ${valor.toLocaleString("pt-BR")} aplicado!`);
+  vibrar(PADROES_VIBRACAO.CONQUISTA);
+  tocarSom("achievement");
+  notie.alert({
+    type: TIPOS.SUCESSO,
+    text: `🎉 Bônus de ${valor.toLocaleString("pt-BR")} aplicado!`,
+    time: NOTIFICACAO_TEMPO_PADRAO,
+  });
+}
+
+/**
+ * Notifica meta batida com celebração especial
+ */
+export function notificarMetaBatida() {
+  vibrar(PADROES_VIBRACAO.CONQUISTA);
+  tocarSom("achievement");
+  notie.alert({
+    type: TIPOS.SUCESSO,
+    text: "🎉🏆 PARABÉNS! Você bateu sua meta mensal! 🏆🎉",
+    time: NOTIFICACAO_TEMPO_LONGO,
+  });
 }
 
 /**

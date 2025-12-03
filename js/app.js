@@ -10,7 +10,13 @@
 // ============================================================================
 
 // UI e utilitários
-import { destacarElemento, alternarDisplay } from "./ui.js";
+import {
+  destacarElemento,
+  alternarDisplay,
+  debounce,
+  mostrarSkeleton,
+  removerLoading,
+} from "./ui.js";
 
 // Gerenciamento de dados
 import {
@@ -47,6 +53,9 @@ import {
   abrirModalHistorico,
   solicitarBonus,
 } from "./history.js";
+
+// Análises e previsões
+import { renderizarAnalises } from "./predictions.js";
 
 // Notificações centralizadas
 import {
@@ -105,6 +114,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 🛡️ PROTEÇÃO: Sincronizar dados entre múltiplas abas
   configurarSincronizacaoAbas();
+
+  // 📍 Configurar botão de scroll para observações
+  configurarScrollParaObservacoes();
+
+  // 📊 Configurar navegação para análises
+  configurarNavegacaoAnalises();
 });
 
 // ============================================================================
@@ -309,7 +324,7 @@ export function refreshMetaDropdownLabels() {
 
 // Você precisa da função atualizarUIDashboard para injetar os dados
 // Ela deve usar os resultados do calc.js e o objeto dadosUsuario
-function atualizarUIDashboard(resultados) {
+export function atualizarUIDashboard(resultados) {
   const dadosUsuario = getDadosUsuario();
 
   // 🛡️ PROTEÇÃO: Verificar se dados existem
@@ -346,7 +361,7 @@ function atualizarUIDashboard(resultados) {
 
     // Texto claro explicando a meta diária
     if (resultados.diasUteisRestantes > 0) {
-      diariaElement.textContent = `${valorFormatado} pts/dia para bater a meta`;
+      diariaElement.textContent = `${valorFormatado} pts/dia `;
     } else if (resultados.isMetaBatida) {
       diariaElement.textContent = `Meta batida! 🎉`;
     } else {
@@ -389,7 +404,7 @@ function atualizarUIDashboard(resultados) {
             time: 5,
             position: "top",
           });
-        } else {
+        } else if (resultados.diasUteisRestantes === 1) {
           const faltante = resultados.faltante;
           notie.alert({
             type: "warning",
@@ -431,12 +446,27 @@ function ativarBotaoEdit() {
       if (isLandscape || isDesktop) {
         // No landscape ou desktop: sempre mostrar o input (não dar toggle)
         inputEdit.classList.remove("edita-pontos-hidden");
-        inputEdit.focus();
+
+        // Foca o input automaticamente
+        const inputPontos = document.getElementById("input-pontos");
+        if (inputPontos) {
+          setTimeout(() => {
+            inputPontos.focus();
+            inputPontos.select(); // Seleciona o conteúdo para fácil substituição
+          }, 100);
+        }
       } else {
         // No portrait mobile: comportamento antigo (toggle)
         inputEdit.classList.toggle("edita-pontos-hidden");
         if (!inputEdit.classList.contains("edita-pontos-hidden")) {
-          inputEdit.focus();
+          // Foca o input automaticamente
+          const inputPontos = document.getElementById("input-pontos");
+          if (inputPontos) {
+            setTimeout(() => {
+              inputPontos.focus();
+              inputPontos.select(); // Seleciona o conteúdo para fácil substituição
+            }, 100);
+          }
         }
       }
 
@@ -756,7 +786,11 @@ function ligarModoSimulacao() {
 
   if (inputPontos) {
     inputPontos.value = "";
-    inputPontos.focus();
+    // Foca o input automaticamente com delay para garantir que funcione
+    setTimeout(() => {
+      inputPontos.focus();
+      inputPontos.select(); // Seleciona o conteúdo para fácil digitação
+    }, 100);
   }
 
   notie.alert({
@@ -843,32 +877,8 @@ function executarCalculoRapidoSimulacao(pontoAdicionado) {
 }
 
 function editoresBtnsListerner() {
-  const btnPrincipal = document.getElementById("btn-principal");
-  const btnCalculadora = document.getElementById("calculo-rapido");
-  const btnLapis = document.getElementById("btn-edit");
-
-  if (btnPrincipal && btnCalculadora && btnLapis) {
-    // Remove the event listener to avoid duplicates
-    btnPrincipal.replaceWith(btnPrincipal.cloneNode(true));
-    document.getElementById("btn-principal").addEventListener("click", () => {
-      alternarDisplay(btnCalculadora);
-      alternarDisplay(btnLapis);
-
-      // Se estivermos em mobile e os botões forem escondidos, também esconder o input ativo
-      const isMobile = window.matchMedia("(max-width: 768px)").matches;
-      if (isMobile) {
-        const inputContainer = document.getElementById("edita-pontos");
-        const calcHidden = btnCalculadora.classList.contains("hidden");
-        const lapisHidden = btnLapis.classList.contains("hidden");
-
-        // Se ambos os botões estiverem escondidos (estado compacto), esconder o input também
-        if (calcHidden && lapisHidden) {
-          if (inputContainer)
-            inputContainer.classList.add("edita-pontos-hidden");
-        }
-      }
-    });
-  }
+  // Função desativada - botões agora estão no footer e sempre visíveis
+  // A lógica de exibição é controlada pelo footer-nav
 }
 
 function solicitarBtnListerner() {
@@ -972,6 +982,172 @@ function configurarLogout() {
 // LÓGICA DE TEMA (DARK/LIGHT MODE)
 // =================================================================================
 
+/**
+ * Configura footer de navegação mobile
+ */
+function configurarFooterNav() {
+  const btnPrincipal = document.getElementById("btn-principal");
+  const footerNav = document.getElementById("footer-nav");
+  const footerBackdrop = document.getElementById("footer-backdrop");
+  const footerConfigBtn = document.getElementById("footer-config-btn");
+
+  if (!btnPrincipal || !footerNav || !footerBackdrop) return;
+
+  // Função para abrir footer
+  const abrirFooter = () => {
+    footerNav.classList.add("show");
+    footerBackdrop.classList.add("show");
+    btnPrincipal.classList.add("hide"); // Esconde o botão
+  };
+
+  // Função para fechar footer
+  const fecharFooter = () => {
+    footerNav.classList.remove("show");
+    footerBackdrop.classList.remove("show");
+    btnPrincipal.classList.remove("hide"); // Mostra o botão novamente
+  };
+
+  // Abrir footer ao clicar no btn-principal
+  btnPrincipal.addEventListener("click", abrirFooter);
+
+  // Fechar footer ao clicar no backdrop
+  footerBackdrop.addEventListener("click", fecharFooter);
+
+  // Configurações via footer
+  footerConfigBtn?.addEventListener("click", () => {
+    // Fecha o footer
+    fecharFooter();
+
+    // Abre modal de configurações
+    const modal = document.getElementById("config-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+    }
+  });
+
+  // Fechar footer com tecla ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && footerNav.classList.contains("show")) {
+      fecharFooter();
+    }
+  });
+}
+
+/**
+ * Configura modal de configurações flutuante
+ */
+function configurarModalConfig() {
+  const btnFloat = document.getElementById("btn-config-float");
+  const btnFooterConfig = document.getElementById("footer-config-btn");
+  const modal = document.getElementById("config-modal");
+  const btnClose = document.getElementById("btn-close-config");
+  const toggleSom = document.getElementById("toggle-som");
+  const toggleVibracao = document.getElementById("toggle-vibracao");
+  const togglePush = document.getElementById("toggle-push");
+  const btnTest = document.querySelector(".btn-test-feedback");
+
+  if (!modal) return;
+
+  // Carregar estados salvos
+  const carregarEstados = () => {
+    if (toggleSom) {
+      toggleSom.checked = localStorage.getItem("feedbackSom") !== "false";
+    }
+    if (toggleVibracao) {
+      toggleVibracao.checked =
+        localStorage.getItem("feedbackVibracao") !== "false";
+    }
+    if (togglePush) {
+      togglePush.checked = pushManager.permission === "granted";
+      togglePush.disabled = pushManager.permission === "denied";
+    }
+  };
+
+  carregarEstados();
+
+  // Abrir modal - suporta ambos os botões
+  const abrirModal = () => {
+    modal.classList.remove("hidden");
+    carregarEstados(); // Atualiza ao abrir
+  };
+
+  if (btnFloat) {
+    btnFloat.addEventListener("click", abrirModal);
+  }
+
+  if (btnFooterConfig) {
+    btnFooterConfig.addEventListener("click", abrirModal);
+  }
+
+  // Fechar modal
+  const fecharModal = () => {
+    modal.classList.add("hidden");
+  };
+
+  if (btnClose) {
+    btnClose.addEventListener("click", fecharModal);
+  }
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) fecharModal();
+  });
+
+  // ESC para fechar
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+      fecharModal();
+    }
+  });
+
+  // Toggle Som
+  toggleSom?.addEventListener("change", (e) => {
+    localStorage.setItem("feedbackSom", e.target.checked.toString());
+    import("./notifications.js").then(({ notificarInfo }) => {
+      notificarInfo(
+        `🔊 Sons ${e.target.checked ? "ativados" : "desativados"}`,
+        2
+      );
+    });
+  });
+
+  // Toggle Vibração
+  toggleVibracao?.addEventListener("change", (e) => {
+    localStorage.setItem("feedbackVibracao", e.target.checked.toString());
+    import("./notifications.js").then(({ notificarInfo }) => {
+      notificarInfo(
+        `📳 Vibração ${e.target.checked ? "ativada" : "desativada"}`,
+        2
+      );
+    });
+  });
+
+  // Toggle Push
+  togglePush?.addEventListener("change", async (e) => {
+    if (e.target.checked) {
+      const success = await pushManager.requestPermission();
+      if (!success) {
+        e.target.checked = false;
+        import("./notifications.js").then(({ notificarErro }) => {
+          notificarErro(
+            "❌ Permissão negada. Ative nas configurações do navegador.",
+            4
+          );
+        });
+      } else {
+        import("./notifications.js").then(({ notificarSucesso }) => {
+          notificarSucesso("✅ Notificações ativadas!", 3);
+        });
+      }
+    }
+  });
+
+  // Testar feedback
+  btnTest?.addEventListener("click", () => {
+    import("./notifications.js").then(({ notificarSucesso }) => {
+      notificarSucesso("🎉 Teste de feedback sensorial completo!");
+    });
+  });
+}
+
 function carregarTema() {
   const temaSalvo = localStorage.getItem("tema") || "light";
   document.documentElement.setAttribute("data-theme", temaSalvo);
@@ -1002,55 +1178,139 @@ function configurarToggleTema() {
     });
   }
 
-  // Botão de ativar notificações push
-  const btnNotifications = document.getElementById("btn-notifications");
-  if (btnNotifications) {
-    // Clique: mostra notificações ou pede permissão
-    btnNotifications.addEventListener("click", async () => {
-      const unreadCount = pushManager.getUnreadCount();
+  // Modal de configurações flutuante
+  configurarModalConfig();
 
-      // Se tiver notificações não lidas, mostra a lista
-      if (unreadCount > 0) {
-        showNotificationsList();
-        return;
-      }
+  // Footer de navegação mobile
+  configurarFooterNav();
 
-      // Se não tiver permissão, solicita
-      if (pushManager.permission !== "granted") {
-        const success = await pushManager.requestPermission();
-        if (success) {
-          notie.alert({
-            type: "success",
-            text: "✅ Notificações ativadas! Você receberá lembretes e parabenizações.",
-            time: 3,
-          });
-          btnNotifications.classList.add("active");
-          btnNotifications.title = "Notificações ativadas ✓";
-        } else {
-          notie.alert({
-            type: "error",
-            text: "❌ Permissão negada. Ative nas configurações do navegador.",
-            time: 4,
-          });
-        }
-      } else {
-        notie.alert({
-          type: "info",
-          text: `<i class="bi bi-chat-square"></i> Você não tem notificações não lidas.`,
-          time: 2,
-        });
+  // Painel desktop
+  configurarDesktopPanel();
+}
+
+/**
+ * Configura painel lateral desktop (apenas >768px)
+ */
+function configurarDesktopPanel() {
+  // Só inicializar em desktop
+  if (window.innerWidth <= 768) {
+    console.log("Desktop panel: largura menor que 768px, não inicializado");
+    return;
+  }
+
+  const configBtn = document.getElementById("desktop-config-btn");
+  const logoutBtn = document.getElementById("desktop-logout-btn");
+  const panel = document.querySelector(".desktop-config-panel");
+  const backdrop = document.querySelector(".desktop-panel-backdrop");
+  const closeBtn = document.querySelector(".panel-close-btn");
+
+  console.log("Desktop panel elementos:", {
+    configBtn,
+    logoutBtn,
+    panel,
+    backdrop,
+    closeBtn,
+  });
+
+  if (!configBtn || !panel || !backdrop || !closeBtn) {
+    console.error("Desktop panel: elementos não encontrados");
+    return;
+  }
+
+  console.log("Desktop panel: inicializado com sucesso");
+
+  let isOpen = false;
+
+  // Abrir painel
+  const openPanel = () => {
+    console.log("Desktop panel: abrindo painel");
+    isOpen = true;
+    panel.classList.add("show");
+    backdrop.classList.add("show");
+    console.log("Desktop panel: classes 'show' adicionadas");
+  };
+
+  // Fechar painel
+  const closePanel = () => {
+    if (!isOpen) return;
+    isOpen = false;
+    panel.classList.remove("show");
+    backdrop.classList.remove("show");
+  };
+
+  // Click no botão config
+  configBtn.addEventListener("click", openPanel);
+
+  // Click no botão fechar
+  closeBtn.addEventListener("click", closePanel);
+
+  // Click no backdrop
+  backdrop.addEventListener("click", closePanel);
+
+  // ESC fecha painel
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isOpen) {
+      closePanel();
+    }
+  });
+
+  // Botão logout
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      const btnLogout = document.getElementById("btn-logout");
+      if (btnLogout) {
+        btnLogout.click();
       }
     });
-
-    // Atualiza badge na inicialização
-    pushManager.updateBadge();
-
-    // Se já tiver permissão, deixa o botão em estado "ativado"
-    if (pushManager.permission === "granted") {
-      btnNotifications.classList.add("active");
-      btnNotifications.title = "Notificações ativadas ✓";
-    }
   }
+
+  // Sincronizar toggles com configurações mobile
+  const syncToggles = () => {
+    const desktopSom = document.getElementById("desktop-toggle-som");
+    const desktopVibracao = document.getElementById("desktop-toggle-vibracao");
+    const desktopPush = document.getElementById("desktop-toggle-push");
+
+    const mobileSom = document.getElementById("toggle-som");
+    const mobileVibracao = document.getElementById("toggle-vibracao");
+    const mobilePush = document.getElementById("toggle-push");
+
+    if (desktopSom && mobileSom) {
+      desktopSom.checked = mobileSom.checked;
+      desktopSom.addEventListener("change", () => {
+        mobileSom.checked = desktopSom.checked;
+        mobileSom.dispatchEvent(new Event("change"));
+      });
+    }
+
+    if (desktopVibracao && mobileVibracao) {
+      desktopVibracao.checked = mobileVibracao.checked;
+      desktopVibracao.addEventListener("change", () => {
+        mobileVibracao.checked = desktopVibracao.checked;
+        mobileVibracao.dispatchEvent(new Event("change"));
+      });
+    }
+
+    if (desktopPush && mobilePush) {
+      desktopPush.checked = mobilePush.checked;
+      desktopPush.addEventListener("change", () => {
+        mobilePush.checked = desktopPush.checked;
+        mobilePush.dispatchEvent(new Event("change"));
+      });
+    }
+  };
+
+  syncToggles();
+
+  // Re-inicializar em resize
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (window.innerWidth <= 768 && isOpen) {
+        closePanel();
+      }
+    }, 250);
+  });
 }
 
 /**
@@ -1134,25 +1394,19 @@ function setupResponsiveMode() {
 
   function applyMode(m) {
     const isMobile = m.matches;
-    const btnEdit = document.getElementById("btn-edit");
-    const btnCalculadora = document.getElementById("calculo-rapido");
     const btnPrincipal = document.getElementById("btn-principal");
     const inputContainer = document.getElementById("edita-pontos");
     const inputPontosElement = document.getElementById("input-pontos");
 
-    // Mobile: keep floating buttons visible, keep input hidden until user toggles
+    // Mobile: botões estão no footer (sempre acessíveis), input escondido por padrão
     if (isMobile) {
-      if (btnEdit) btnEdit.classList.remove("hidden");
-      if (btnCalculadora) btnCalculadora.classList.remove("hidden");
       if (btnPrincipal) btnPrincipal.classList.remove("hidden");
       if (inputContainer) inputContainer.classList.add("edita-pontos-hidden");
       if (inputPontosElement) {
         inputPontosElement.placeholder = ""; // no hint on mobile (keeps compact)
       }
     } else {
-      // Desktop / landscape: hide mobile-only buttons and show input always
-      if (btnEdit) btnEdit.classList.add("hidden");
-      if (btnCalculadora) btnCalculadora.classList.add("hidden");
+      // Desktop / landscape: esconde btn-principal (footer não aparece), mostra input sempre
       if (btnPrincipal) btnPrincipal.classList.add("hidden");
       if (inputContainer)
         inputContainer.classList.remove("edita-pontos-hidden");
@@ -1160,7 +1414,7 @@ function setupResponsiveMode() {
       modoAtual = "simulacao";
       if (inputPontosElement) {
         inputPontosElement.placeholder =
-          "Enter → Simular · Ctrl+Enter → Registrar";
+          "Enter →Simular · Ctrl+Enter→ Registrar";
       }
     }
   }
@@ -1354,6 +1608,173 @@ if (
     "color: #6c757d"
   );
   debugLog("%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "color: #6c757d");
+}
+
+// ============================================================================
+// SCROLL PARA OBSERVAÇÕES
+// ============================================================================
+
+/**
+ * Configura botão flutuante para scroll até campo de observações
+ */
+function configurarScrollParaObservacoes() {
+  const scrollBtn = document.getElementById("scroll-to-obs-btn");
+  const obsTextarea = document.getElementById("texterarea-obervacoes");
+  const modal = document.getElementById("historico-modal");
+
+  if (!scrollBtn || !obsTextarea) {
+    return;
+  }
+
+  // Função para verificar se o textarea está visível na viewport do modal
+  function isTextareaVisible() {
+    if (!modal || modal.style.display === "none") return false;
+
+    const modalRect = modal.getBoundingClientRect();
+    const textareaRect = obsTextarea.getBoundingClientRect();
+
+    // Verifica se o textarea está dentro da área visível do modal
+    const isVisible =
+      textareaRect.top >= modalRect.top &&
+      textareaRect.bottom <= modalRect.bottom + 200; // 200px de tolerância
+
+    return isVisible;
+  }
+
+  // Atualizar visibilidade do botão
+  function updateButtonVisibility() {
+    // Verificar se seção de previsões está aberta
+    const predictionsSection = document.getElementById("predictions-section");
+    const predictionsAberta =
+      predictionsSection && !predictionsSection.classList.contains("hidden");
+
+    if (predictionsAberta) {
+      // Seção de previsões aberta = esconder botão
+      scrollBtn.classList.add("hidden");
+      return;
+    }
+
+    // Verificar se modal está aberto (usa classe modal-backdrop-hidden)
+    const modalAberto =
+      modal && !modal.classList.contains("modal-backdrop-hidden");
+    const textareaVisivel = isTextareaVisible();
+
+    if (!modalAberto) {
+      // Modal fechado = esconder botão
+      scrollBtn.classList.add("hidden");
+      return;
+    }
+
+    // Modal aberto: mostrar/esconder baseado na visibilidade do textarea
+    if (textareaVisivel) {
+      scrollBtn.classList.add("hidden");
+    } else {
+      scrollBtn.classList.remove("hidden");
+    }
+  }
+
+  // Scroll suave até o textarea
+  scrollBtn.addEventListener("click", () => {
+    obsTextarea.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    // Focar no textarea após o scroll
+    setTimeout(() => {
+      obsTextarea.focus();
+      updateButtonVisibility();
+    }, 500);
+  });
+
+  // Verificar visibilidade no scroll do modal
+  if (modal) {
+    modal.addEventListener("scroll", updateButtonVisibility);
+  }
+
+  // Observer para detectar mudanças no modal (abrir/fechar)
+  const observer = new MutationObserver(() => {
+    setTimeout(updateButtonVisibility, 100);
+  });
+
+  if (modal) {
+    observer.observe(modal, {
+      attributes: true,
+      attributeFilter: ["style"],
+    });
+  }
+
+  // Verificar visibilidade inicial
+  setTimeout(updateButtonVisibility, 200);
+}
+
+// ============================================================================
+// NAVEGAÇÃO ANÁLISES E PREVISÕES
+// ============================================================================
+
+/**
+ * Configura navegação para seção de análises
+ */
+function configurarNavegacaoAnalises() {
+  const btnAbrir = document.getElementById("btn-abrir-predictions");
+  const btnVoltar = document.getElementById("btn-voltar-predictions");
+  const section = document.getElementById("predictions-section");
+
+  if (!btnAbrir || !section) return;
+
+  // Abrir seção de análises
+  btnAbrir.addEventListener("click", () => {
+    // Fechar modal de histórico se estiver aberto
+    const modalHistorico = document.getElementById("historico-modal");
+    if (
+      modalHistorico &&
+      !modalHistorico.classList.contains("modal-backdrop-hidden")
+    ) {
+      modalHistorico.classList.add("modal-backdrop-hidden");
+    }
+
+    // Mostrar seção com skeleton
+    section.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+
+    const container = document.getElementById("predictions-container");
+    if (container) {
+      mostrarSkeleton(container, 4); // 4 cards skeleton
+    }
+
+    // Renderizar análises de forma assíncrona para não bloquear UI
+    setTimeout(() => {
+      renderizarAnalises();
+    }, 50);
+
+    // Esconder botão de scroll
+    const scrollBtn = document.getElementById("scroll-to-obs-btn");
+    if (scrollBtn) scrollBtn.classList.add("hidden");
+  });
+
+  // Função para fechar seção de previsões
+  function fecharPrevisoes() {
+    section.classList.add("hidden");
+    document.body.style.overflow = "";
+    document.body.style.overflowX = "";
+    document.body.style.overflowY = "";
+    document.body.style.position = "";
+    document.body.style.width = "";
+  }
+
+  // Fechar seção de análises
+  if (btnVoltar) {
+    btnVoltar.addEventListener("click", fecharPrevisoes);
+  }
+
+  // Fechar com ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !section.classList.contains("hidden")) {
+      fecharPrevisoes();
+    }
+  });
 }
 
 // Service worker / PWA offline support removed per user request.

@@ -1,0 +1,274 @@
+// ============================================================================
+// FOOTER DE NAVEGAÇÃO MOBILE
+// ============================================================================
+// Footer horizontal que aparece no mobile quando clica no btn-principal
+// Agrupa botões de ação (privacidade, configurações, etc.)
+// ============================================================================
+
+@import "../variaveis/cores";
+@import "../variaveis/mixin";
+
+// ============================================================================
+// BACKDROP - Overlay para fechar footer
+// ============================================================================
+
+.footer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 9997; // Abaixo do footer e btn-principal
+  opacity: 0;
+  pointer-events: none;
+  @include transitions(opacity 0.3s ease);
+
+  &.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  // Apenas no mobile
+  @include landscape-desktop {
+    display: none;
+  }
+}
+
+// ============================================================================
+// FOOTER NAV - Container Principal
+// ============================================================================
+
+.footer-nav {
+  position: fixed;
+  bottom: 3rem; // Mesma altura do btn-principal
+  left: 50%; // Centraliza horizontalmente
+  height: 8rem; // Mesma altura total do btn-principal
+  width: calc(100vw - 12rem); // Largura total menos espaços do botão
+  max-width: 50rem; // Limita largura máxima
+  background: clr(primary);
+  z-index: 9998; // Abaixo do btn-principal (9999)
+  border-radius: 4rem;
+  transform: translate(-50%, 0) translateX(calc(100% + 10rem)); // Centralizado e hidden
+  @include transitions(transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55));
+  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.2),
+    0 1.6rem 3.2rem rgba(0, 0, 0, 0.15), 0 0.2rem 0.8rem rgba(0, 123, 255, 0.4); // Shadow de suspensão
+  border: 2px solid rgba(0, 123, 255, 0.3);
+  overflow: hidden; // Evita overflow dos botões
+  display: flex;
+  align-items: center;
+
+  // Estado visível - desliza e centraliza
+  &.show {
+    transform: translate(-50%, 0); // Apenas centraliza, sem translateX extra
+    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.2), 0 2rem 4rem rgba(0, 0, 0, 0.1),
+      0 0.4rem 1.2rem rgba(0, 123, 255, 0.2); // Shadow mais intenso quando visível
+  }
+
+  // Responsivo - ajusta largura baseado na tela
+  @media (max-width: 480px) {
+    width: calc(100vw - 11rem);
+    max-width: none;
+  }
+
+  @media (min-width: 481px) and (max-width: 768px) {
+    width: calc(100vw - 13rem);
+  }
+
+  // Apenas no mobile
+  @include landscape-desktop {
+    display: none;
+  }
+}
+
+// ============================================================================
+// FOOTER NAV CONTAINER - Layout Horizontal
+// ============================================================================
+
+.footer-nav-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 1.2rem 2rem;
+  gap: 0.8rem;
+  white-space: nowrap;
+  height: 100%;
+  width: 100%;
+
+  // Responsivo
+  @media (max-width: 480px) {
+    padding: 1rem 1rem;
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 481px) and (max-width: 768px) {
+    padding: 1rem 1.5rem;
+    gap: 0.6rem;
+  }
+} // ============================================================================
+// FOOTER NAV ITEM - Botões Individuais
+// ============================================================================
+
+.footer-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.6rem 0.5rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: clr(azul-claro);
+  text-decoration: none;
+  cursor: pointer;
+  @include transitions(all 0.3s ease);
+  flex: 1; // Distribui igualmente
+  min-width: 0; // Permite encolher
+  max-width: 8rem; // Limita largura máxima
+
+  // Ícone
+  i {
+    font-size: 1.8rem;
+    @include transitions(transform 0.3s ease);
+  }
+
+  // Texto
+  span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  // Telas muito pequenas (320-360px) - Ajustado para aproveitar melhor o espaço
+  @media (max-width: 360px) {
+    padding: 0.6rem 0.4rem;
+    gap: 0.15rem;
+
+    i {
+      font-size: 1.7rem; // Mantém ícone visível
+    }
+
+    span {
+      font-size: 0.85rem; // Texto mais legível
+    }
+  }
+
+  // Telas pequenas (361-480px)
+  @media (min-width: 361px) and (max-width: 480px) {
+    padding: 0.6rem 0.5rem;
+
+    i {
+      font-size: 1.75rem;
+    }
+
+    span {
+      font-size: 0.9rem;
+    }
+  }
+
+  // Telas médias (481-768px)
+  @media (min-width: 481px) and (max-width: 768px) {
+    padding: 0.7rem 0.6rem;
+
+    i {
+      font-size: 1.9rem;
+    }
+
+    span {
+      font-size: 0.95rem;
+    }
+  }
+
+  // Hover/Active States
+  &:hover,
+  &:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: clr(secondary);
+    color: clr(blanco);
+    transform: translateY(-0.2rem);
+
+    i {
+      transform: scale(1.1);
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.15);
+  }
+}
+
+// ============================================================================
+// BTN PRINCIPAL - Ajustes para Mobile
+// ============================================================================
+
+.edit-icon {
+  // Z-index maior para ficar acima do footer-nav
+  z-index: 9999;
+
+  // Adicionar indicador visual de que é um toggle
+  @include transitions(all 0.3s ease);
+
+  &.active {
+    transform: rotate(45deg);
+    background-color: clr(secondary);
+
+    i {
+      transform: rotate(-45deg);
+    }
+  }
+}
+
+// ============================================================================
+// ANIMAÇÕES
+// ============================================================================
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+// ============================================================================
+// RESPONSIVIDADE - Ajustes Fine-tune
+// ============================================================================
+
+@media (max-width: 360px) {
+  .footer-nav-item {
+    padding: 0.6rem 0.8rem;
+
+    i {
+      font-size: 1.8rem;
+    }
+
+    span {
+      font-size: 1rem;
+    }
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  .footer-nav-item {
+    padding: 0.8rem 1rem;
+  }
+}
