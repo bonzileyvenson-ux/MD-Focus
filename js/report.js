@@ -1,3 +1,13 @@
+// ============================================================================
+// REPORT.JS - Sistema de Relatórios
+// ============================================================================
+// 📊 Propósito: Gerar relatórios detalhados de progresso mensal
+// 🎯 Arquitetura: Usa EXCLUSIVAMENTE getDadosUsuario() para dados
+//    - NÃO acessa localStorage diretamente
+//    - Garante consistência com o data layer central
+//    - Todos os dados vêm do cache em memória via data.js
+// ============================================================================
+
 import { getDadosUsuario } from "./data.js";
 import { debugLog, debugWarn } from "./debug.js";
 import chartManager from "./charts.js";
