@@ -7,6 +7,15 @@
 //    - Responsabilidade única (apenas lógica de negócio)
 //    - Fácil manutenção e teste
 //    - Documentação completa com JSDoc
+//
+// ⚠️  ARQUITETURA IMPORTANTE:
+//    Este é o ÚNICO ponto de acesso aos dados do usuário!
+//    TODOS os componentes de UI devem usar getDadosUsuario() ao invés de 
+//    acessar localStorage diretamente. Isso garante:
+//    - Cache em memória para performance
+//    - Dados sempre consistentes
+//    - Fácil migração para backend no futuro
+//    - Single source of truth
 // ============================================================================
 
 import {
