@@ -1,3 +1,14 @@
+// ============================================================================
+// CALC.JS - Cálculos e Métricas do Dashboard
+// ============================================================================
+// 🧮 Propósito: Funções puras de cálculo (recebem dados como parâmetro)
+// 🎯 Arquitetura: Funções PURAS que NÃO acessam storage
+//    - Recebem dados como parâmetro
+//    - Retornam métricas calculadas
+//    - Sem side effects ou acesso a storage
+//    - Fácil de testar e reutilizar
+// ============================================================================
+
 export function contarDiasUteis(diasOffAgendados = []) {
   const hoje = new Date();
   const ano = hoje.getFullYear();

@@ -6,6 +6,9 @@
 //    1. Card de Projeção Mensal
 //    2. Velocímetro de Ritmo
 //    3. Comparação Semanal (últimas 4 semanas)
+// 🔄 Arquitetura: Usa EXCLUSIVAMENTE getDadosUsuario() para dados
+//    - NÃO acessa localStorage diretamente
+//    - Cache inteligente para performance (invalidado quando dados mudam)
 // ============================================================================
 
 import { getDadosUsuario, MAPA_METAS } from "./data.js";

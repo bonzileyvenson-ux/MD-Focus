@@ -93,6 +93,59 @@ import { debugLog } from "./debug.js";
 let modoAtual = "registro";
 
 // ============================================================================
+// FUNÇÃO CENTRAL DE ATUALIZAÇÃO DE UI
+// ============================================================================
+
+/**
+ * 🔄 Atualiza todos os componentes da UI com dados atualizados
+ * Esta é a função central que garante que toda a interface seja renderizada
+ * com dados do data layer (não localStorage direto)
+ * 
+ * @param {Object} dados - Dados do usuário (opcional, busca automaticamente se não fornecido)
+ */
+export function atualizarTodaUI(dados = null) {
+  // Busca dados se não foram fornecidos
+  const dadosUsuario = dados || getDadosUsuario();
+  
+  if (!dadosUsuario) {
+    console.warn("⚠️ Nenhum dado disponível para atualizar UI");
+    return;
+  }
+
+  debugLog("🔄 Atualizando toda a UI com dados centralizados");
+
+  // 1. Calcular métricas do dashboard
+  const resultado = calcularEAtualizarDashboard(dadosUsuario);
+
+  // 2. Atualizar dashboard principal (pontos, meta, progresso)
+  atualizarUIDashboard(resultado);
+
+  // 3. Atualizar análises e previsões
+  try {
+    renderizarAnalises();
+  } catch (error) {
+    console.error("Erro ao renderizar análises:", error);
+  }
+
+  // 4. Atualizar gráficos se existirem na página
+  try {
+    const progressChart = document.getElementById("progress-chart");
+    if (progressChart) {
+      import("./charts.js").then((module) => {
+        const chartManager = module.default;
+        if (chartManager && chartManager.createProgressLineChart) {
+          chartManager.createProgressLineChart("progress-chart");
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Erro ao atualizar gráficos:", error);
+  }
+
+  debugLog("✅ UI completamente atualizada");
+}
+
+// ============================================================================
 // INICIALIZAÇÃO DA APLICAÇÃO
 // ============================================================================
 
@@ -1484,8 +1537,8 @@ function sincronizarDadosDeOutraAba(novosValorJSON) {
     // Atualizar cache local
     atualizarDadosUsuario(novosDados);
 
-    // Recalcular e atualizar UI
-    calcularEAtualizarDashboard();
+    // Atualizar TODA a UI usando dados centralizados (não localStorage)
+    atualizarTodaUI(novosDados);
 
     // Notificar usuário
     notificarSincronizado();

@@ -3,6 +3,9 @@
 // ============================================================================
 // 📊 Propósito: Visualizar progresso mensal com gráficos de linhas
 // 🎯 Contexto: Dados alimentados manualmente pelo usuário
+// 🔄 Arquitetura: Usa EXCLUSIVAMENTE getDadosUsuario() para dados
+//    - NÃO acessa localStorage diretamente
+//    - Garante sincronização com data layer central
 // ============================================================================
 
 import { getDadosUsuario } from "./data.js";
